@@ -23,7 +23,7 @@
   <meta name="twitter:card" content="summary_large_image">
 
   <!-- 共通スタイル -->
-  <link rel="stylesheet" href="assets/common.css">
+  <link rel="stylesheet" href="assets/css/common.css">
 
   <style>
     /* --- 全体背景：モダンな微細ドットパターン --- */
@@ -94,7 +94,6 @@
       text-align: left;
     }
 
-    /* 内部の2カラムフレックスレイアウト */
     .featured-card-body {
       display: flex;
       align-items: center;
@@ -109,7 +108,6 @@
       min-width: 0;
     }
 
-    /* ビジュアル画像カラム */
     .featured-visual-col {
       flex-shrink: 0;
       width: 320px;
@@ -318,7 +316,6 @@
       gap: 4px;
     }
 
-    /* スマホ表示時の調整（画像を上または下に積み上げ） */
     @media (max-width: 720px) {
       .featured-card-body {
         flex-direction: column;
@@ -328,7 +325,7 @@
         width: 100%;
         max-width: 280px;
         margin: 0 auto;
-        order: 2; /* スマホではリード文の後に自然に表示 */
+        order: 2;
       }
       .featured-hero-card {
         padding: 24px 18px;
@@ -360,7 +357,6 @@
       </div>
 
       <div class="featured-card-body">
-        <!-- 左カラム：説明文＆アクション -->
         <div class="featured-text-col">
           <h2 class="featured-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1.02rem; font-weight: 600; opacity: 0.9;">― 人間関係ごとの顔を暴く性格診断 ―</span></h2>
           <p class="featured-lead">
@@ -384,9 +380,8 @@
           </div>
         </div>
 
-        <!-- 右カラム：作成いただいたグラフィック -->
         <div class="featured-visual-col">
-          <img src="assets/images/persona-flow.webp" alt="ペルソナ他己分析の仕組み：URL発行から回答集計まで" class="featured-flow-img" width="384" height="287">
+          <img src="assets/img/persona-flow.webp" alt="ペルソナ他己分析の仕組み：URL発行から回答集計まで" class="featured-flow-img" width="384" height="287">
         </div>
       </div>
     </section>
@@ -398,15 +393,11 @@
         <span class="section-sub" id="item-counter">全診断一覧</span>
       </div>
 
-      <!-- リアルタイム絞り込み検索 -->
       <div class="search-filter-wrap">
         <input type="text" id="tool-search" class="filter-input" placeholder="診断タイトルやキーワードで検索…">
       </div>
 
-      <!-- JSONから自動生成されるカードグリッド -->
-      <div id="test-grid" class="test-grid">
-        <!-- items.json のデータが動的に挿入される -->
-      </div>
+      <div id="test-grid" class="test-grid"></div>
     </section>
 
     <footer class="tool-footer" style="text-align: center; margin-top: 40px; padding: 20px 0; color: #94a3b8; font-size: 0.8rem;">
@@ -414,7 +405,7 @@
     </footer>
   </main>
 
-  <script src="assets/common.js"></script>
+  <script src="assets/js/common.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       const grid = document.getElementById("test-grid");
