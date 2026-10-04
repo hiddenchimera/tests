@@ -68,6 +68,17 @@
           <p class="share-hint">※LINEやDMで送って答えてもらい、結果URLを送り返してもらってください。</p>
         </div>
 
+        <!-- 関係性フィルタータブ（★ #stats-area の外に配置し、常に操作可能にする） -->
+        <div class="relation-tabs" id="relation-tabs" style="display: none;">
+          <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
+          <button class="tab-btn" data-rel="friend">友人 (<span id="count-friend">0</span>)</button>
+          <button class="tab-btn" data-rel="partner">恋人 (<span id="count-partner">0</span>)</button>
+          <button class="tab-btn" data-rel="colleague">同僚 (<span id="count-colleague">0</span>)</button>
+          <button class="tab-btn" data-rel="senior">先輩 (<span id="count-senior">0</span>)</button>
+          <button class="tab-btn" data-rel="junior">後輩 (<span id="count-junior">0</span>)</button>
+          <button class="tab-btn" data-rel="family">家族 (<span id="count-family">0</span>)</button>
+        </div>
+
         <!-- データ未集計時のプレースホルダー -->
         <div id="empty-state" class="empty-state" style="display: none;">
           <p class="empty-title">まだ回答が届いていません</p>
@@ -76,17 +87,6 @@
 
         <!-- データ集計表示エリア -->
         <div id="stats-area" style="display: none;">
-          <!-- 関係性フィルタータブ -->
-          <div class="relation-tabs" id="relation-tabs">
-            <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
-            <button class="tab-btn" data-rel="friend">友人 (<span id="count-friend">0</span>)</button>
-            <button class="tab-btn" data-rel="partner">恋人 (<span id="count-partner">0</span>)</button>
-            <button class="tab-btn" data-rel="colleague">同僚 (<span id="count-colleague">0</span>)</button>
-            <button class="tab-btn" data-rel="senior">先輩 (<span id="count-senior">0</span>)</button>
-            <button class="tab-btn" data-rel="junior">後輩 (<span id="count-junior">0</span>)</button>
-            <button class="tab-btn" data-rel="family">家族 (<span id="count-family">0</span>)</button>
-          </div>
-
           <!-- 総合判定カード -->
           <div class="result-summary-card">
             <p class="summary-sub" id="current-filter-label">全体の他己評価タイプ</p>
