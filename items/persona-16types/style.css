@@ -397,14 +397,13 @@
   color: #334155;
 }
 
-/* 関係性別のバッジ色分け */
-.rel-friend { background: #e0e7ff; color: #3730a3; }
-.rel-partner { background: #fce7f3; color: #9d174d; }
-.rel-colleague { background: #e0f2fe; color: #075985; }
-.rel-senior { background: #fef3c7; color: #92400e; }
-.rel-junior { background: #dcfce7; color: #166534; }
-.rel-family { background: #ffedd5; color: #9a3412; }
-.rel-other { background: #f1f5f9; color: #475569; }
+/* 関係性別のバッジ色分け（案A対応） */
+.rel-friend { background: #e0e7ff; color: #3730a3; }  /* 友達：インディゴ */
+.rel-partner { background: #fce7f3; color: #9d174d; } /* 恋人：ピンク */
+.rel-work { background: #e0f2fe; color: #0369a1; }    /* 職場・学校：スカイブルー */
+.rel-family { background: #ffedd5; color: #9a3412; }  /* 家族：オレンジ */
+.rel-hobby { background: #f3e8ff; color: #6b21a8; }   /* ネット・趣味：パープル */
+.rel-other { background: #f1f5f9; color: #475569; }   /* その他：グレー */
 
 .response-type {
   font-weight: 800;
@@ -429,7 +428,7 @@
   line-height: 1.4;
 }
 
-/* --- 回答者：関係性選択グリッド --- */
+/* --- 回答者：関係性選択グリッド（全6個、2列×3行） --- */
 .relation-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
@@ -446,10 +445,6 @@
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
-}
-
-.rel-select-btn[data-rel="other"] {
-  grid-column: span 2;
 }
 
 .rel-select-btn:hover {
