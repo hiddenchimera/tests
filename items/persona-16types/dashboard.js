@@ -1,11 +1,10 @@
-// 関係性マッピング定義
+// 関係性マッピング定義（案A対応）
 const RELATIONS = {
-  friend: { label: "友人", class: "rel-friend" },
+  friend: { label: "友達", class: "rel-friend" },
   partner: { label: "恋人", class: "rel-partner" },
-  colleague: { label: "同僚", class: "rel-colleague" },
-  senior: { label: "先輩", class: "rel-senior" },
-  junior: { label: "後輩", class: "rel-junior" },
+  work: { label: "職場・学校", class: "rel-work" },
   family: { label: "家族", class: "rel-family" },
+  hobby: { label: "ネット・趣味", class: "rel-hobby" },
   other: { label: "その他", class: "rel-other" }
 };
 
@@ -101,7 +100,6 @@ function generateUUID(prefix = "") {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return prefix + crypto.randomUUID();
   }
-  // HTTPS以外の開発環境フォールバック
   return prefix + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
 }
 
@@ -272,14 +270,15 @@ function renderStats(responses, filterRel) {
     statsArea.style.display = "none";
     emptyState.style.display = "block";
     emptyState.querySelector(".empty-title").textContent = "まだ回答が届いていません";
-    emptyState.querySelector(".empty-desc").textContent = "上のURLを友達や同僚にシェアして、あなたの普段の印象を回答してもらいましょう！";
+    emptyState.querySelector(".empty-desc").textContent = "上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！";
     return;
   }
 
   tabsContainer.style.display = "flex";
 
+  // 各タブの件数バッジ更新（案Aのキー名）
   document.getElementById("count-all").textContent = responses.length;
-  ["friend", "partner", "colleague", "senior", "junior", "family"].forEach(r => {
+  ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
     if (countEl) countEl.textContent = responses.filter(item => item.relation === r).length;
   });
