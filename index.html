@@ -26,59 +26,84 @@
   <link rel="stylesheet" href="assets/common.css">
 
   <style>
-    /* --- トップページ専用レイアウト --- */
+    /* --- 全体背景：モダンな微細ドットパターン（ラボ・グリッド感） --- */
+    body {
+      background-color: #f8fafc;
+      background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
+      background-size: 24px 24px;
+      min-height: 100vh;
+    }
+
+    /* メインコンテナの幅と余白調整 */
+    .container {
+      max-width: 840px;
+      margin: 0 auto;
+      padding: 0 16px 40px;
+    }
+
+    /* --- ヘッダー領域 --- */
     .hero-header {
       text-align: center;
-      padding: 32px 16px 20px;
+      padding: 40px 16px 24px;
     }
     .portal-tag {
-      display: inline-block;
-      font-size: 0.75rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.72rem;
       font-weight: 800;
       letter-spacing: 0.12em;
-      color: #6366f1;
-      background: #e0e7ff;
+      color: #4f46e5;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
       padding: 4px 12px;
       border-radius: 9999px;
       margin-bottom: 12px;
     }
+    .portal-tag::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      background: #4f46e5;
+      border-radius: 50%;
+    }
     .portal-title {
-      font-size: 1.8rem;
+      font-size: 1.85rem;
       font-weight: 900;
       color: #0f172a;
       letter-spacing: -0.02em;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
     .portal-desc {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #64748b;
-      max-width: 540px;
+      max-width: 520px;
       margin: 0 auto;
       line-height: 1.6;
     }
 
-    /* --- メインキラーコンテンツ：フィーチャー枠 --- */
+    /* --- メインキラーコンテンツ：特設フィーチャー枠 --- */
     .featured-hero-card {
       position: relative;
-      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%);
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
       color: #ffffff;
       border-radius: 20px;
-      padding: 32px 24px;
-      margin: 20px 0 40px;
-      box-shadow: 0 20px 35px -10px rgba(67, 56, 202, 0.35);
+      padding: 34px 28px;
+      margin: 16px 0 44px;
+      box-shadow: 0 16px 36px -8px rgba(30, 27, 75, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       overflow: hidden;
       text-align: left;
     }
 
-    /* 背景の装飾サークル */
-    .featured-hero-card::before {
+    /* 背景のソフトなアクセントグロー */
+    .featured-hero-card::after {
       content: "";
       position: absolute;
-      top: -40px;
-      right: -40px;
-      width: 220px;
-      height: 220px;
-      background: radial-gradient(circle, rgba(129, 140, 248, 0.25) 0%, rgba(129, 140, 248, 0) 70%);
+      top: -30%;
+      right: -10%;
+      width: 320px;
+      height: 320px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.22) 0%, rgba(129, 140, 248, 0) 70%);
       border-radius: 50%;
       pointer-events: none;
     }
@@ -92,18 +117,18 @@
     .badge-killer {
       background: #f43f5e;
       color: #ffffff;
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 800;
       letter-spacing: 0.08em;
       padding: 3px 10px;
       border-radius: 9999px;
-      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.35);
     }
     .badge-sub {
       color: #c7d2fe;
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 600;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
     }
 
     .featured-title {
@@ -111,36 +136,38 @@
       font-weight: 900;
       line-height: 1.35;
       color: #ffffff;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
+      letter-spacing: -0.01em;
     }
     .featured-lead {
       font-size: 0.9rem;
       color: #e0e7ff;
-      line-height: 1.6;
-      margin-bottom: 20px;
+      line-height: 1.65;
+      margin-bottom: 22px;
       max-width: 580px;
     }
 
-    /* 4色カテゴリの視覚的アピール */
+    /* 4色トーンピル */
     .four-tones-row {
       display: flex;
-      gap: 6px;
-      margin-bottom: 22px;
+      gap: 8px;
+      margin-bottom: 24px;
       flex-wrap: wrap;
     }
     .tone-pill {
-      font-size: 0.75rem;
+      font-size: 0.74rem;
       font-weight: 700;
-      padding: 4px 10px;
-      border-radius: 6px;
+      padding: 5px 12px;
+      border-radius: 8px;
       display: inline-flex;
       align-items: center;
-      gap: 4px;
+      gap: 5px;
+      backdrop-filter: blur(4px);
     }
-    .tone-purple { background: rgba(168, 85, 247, 0.25); color: #e9d5ff; border: 1px solid rgba(192, 132, 252, 0.4); }
-    .tone-green  { background: rgba(34, 197, 94, 0.25);  color: #bbf7d0; border: 1px solid rgba(74, 222, 128, 0.4); }
-    .tone-blue   { background: rgba(14, 165, 233, 0.25); color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.4); }
-    .tone-yellow { background: rgba(245, 158, 11, 0.25); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.4); }
+    .tone-purple { background: rgba(168, 85, 247, 0.2); color: #f3e8ff; border: 1px solid rgba(216, 180, 254, 0.4); }
+    .tone-green  { background: rgba(34, 197, 94, 0.2);  color: #dcfce7; border: 1px solid rgba(134, 239, 172, 0.4); }
+    .tone-blue   { background: rgba(14, 165, 233, 0.2); color: #e0f2fe; border: 1px solid rgba(125, 211, 252, 0.4); }
+    .tone-yellow { background: rgba(245, 158, 11, 0.2); color: #fef3c7; border: 1px solid rgba(253, 224, 71, 0.4); }
 
     .featured-action-wrap {
       display: flex;
@@ -155,21 +182,21 @@
       gap: 8px;
       background: #ffffff;
       color: #312e81;
-      font-size: 1rem;
+      font-size: 0.96rem;
       font-weight: 800;
-      padding: 14px 28px;
+      padding: 13px 26px;
       border-radius: 12px;
       text-decoration: none;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
-      transition: all 0.2s ease;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     }
     .btn-launch-primary:hover {
       background: #f8fafc;
       transform: translateY(-2px);
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+      box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
     }
     .btn-hint-text {
-      font-size: 0.78rem;
+      font-size: 0.76rem;
       color: #c7d2fe;
     }
 
@@ -178,24 +205,47 @@
       display: flex;
       align-items: baseline;
       justify-content: space-between;
-      border-bottom: 2px solid #f1f5f9;
-      padding-bottom: 10px;
-      margin-bottom: 20px;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
     }
     .section-title {
       font-size: 1.15rem;
       font-weight: 800;
-      color: #1e293b;
+      color: #0f172a;
+      letter-spacing: -0.01em;
     }
     .section-sub {
       font-size: 0.8rem;
-      color: #94a3b8;
+      font-weight: 600;
+      color: #64748b;
+    }
+
+    /* 検索フィルター */
+    .search-filter-wrap {
+      margin-bottom: 20px;
+    }
+    .filter-input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 11px 16px;
+      border-radius: 10px;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      font-size: 0.88rem;
+      color: #0f172a;
+      outline: none;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .filter-input:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
     }
 
     /* テストグリッドカード */
     .test-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
       gap: 16px;
       margin-bottom: 40px;
     }
@@ -203,38 +253,39 @@
       background: #ffffff;
       border: 1px solid #e2e8f0;
       border-radius: 14px;
-      padding: 18px;
+      padding: 20px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
       text-decoration: none;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
       transition: all 0.2s ease;
     }
     .test-card:hover {
       transform: translateY(-2px);
       border-color: #cbd5e1;
-      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
     }
     .test-card-cat {
-      font-size: 0.7rem;
-      font-weight: 700;
-      color: #64748b;
+      font-size: 0.68rem;
+      font-weight: 800;
+      color: #6366f1;
+      letter-spacing: 0.06em;
       margin-bottom: 6px;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
     }
     .test-card-title {
       font-size: 1rem;
       font-weight: 800;
       color: #0f172a;
       margin-bottom: 8px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
     .test-card-desc {
       font-size: 0.82rem;
       color: #64748b;
-      line-height: 1.5;
-      margin-bottom: 14px;
+      line-height: 1.55;
+      margin-bottom: 16px;
     }
     .test-card-link {
       font-size: 0.8rem;
@@ -245,27 +296,9 @@
       gap: 4px;
     }
 
-    /* 検索・フィルターバー */
-    .search-filter-wrap {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
-    .filter-input {
-      flex: 1;
-      padding: 10px 14px;
-      border-radius: 8px;
-      border: 1px solid #cbd5e1;
-      font-size: 0.88rem;
-      outline: none;
-    }
-    .filter-input:focus {
-      border-color: #6366f1;
-    }
-
     @media (max-width: 640px) {
       .featured-hero-card {
-        padding: 24px 18px;
+        padding: 26px 20px;
       }
       .featured-title {
         font-size: 1.35rem;
@@ -286,7 +319,7 @@
       </p>
     </header>
 
-    <!-- ★ 主力キラーコンテンツ：ペルソナ16タイプ他己分析 特設大型枠 ★ -->
+    <!-- ★ 主力キラーコンテンツ：ペルソナ16タイプ他己分析 特設枠 ★ -->
     <section class="featured-hero-card">
       <div class="featured-badge-row">
         <span class="badge-killer">PICK UP !</span>
@@ -348,7 +381,7 @@
       try {
         const res = await fetch("items.json");
         allItems = await res.json();
-        // キラーコンテンツ自身は上の特設バナーで目立たせているため、下の一般一覧では重複させず除外（または下にも残す場合はフィルタを外す）
+        // キラーコンテンツ自身は上の特設バナーで目立たせているため除外
         const subItems = allItems.filter(item => item.id !== "persona-16types");
         renderCards(subItems);
         counter.textContent = `${subItems.length} 個のテスト`;
