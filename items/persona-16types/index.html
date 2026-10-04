@@ -28,7 +28,7 @@
 </head>
 <body>
   <main class="container">
-    <!-- トースト通知（重複防止や登録完了のメッセージ） -->
+    <!-- トースト通知 -->
     <div id="toast" class="toast" style="display: none;"></div>
 
     <section id="quiz-card">
@@ -80,7 +80,7 @@
           <p class="share-hint">※LINEやDMで送って答えてもらい、結果URLを送り返してもらってください。</p>
         </div>
 
-        <!-- 関係性フィルタータブ（案A対応） -->
+        <!-- 関係性フィルタータブ -->
         <div class="relation-tabs" id="relation-tabs" style="display: none;">
           <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
           <button class="tab-btn" data-rel="friend">友達 (<span id="count-friend">0</span>)</button>
@@ -166,6 +166,24 @@
         </div>
 
       </div>
+
+      <!-- 技術仕様・データ保存に関する開閉アコーディオン -->
+      <details class="tech-spec-details">
+        <summary class="tech-spec-summary">
+          データの保存仕様とプライバシーについて
+        </summary>
+        <div class="tech-spec-content">
+          <p>
+            本ツールはバックエンドサーバーを持たない<strong>完全クライアントサイド（静的Webアプリ）</strong>として設計されています。
+          </p>
+          <ul>
+            <li><strong>データ保持先:</strong> あなたのプロファイルおよび回答データは、当サーバーではなくお使いのブラウザ内部（LocalStorage）にのみ安全に暗号化されず平文保存されます。</li>
+            <li><strong>端末・ブラウザ間の非同期:</strong> 別の端末（PCからスマホ等）や異なるブラウザ（SafariとChrome等）、シークレット/プライベートモード間ではデータは共有・引き継ぎされません。</li>
+            <li><strong>キャッシュクリアの注意:</strong> ブラウザの履歴やCookie・サイトデータを手動で完全消去した場合、保存されていたプロファイルや集計履歴もすべて消失しますのでご注意ください。</li>
+            <li><strong>プライバシー保護:</strong> 入力されたニックネームや回答スコアが外部サーバーへ送信・記録されることは一切ありません。</li>
+          </ul>
+        </div>
+      </details>
 
       <!-- 免責事項・フッター -->
       <footer class="tool-footer">
