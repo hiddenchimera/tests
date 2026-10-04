@@ -81,6 +81,7 @@ const SCALE_OPTIONS = [
 ];
 
 let targetName = "あの人";
+let targetUid = "";
 let selectedRelation = "";
 let currentIndex = 0;
 // 各軸のスコア合算 [E/I, S/N, T/F, J/P]
@@ -90,10 +91,15 @@ const axisCounts = [0, 0, 0, 0];
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
   const uParam = urlParams.get("u");
+  const uidParam = urlParams.get("uid");
+
   if (uParam) {
     targetName = uParam;
     document.getElementById("target-name-display").textContent = `${targetName} さん`;
     document.getElementById("target-name-inline").textContent = `${targetName} さん`;
+  }
+  if (uidParam) {
+    targetUid = uidParam;
   }
 
   // 関係性ボタンの選択制御
@@ -116,6 +122,14 @@ document.addEventListener("DOMContentLoaded", () => {
     renderQuestion();
   });
 });
+
+// 暗号学的一意ID生成関数
+function generateUUID(prefix = "") {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return prefix + crypto.randomUUID();
+  }
+  return prefix + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
+}
 
 // 設問の描画
 function renderQuestion() {
@@ -140,8 +154,6 @@ function renderQuestion() {
 
 // 回答選択時の処理
 function handleSelect(question, rawScore) {
-  // スコア算出（1: 左寄り 〜 5: 右寄りに正規化）
-  // reverse === true の場合、当てはまる(5)ほど左(1)になるよう反転
   const normalizedScore = question.reverse ? (6 - rawScore) : rawScore;
 
   axisTotals[question.axis] += normalizedScore;
@@ -162,25 +174,22 @@ function finishQuiz() {
   document.getElementById("complete-view").style.display = "block";
   document.getElementById("target-name-complete").textContent = targetName;
 
-  // 各軸の平均スコア（小数第1位まで）
   const finalScores = axisTotals.map((tot, idx) => {
     return (tot / axisCounts[idx]).toFixed(1);
   });
 
-  // 一意の回答ID生成 (タイムスタンプ + ランダム文字列)
-  const rid = "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 6);
+  // 暗号学的一意な回答ID（rid）を発行
+  const rid = generateUUID("r_");
   const respondentName = document.getElementById("respondent-name-input").value.trim() || "匿名";
 
   // 出題者（index.html）へ戻すパラメータ付きURL
   const baseUrl = window.location.href.split("?")[0].replace("answer.html", "");
-  const returnUrl = `${baseUrl}?rid=${rid}&rel=${selectedRelation}&sc=${finalScores.join(",")}&n=${encodeURIComponent(respondentName)}`;
+  const returnUrl = `${baseUrl}?uid=${targetUid}&rid=${rid}&rel=${selectedRelation}&sc=${finalScores.join(",")}&n=${encodeURIComponent(respondentName)}`;
 
-  // LINE送信ボタン設定（★「他己分析」表記に統一）
   const lineBtn = document.getElementById("line-send-btn");
   const lineText = encodeURIComponent(`${targetName}さんの他己分析に回答したよ！結果を確認してみてね👇\n${returnUrl}`);
   lineBtn.href = `https://line.me/R/msg/text/?${lineText}`;
 
-  // コピー用設定
   const copyBtn = document.getElementById("copy-result-btn");
   copyBtn.addEventListener("click", () => {
     navigator.clipboard.writeText(returnUrl);
