@@ -103,6 +103,20 @@ function generateUUID(prefix = "") {
   return prefix + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
 }
 
+// 4色系統クラスの取得
+function getColorCategoryClass(typeStr) {
+  if (!typeStr || typeStr.length < 4) return "theme-sj";
+  const s_n = typeStr[1]; // S or N
+  const t_f = typeStr[2]; // T or F
+  const j_p = typeStr[3]; // J or P
+
+  if (s_n === "N" && t_f === "T") return "nt"; // 紫系
+  if (s_n === "N" && t_f === "F") return "nf"; // 緑系
+  if (s_n === "S" && j_p === "J") return "sj"; // 青系
+  if (s_n === "S" && j_p === "P") return "sp"; // 黄系
+  return "sj";
+}
+
 // ストレージ読み込み＆マイグレーション処理
 function loadStore() {
   const raw = localStorage.getItem("persona16_data");
@@ -112,7 +126,6 @@ function loadStore() {
 
   const parsed = JSON.parse(raw);
 
-  // 旧データ形式（単一プロファイル構造）からの自動移行
   if (parsed.userName && Array.isArray(parsed.responses)) {
     const migratedProfile = {
       id: generateUUID("p_"),
@@ -264,6 +277,7 @@ function renderStats(responses, filterRel) {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
   const statsArea = document.getElementById("stats-area");
+  const summaryCard = document.querySelector(".result-summary-card");
 
   if (responses.length === 0) {
     tabsContainer.style.display = "none";
@@ -276,7 +290,7 @@ function renderStats(responses, filterRel) {
 
   tabsContainer.style.display = "flex";
 
-  // 各タブの件数バッジ更新（案Aのキー名）
+  // 各タブの件数バッジ更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
@@ -314,6 +328,10 @@ function renderStats(responses, filterRel) {
   document.getElementById("dominant-type").textContent = dominantType;
   document.getElementById("type-description").textContent = TYPE_DESCS[dominantType] || "";
 
+  // 判定タイプに応じた4色テーマの適用
+  const colorCat = getColorCategoryClass(dominantType);
+  summaryCard.className = `result-summary-card theme-${colorCat}`;
+
   const axes = [
     { id: "ei", score: avgScores[0] },
     { id: "sn", score: avgScores[1] },
@@ -348,13 +366,14 @@ function renderResponseList(profile) {
 
     const relConfig = RELATIONS[item.relation] || { label: "その他", class: "rel-other" };
     const dateStr = new Date(item.createdAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" });
+    const colorCat = getColorCategoryClass(item.type);
 
     card.innerHTML = `
       <div class="response-info-left">
         <input type="checkbox" class="select-checkbox" data-id="${item.id}">
         <span class="badge-rel ${relConfig.class}">${relConfig.label}</span>
         <span style="font-weight:600; color:#334155;">${escapeHtml(item.name)}</span>
-        <span class="response-type">${item.type}</span>
+        <span class="response-type type-${colorCat}">${item.type}</span>
       </div>
       <span class="response-date">${dateStr}</span>
     `;
