@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (rid && rel && sc) {
     handleIncomingResponse(rid, rel, sc, uid, n);
-    // URLのパラメータを除去してクリーンなURLに戻す
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
   }
@@ -106,14 +105,14 @@ function generateUUID(prefix = "") {
 // 4色系統クラスの取得
 function getColorCategoryClass(typeStr) {
   if (!typeStr || typeStr.length < 4) return "theme-sj";
-  const s_n = typeStr[1]; // S or N
-  const t_f = typeStr[2]; // T or F
-  const j_p = typeStr[3]; // J or P
+  const s_n = typeStr[1];
+  const t_f = typeStr[2];
+  const j_p = typeStr[3];
 
-  if (s_n === "N" && t_f === "T") return "nt"; // 紫系
-  if (s_n === "N" && t_f === "F") return "nf"; // 緑系
-  if (s_n === "S" && j_p === "J") return "sj"; // 青系
-  if (s_n === "S" && j_p === "P") return "sp"; // 黄系
+  if (s_n === "N" && t_f === "T") return "nt";
+  if (s_n === "N" && t_f === "F") return "nf";
+  if (s_n === "S" && j_p === "J") return "sj";
+  if (s_n === "S" && j_p === "P") return "sp";
   return "sj";
 }
 
@@ -181,7 +180,6 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
     store.activeProfileId = targetProfile.id;
   }
 
-  // 重複チェック
   const isDuplicate = targetProfile.responses.some(r => r.id === rid);
   if (isDuplicate) {
     showToast("この回答はすでに反映済みです");
@@ -290,7 +288,6 @@ function renderStats(responses, filterRel) {
 
   tabsContainer.style.display = "flex";
 
-  // 各タブの件数バッジ更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
@@ -328,7 +325,6 @@ function renderStats(responses, filterRel) {
   document.getElementById("dominant-type").textContent = dominantType;
   document.getElementById("type-description").textContent = TYPE_DESCS[dominantType] || "";
 
-  // 判定タイプに応じた4色テーマの適用
   const colorCat = getColorCategoryClass(dominantType);
   summaryCard.className = `result-summary-card theme-${colorCat}`;
 
@@ -348,7 +344,7 @@ function renderStats(responses, filterRel) {
   });
 }
 
-// 回答履歴一覧＆削除
+// 回答履歴一覧＆削除（★ 各回答者のパラメータ開閉表示に対応）
 function renderResponseList(profile) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
@@ -368,15 +364,60 @@ function renderResponseList(profile) {
     const dateStr = new Date(item.createdAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" });
     const colorCat = getColorCategoryClass(item.type);
 
+    // 回答者個別の4軸比率算出（各スコア 1.0〜5.0 を 0〜100% に変換）
+    const axisConfigs = [
+      { left: "外向 (E)", right: "内向 (I)", score: item.scores[0] },
+      { left: "感覚 (S)", right: "直観 (N)", score: item.scores[1] },
+      { left: "思考 (T)", right: "感情 (F)", score: item.scores[2] },
+      { left: "判断 (J)", right: "知覚 (P)", score: item.scores[3] }
+    ];
+
+    const detailRowsHtml = axisConfigs.map(ax => {
+      const rightPct = Math.round(((ax.score - 1) / 4) * 100);
+      const leftPct = 100 - rightPct;
+      return `
+        <div class="detail-axis-row">
+          <div class="detail-axis-labels">
+            <span style="color:#4f46e5;">${ax.left}</span>
+            <span style="color:#64748b; font-size:0.7rem;">${leftPct}% : ${rightPct}%</span>
+            <span style="color:#0ea5e9;">${ax.right}</span>
+          </div>
+          <div class="detail-axis-bar-wrap">
+            <div class="detail-axis-indicator" style="left: ${rightPct}%;"></div>
+          </div>
+        </div>
+      `;
+    }).join("");
+
     card.innerHTML = `
-      <div class="response-info-left">
-        <input type="checkbox" class="select-checkbox" data-id="${item.id}">
-        <span class="badge-rel ${relConfig.class}">${relConfig.label}</span>
-        <span style="font-weight:600; color:#334155;">${escapeHtml(item.name)}</span>
-        <span class="response-type type-${colorCat}">${item.type}</span>
+      <div class="response-card-main">
+        <div class="response-info-left">
+          <input type="checkbox" class="select-checkbox" data-id="${item.id}">
+          <span class="badge-rel ${relConfig.class}">${relConfig.label}</span>
+          <span class="response-name-clickable" title="タップでパラメータを表示/非表示">
+            ${escapeHtml(item.name)}
+            <span class="response-toggle-arrow">▼</span>
+          </span>
+        </div>
+        <div class="response-info-right">
+          <span class="response-type type-${colorCat}">${item.type}</span>
+          <span class="response-date">${dateStr}</span>
+        </div>
       </div>
-      <span class="response-date">${dateStr}</span>
+      <div class="response-detail">
+        <p class="detail-header-label">${escapeHtml(item.name)} さんから見たパラメータ</p>
+        <div class="detail-axes">
+          ${detailRowsHtml}
+        </div>
+      </div>
     `;
+
+    // 名前または行のクリックで開閉（チェックボックス操作時は開閉しない）
+    const toggleTrigger = card.querySelector(".response-name-clickable");
+    toggleTrigger.addEventListener("click", (e) => {
+      e.stopPropagation();
+      card.classList.toggle("open");
+    });
 
     container.appendChild(card);
   });
