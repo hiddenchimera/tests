@@ -8,130 +8,386 @@
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-
-    // Tests 単体統計用
     gtag('config', 'G-7MNC1PLLZ7');
-    // 全体総合統計用
     gtag('config', 'G-FW7R85YTVX');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Chimera Test Lab｜自己理解・思考特性 診断ポータル</title>
-  <meta name="description" content="無意識の思考パターン、デジタル依存度、対人関係の傾向を可視化する無料の自己診断ポータルサイト。">
+  <title>Chimera Test Lab｜性格・適性・心理テストポータル</title>
+  <meta name="description" content="隠しキメラが贈るWeb診断ポータル。人間関係ごとの社会的仮面を暴く『ペルソナ16タイプ他己分析』や各種心理・性格テストを無料で遊べます。">
 
   <!-- OGP基本設定 -->
-  <meta property="og:title" content="Chimera Test Lab｜自己理解・思考特性 診断ポータル">
-  <meta property="og:description" content="無意識の思考パターンや生活習慣を可視化する無料の自己診断ポータル。">
+  <meta property="og:title" content="Chimera Test Lab｜性格・適性・心理テストポータル">
+  <meta property="og:description" content="人間関係ごとの社会的仮面を暴く『ペルソナ16タイプ他己分析』をはじめ、多彩な性格・心理テストを公開中。">
   <meta property="og:type" content="website">
   <meta property="og:url" content="https://tests.hiddenchimera.com/">
-  <meta name="twitter:card" content="summary">
+  <meta name="twitter:card" content="summary_large_image">
 
-  <!-- 共通CSS -->
+  <!-- 共通スタイル -->
   <link rel="stylesheet" href="assets/common.css">
 
   <style>
-    /* トップページ専用の微調整 */
-    .portal-list {
+    /* --- トップページ専用レイアウト --- */
+    .hero-header {
+      text-align: center;
+      padding: 32px 16px 20px;
+    }
+    .portal-tag {
+      display: inline-block;
+      font-size: 0.75rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      color: #6366f1;
+      background: #e0e7ff;
+      padding: 4px 12px;
+      border-radius: 9999px;
+      margin-bottom: 12px;
+    }
+    .portal-title {
+      font-size: 1.8rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .portal-desc {
+      font-size: 0.9rem;
+      color: #64748b;
+      max-width: 540px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* --- メインキラーコンテンツ：フィーチャー枠 --- */
+    .featured-hero-card {
+      position: relative;
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 45%, #4338ca 100%);
+      color: #ffffff;
+      border-radius: 20px;
+      padding: 32px 24px;
+      margin: 20px 0 40px;
+      box-shadow: 0 20px 35px -10px rgba(67, 56, 202, 0.35);
+      overflow: hidden;
+      text-align: left;
+    }
+
+    /* 背景の装飾サークル */
+    .featured-hero-card::before {
+      content: "";
+      position: absolute;
+      top: -40px;
+      right: -40px;
+      width: 220px;
+      height: 220px;
+      background: radial-gradient(circle, rgba(129, 140, 248, 0.25) 0%, rgba(129, 140, 248, 0) 70%);
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    .featured-badge-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .badge-killer {
+      background: #f43f5e;
+      color: #ffffff;
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      padding: 3px 10px;
+      border-radius: 9999px;
+      box-shadow: 0 2px 8px rgba(244, 63, 94, 0.4);
+    }
+    .badge-sub {
+      color: #c7d2fe;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+    }
+
+    .featured-title {
+      font-size: 1.65rem;
+      font-weight: 900;
+      line-height: 1.35;
+      color: #ffffff;
+      margin-bottom: 10px;
+    }
+    .featured-lead {
+      font-size: 0.9rem;
+      color: #e0e7ff;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      max-width: 580px;
+    }
+
+    /* 4色カテゴリの視覚的アピール */
+    .four-tones-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 22px;
+      flex-wrap: wrap;
+    }
+    .tone-pill {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .tone-purple { background: rgba(168, 85, 247, 0.25); color: #e9d5ff; border: 1px solid rgba(192, 132, 252, 0.4); }
+    .tone-green  { background: rgba(34, 197, 94, 0.25);  color: #bbf7d0; border: 1px solid rgba(74, 222, 128, 0.4); }
+    .tone-blue   { background: rgba(14, 165, 233, 0.25); color: #bae6fd; border: 1px solid rgba(56, 189, 248, 0.4); }
+    .tone-yellow { background: rgba(245, 158, 11, 0.25); color: #fde68a; border: 1px solid rgba(251, 191, 36, 0.4); }
+
+    .featured-action-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+    .btn-launch-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #ffffff;
+      color: #312e81;
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 14px 28px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s ease;
+    }
+    .btn-launch-primary:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+    }
+    .btn-hint-text {
+      font-size: 0.78rem;
+      color: #c7d2fe;
+    }
+
+    /* --- その他テスト一覧セクション --- */
+    .section-heading-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      border-bottom: 2px solid #f1f5f9;
+      padding-bottom: 10px;
+      margin-bottom: 20px;
+    }
+    .section-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: #1e293b;
+    }
+    .section-sub {
+      font-size: 0.8rem;
+      color: #94a3b8;
+    }
+
+    /* テストグリッドカード */
+    .test-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 40px;
+    }
+    .test-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 14px;
+      padding: 18px;
       display: flex;
       flex-direction: column;
-      gap: 14px;
-      margin-top: 20px;
-    }
-    .portal-item {
-      display: block;
-      background-color: #f8fafc;
-      border: 1px solid #e2e8f0;
-      border-radius: 12px;
-      padding: 16px;
+      justify-content: space-between;
       text-decoration: none;
       transition: all 0.2s ease;
     }
-    @media (hover: hover) and (pointer: fine) {
-      .portal-item:hover {
-        background-color: #eef2ff;
-        border-color: #818cf8;
-        transform: translateY(-2px);
-      }
+    .test-card:hover {
+      transform: translateY(-2px);
+      border-color: #cbd5e1;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
     }
-    .portal-item-badge {
-      display: inline-block;
+    .test-card-cat {
       font-size: 0.7rem;
       font-weight: 700;
-      color: #4f46e5;
+      color: #64748b;
       margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .portal-item-title {
-      font-size: 1.05rem;
-      font-weight: 700;
+    .test-card-title {
+      font-size: 1rem;
+      font-weight: 800;
       color: #0f172a;
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      line-height: 1.4;
     }
-    .portal-item-desc {
-      font-size: 0.85rem;
+    .test-card-desc {
+      font-size: 0.82rem;
       color: #64748b;
       line-height: 1.5;
-      margin-bottom: 10px;
+      margin-bottom: 14px;
     }
-    .portal-item-meta {
-      font-size: 0.75rem;
-      color: #94a3b8;
-      font-weight: 600;
+    .test-card-link {
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #4f46e5;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
     }
-    .portal-footer {
-      text-align: center;
-      margin-top: 24px;
-      font-size: 0.78rem;
-      color: #94a3b8;
+
+    /* 検索・フィルターバー */
+    .search-filter-wrap {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 24px;
+    }
+    .filter-input {
+      flex: 1;
+      padding: 10px 14px;
+      border-radius: 8px;
+      border: 1px solid #cbd5e1;
+      font-size: 0.88rem;
+      outline: none;
+    }
+    .filter-input:focus {
+      border-color: #6366f1;
+    }
+
+    @media (max-width: 640px) {
+      .featured-hero-card {
+        padding: 24px 18px;
+      }
+      .featured-title {
+        font-size: 1.35rem;
+      }
+      .btn-launch-primary {
+        width: 100%;
+      }
     }
   </style>
 </head>
 <body>
   <main class="container">
-    <section id="quiz-card">
-      <div id="intro-view">
-        <span class="intro-badge">PORTAL</span>
-        <h1 class="intro-title">Chimera Test Lab</h1>
-        <p class="intro-desc" style="text-align: center;">
-          無意識の思考パターン、デジタル依存度、対人関係の傾向を可視化する診断ポータルサイトです。
-        </p>
+    <header class="hero-header">
+      <span class="portal-tag">CHIMERA TEST LAB</span>
+      <h1 class="portal-title">性格・適性テストポータル</h1>
+      <p class="portal-desc">
+        客観的な視点から自分を知る診断ツールコレクション。人間関係ごとの社会的仮面を分析する看板ツールを今すぐ体験できます。
+      </p>
+    </header>
 
-        <!-- items.json から動的に展開 -->
-        <div id="portal-list" class="portal-list"></div>
+    <!-- ★ 主力キラーコンテンツ：ペルソナ16タイプ他己分析 特設大型枠 ★ -->
+    <section class="featured-hero-card">
+      <div class="featured-badge-row">
+        <span class="badge-killer">PICK UP !</span>
+        <span class="badge-sub">看板ツール / 会員登録不要</span>
+      </div>
+      <h2 class="featured-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1.05rem; font-weight: 600; opacity: 0.9;">― 人間関係ごとの顔を暴く性格診断 ―</span></h2>
+      <p class="featured-lead">
+        人は「友達」「恋人」「職場」「ネット仲間」によって見せる顔が全く違います。<br>
+        URLをシェアして周りの人から12問で回答を集めるだけで、相手ごとに演じ分けているあなたの「社会的仮面（ペルソナ）」を16タイプで可視化・集計します。
+      </p>
 
-        <div class="portal-footer">
-          &copy; Hidden Chimera All Rights Reserved.
-        </div>
+      <div class="four-tones-row">
+        <span class="tone-pill tone-purple">🟣 NT 合理・探求</span>
+        <span class="tone-pill tone-green">🟢 NF 理想・共感</span>
+        <span class="tone-pill tone-blue">🔵 SJ 秩序・堅実</span>
+        <span class="tone-pill tone-yellow">🟡 SP 実践・行動</span>
+      </div>
+
+      <div class="featured-action-wrap">
+        <a href="items/persona-16types/" class="btn-launch-primary">
+          <span>他己分析をはじめる（URL発行）</span>
+          <span style="font-size: 1.1rem;">→</span>
+        </a>
+        <span class="btn-hint-text">※ 複数プロファイルの作成・切り替え・削除にも対応</span>
       </div>
     </section>
+
+    <!-- その他の診断一覧セクション -->
+    <section>
+      <div class="section-heading-row">
+        <h2 class="section-title">その他の診断テスト</h2>
+        <span class="section-sub" id="item-counter">全診断一覧</span>
+      </div>
+
+      <!-- リアルタイム絞り込み検索 -->
+      <div class="search-filter-wrap">
+        <input type="text" id="tool-search" class="filter-input" placeholder="診断タイトルやキーワードで検索…">
+      </div>
+
+      <!-- JSONから自動生成されるカードグリッド -->
+      <div id="test-grid" class="test-grid">
+        <!-- items.json のデータが動的に挿入される -->
+      </div>
+    </section>
+
+    <footer class="tool-footer" style="text-align: center; margin-top: 40px; padding: 20px 0; color: #94a3b8; font-size: 0.8rem;">
+      <p>© Chimera Test Lab. All rights reserved.</p>
+    </footer>
   </main>
 
+  <script src="assets/common.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', async () => {
-      const container = document.getElementById('portal-list');
+    document.addEventListener("DOMContentLoaded", async () => {
+      const grid = document.getElementById("test-grid");
+      const searchInput = document.getElementById("tool-search");
+      const counter = document.getElementById("item-counter");
+      let allItems = [];
 
       try {
-        const response = await fetch('./items.json');
-        if (!response.ok) throw new Error('items.json の取得に失敗しました');
+        const res = await fetch("items.json");
+        allItems = await res.json();
+        // キラーコンテンツ自身は上の特設バナーで目立たせているため、下の一般一覧では重複させず除外（または下にも残す場合はフィルタを外す）
+        const subItems = allItems.filter(item => item.id !== "persona-16types");
+        renderCards(subItems);
+        counter.textContent = `${subItems.length} 個のテスト`;
 
-        const items = await response.json();
+        searchInput.addEventListener("input", (e) => {
+          const q = e.target.value.toLowerCase().trim();
+          const filtered = subItems.filter(item => 
+            item.title.toLowerCase().includes(q) || 
+            (item.description && item.description.toLowerCase().includes(q))
+          );
+          renderCards(filtered);
+          counter.textContent = `${filtered.length} 個のテスト`;
+        });
+      } catch (err) {
+        console.error("items.json 読み込み失敗:", err);
+      }
 
-        container.innerHTML = items.map(item => {
-          // badge が空文字でない場合のみ表示
-          const badgeHtml = item.badge 
-            ? `<span class="portal-item-badge">${item.badge}</span>` 
-            : '';
+      function renderCards(list) {
+        grid.innerHTML = "";
+        if (list.length === 0) {
+          grid.innerHTML = `<p style="grid-column: 1/-1; text-align: center; color: #94a3b8; padding: 30px;">該当する診断テストが見つかりませんでした</p>`;
+          return;
+        }
 
-          return `
-            <a href="items/${item.id}/" class="portal-item">
-              ${badgeHtml}
-              <div class="portal-item-title">${item.title}</div>
-              <div class="portal-item-desc">${item.description}</div>
-            </a>
+        list.forEach(item => {
+          const card = document.createElement("a");
+          card.className = "test-card";
+          card.href = item.path || `items/${item.id}/`;
+          
+          card.innerHTML = `
+            <div>
+              <span class="test-card-cat">${item.category || "PSYCHOLOGY"}</span>
+              <h3 class="test-card-title">${item.title}</h3>
+              <p class="test-card-desc">${item.description || ""}</p>
+            </div>
+            <div class="test-card-link">診断を受ける <span>→</span></div>
           `;
-        }).join('');
-
-      } catch (error) {
-        console.error(error);
-        container.innerHTML = '<p style="color: #94a3b8; text-align: center; font-size: 0.85rem;">診断一覧の読み込みに失敗しました。</p>';
+          grid.appendChild(card);
+        });
       }
     });
   </script>
