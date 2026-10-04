@@ -144,6 +144,23 @@ function initDashboard(appData) {
 
 // 統計・集計の描画
 function renderStats(responses, filterRel) {
+  const tabsContainer = document.getElementById("relation-tabs");
+  const emptyState = document.getElementById("empty-state");
+  const statsArea = document.getElementById("stats-area");
+
+  // 全体で回答が1件もない場合
+  if (responses.length === 0) {
+    tabsContainer.style.display = "none";
+    statsArea.style.display = "none";
+    emptyState.style.display = "block";
+    emptyState.querySelector(".empty-title").textContent = "まだ回答が届いていません";
+    emptyState.querySelector(".empty-desc").textContent = "上のURLを友達や同僚にシェアして、あなたの普段の印象を回答してもらいましょう！";
+    return;
+  }
+
+  // 1件以上あればタブは常に表示
+  tabsContainer.style.display = "flex";
+
   // 各タブの件数バッジ更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "colleague", "senior", "junior", "family"].forEach(r => {
@@ -151,26 +168,19 @@ function renderStats(responses, filterRel) {
     if (countEl) countEl.textContent = responses.filter(item => item.relation === r).length;
   });
 
-  const emptyState = document.getElementById("empty-state");
-  const statsArea = document.getElementById("stats-area");
-
-  if (responses.length === 0) {
-    emptyState.style.display = "block";
-    statsArea.style.display = "none";
-    return;
-  }
-
   // フィルタリング
   const targetData = filterRel === "all" ? responses : responses.filter(r => r.relation === filterRel);
 
+  // 選択されたタブの回答数が0件の場合（タブは残し、メッセージのみ切り替え）
   if (targetData.length === 0) {
-    emptyState.style.display = "block";
     statsArea.style.display = "none";
+    emptyState.style.display = "block";
     emptyState.querySelector(".empty-title").textContent = `「${RELATIONS[filterRel]?.label || filterRel}」からの回答はまだありません`;
-    emptyState.querySelector(".empty-desc").textContent = "この関係性の人にURLをシェアして回答を集めてみましょう。";
+    emptyState.querySelector(".empty-desc").textContent = "他のタブを選択するか、この関係性の人にURLをシェアして回答を集めてみましょう。";
     return;
   }
 
+  // データがある場合は集計エリアを表示
   emptyState.style.display = "none";
   statsArea.style.display = "block";
 
@@ -196,7 +206,6 @@ function renderStats(responses, filterRel) {
   document.getElementById("type-description").textContent = TYPE_DESCS[dominantType] || "";
 
   // 4軸スライダー（中央=3.0を基準に0〜100%にマッピング）
-  // 1(左寄り) 〜 5(右寄り)
   const axes = [
     { id: "ei", score: avgScores[0] }, // 1:E 〜 5:I
     { id: "sn", score: avgScores[1] }, // 1:S 〜 5:N
@@ -205,7 +214,6 @@ function renderStats(responses, filterRel) {
   ];
 
   axes.forEach(axis => {
-    // 1〜5を 0%〜100% に変換
     const rightPercent = Math.round(((axis.score - 1) / 4) * 100);
     const leftPercent = 100 - rightPercent;
 
@@ -274,7 +282,6 @@ function renderResponseList(appData) {
 }
 
 // 4軸スコア（1〜5の配列）から16タイプ文字を判定
-// 3.0未満なら左側（E, S, T, J）、3.0以上なら右側（I, N, F, P）
 function calculateTypeFromScore(scores) {
   const e_or_i = scores[0] >= 3.0 ? "I" : "E";
   const s_or_n = scores[1] >= 3.0 ? "N" : "S";
