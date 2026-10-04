@@ -116,6 +116,16 @@ function getColorCategoryClass(typeStr) {
   return "sj";
 }
 
+// 日付フォーマット関数（YYYY/MM/DD）
+function formatDate(isoStr) {
+  const d = new Date(isoStr);
+  if (isNaN(d.getTime())) return "";
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}/${month}/${day}`;
+}
+
 // ストレージ読み込み＆マイグレーション処理
 function loadStore() {
   const raw = localStorage.getItem("persona16_data");
@@ -344,7 +354,7 @@ function renderStats(responses, filterRel) {
   });
 }
 
-// 回答履歴一覧＆削除（★ 各回答者のパラメータ開閉表示に対応）
+// 回答履歴一覧＆削除（★ 日付を YYYY/MM/DD 形式で表示）
 function renderResponseList(profile) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
@@ -361,10 +371,9 @@ function renderResponseList(profile) {
     card.className = "response-card";
 
     const relConfig = RELATIONS[item.relation] || { label: "その他", class: "rel-other" };
-    const dateStr = new Date(item.createdAt).toLocaleDateString("ja-JP", { month: "numeric", day: "numeric" });
+    const dateStr = formatDate(item.createdAt);
     const colorCat = getColorCategoryClass(item.type);
 
-    // 回答者個別の4軸比率算出（各スコア 1.0〜5.0 を 0〜100% に変換）
     const axisConfigs = [
       { left: "外向 (E)", right: "内向 (I)", score: item.scores[0] },
       { left: "感覚 (S)", right: "直観 (N)", score: item.scores[1] },
@@ -412,7 +421,6 @@ function renderResponseList(profile) {
       </div>
     `;
 
-    // 名前または行のクリックで開閉（チェックボックス操作時は開閉しない）
     const toggleTrigger = card.querySelector(".response-name-clickable");
     toggleTrigger.addEventListener("click", (e) => {
       e.stopPropagation();
