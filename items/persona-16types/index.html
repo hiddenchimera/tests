@@ -39,7 +39,7 @@
         <span class="intro-badge">PERSONA 16 TYPES</span>
         <h1 class="intro-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1rem; color: #64748b; font-weight: normal;">人間関係ごとの顔を暴く性格診断</span></h1>
         <p class="intro-desc">
-          人は相手（友達、恋人、職場、先輩、後輩）によって見せる顔が無意識に変わります。<br>
+          人は相手（友達、恋人、職場、家族、趣味仲間）によって見せる顔が無意識に変わります。<br>
           周りの人にこの診断を解いてもらい、客観的に映る「あなたの社会的仮面」を集計・分析しましょう。
         </p>
 
@@ -72,7 +72,7 @@
 
         <!-- シェア用URLボックス -->
         <div class="share-box">
-          <p class="share-box-label">友達や恋人に送る回答用URL</p>
+          <p class="share-box-label">友達や仲間に送る回答用URL</p>
           <div class="share-url-row">
             <input type="text" id="share-url-input" class="share-url-input" readonly>
             <button id="copy-url-btn" class="copy-btn">コピー</button>
@@ -80,21 +80,21 @@
           <p class="share-hint">※LINEやDMで送って答えてもらい、結果URLを送り返してもらってください。</p>
         </div>
 
-        <!-- 関係性フィルタータブ -->
+        <!-- 関係性フィルタータブ（案A対応） -->
         <div class="relation-tabs" id="relation-tabs" style="display: none;">
           <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
-          <button class="tab-btn" data-rel="friend">友人 (<span id="count-friend">0</span>)</button>
+          <button class="tab-btn" data-rel="friend">友達 (<span id="count-friend">0</span>)</button>
           <button class="tab-btn" data-rel="partner">恋人 (<span id="count-partner">0</span>)</button>
-          <button class="tab-btn" data-rel="colleague">同僚 (<span id="count-colleague">0</span>)</button>
-          <button class="tab-btn" data-rel="senior">先輩 (<span id="count-senior">0</span>)</button>
-          <button class="tab-btn" data-rel="junior">後輩 (<span id="count-junior">0</span>)</button>
+          <button class="tab-btn" data-rel="work">職場・学校 (<span id="count-work">0</span>)</button>
           <button class="tab-btn" data-rel="family">家族 (<span id="count-family">0</span>)</button>
+          <button class="tab-btn" data-rel="hobby">ネット・趣味 (<span id="count-hobby">0</span>)</button>
+          <button class="tab-btn" data-rel="other">その他 (<span id="count-other">0</span>)</button>
         </div>
 
         <!-- データ未集計時のプレースホルダー -->
         <div id="empty-state" class="empty-state" style="display: none;">
           <p class="empty-title">まだ回答が届いていません</p>
-          <p class="empty-desc">上のURLを友達や同僚にシェアして、あなたの普段の印象を回答してもらいましょう！</p>
+          <p class="empty-desc">上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！</p>
         </div>
 
         <!-- データ集計表示エリア -->
