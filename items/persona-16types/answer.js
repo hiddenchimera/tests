@@ -175,9 +175,9 @@ function finishQuiz() {
   const baseUrl = window.location.href.split("?")[0].replace("answer.html", "");
   const returnUrl = `${baseUrl}?rid=${rid}&rel=${selectedRelation}&sc=${finalScores.join(",")}&n=${encodeURIComponent(respondentName)}`;
 
-  // LINE送信ボタン設定
+  // LINE送信ボタン設定（★「他己分析」表記に統一）
   const lineBtn = document.getElementById("line-send-btn");
-  const lineText = encodeURIComponent(`${targetName}さんの他己診断に回答したよ！結果を確認してみてね👇\n${returnUrl}`);
+  const lineText = encodeURIComponent(`${targetName}さんの他己分析に回答したよ！結果を確認してみてね👇\n${returnUrl}`);
   lineBtn.href = `https://line.me/R/msg/text/?${lineText}`;
 
   // コピー用設定
