@@ -218,8 +218,8 @@
 /* --- 関係性タブ（折り返し対応＆すっきり配置） --- */
 .relation-tabs {
   display: flex;
-  flex-wrap: wrap;       /* 横幅に応じて自然に改行 */
-  gap: 8px 6px;          /* 行間8px、横間隔6px */
+  flex-wrap: wrap;
+  gap: 8px 6px;
   justify-content: flex-start;
   margin-bottom: 18px;
 }
@@ -233,7 +233,7 @@
   color: #64748b;
   border-radius: 9999px;
   cursor: pointer;
-  white-space: nowrap;   /* ボタン内の文字と数字は改行させない */
+  white-space: nowrap;
   transition: all 0.15s ease;
 }
 
@@ -402,7 +402,7 @@
   overflow-y: auto;
 }
 
-/* 回答カード本体（開閉式ラッパー） */
+/* 回答カード本体 */
 .response-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -430,7 +430,6 @@
   flex: 1;
 }
 
-/* 名前＋詳細トグルエリア */
 .response-name-clickable {
   font-weight: 600;
   color: #1e293b;
@@ -483,7 +482,7 @@
 .rel-hobby { background: #f3e8ff; color: #6b21a8; }
 .rel-other { background: #f1f5f9; color: #475569; }
 
-/* 回答履歴のタイプバッジ（4色対応） */
+/* 回答履歴のタイプバッジ */
 .response-type {
   font-weight: 800;
   font-size: 0.82rem;
@@ -500,7 +499,7 @@
   color: #94a3b8;
 }
 
-/* --- 回答者個別のパラメータ詳細エリア --- */
+/* 回答者個別のパラメータ詳細エリア */
 .response-detail {
   display: none;
   background: #ffffff;
@@ -564,9 +563,59 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
+/* --- 技術仕様・データ保存アコーディオン（目立たない控えめなデザイン） --- */
+.tech-spec-details {
+  margin-top: 36px;
+  text-align: left;
+  border-top: 1px dashed #e2e8f0;
+  padding-top: 16px;
+}
+
+.tech-spec-summary {
+  font-size: 0.76rem;
+  color: #94a3b8;
+  cursor: pointer;
+  user-select: none;
+  outline: none;
+  transition: color 0.15s ease;
+  list-style-position: inside;
+}
+
+.tech-spec-summary:hover {
+  color: #64748b;
+}
+
+.tech-spec-content {
+  margin-top: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 0.76rem;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.tech-spec-content p {
+  margin-bottom: 8px;
+}
+
+.tech-spec-content ul {
+  padding-left: 18px;
+  margin: 0;
+}
+
+.tech-spec-content li {
+  margin-bottom: 6px;
+}
+
+.tech-spec-content li:last-child {
+  margin-bottom: 0;
+}
+
 /* フッター */
 .tool-footer {
-  margin-top: 32px;
+  margin-top: 24px;
   border-top: 1px solid #f1f5f9;
   padding-top: 16px;
 }
