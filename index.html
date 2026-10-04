@@ -13,7 +13,7 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ペルソナ16タイプ他己分析＆無料性格診断｜Chimera Test Lab</title>
-  <meta name="description" content="友達・恋人・職場からの見え方を16タイプで可視化する「ペルソナ16タイプ他己分析」をはじめ、登録不要・無料で遊べる心理・性格診断テスト集。">
+  <meta name="description" content="友達・恋人・職場からの見え方を16タイプで可視化する「ペルソナ16タイプ他己分析」をはじめ、登録不要・無料で遊べる心理テスト・性格診断集。">
 
   <!-- OGP基本設定 -->
   <meta property="og:title" content="ペルソナ16タイプ他己分析＆無料性格診断｜Chimera Test Lab">
@@ -26,7 +26,7 @@
   <link rel="stylesheet" href="assets/common.css">
 
   <style>
-    /* --- 全体背景：モダンな微細ドットパターン（ラボ・グリッド感） --- */
+    /* --- 全体背景：モダンな微細ドットパターン --- */
     body {
       background-color: #f8fafc;
       background-image: radial-gradient(#cbd5e1 1.2px, transparent 1.2px);
@@ -34,9 +34,8 @@
       min-height: 100vh;
     }
 
-    /* メインコンテナの幅と余白調整 */
     .container {
-      max-width: 840px;
+      max-width: 860px;
       margin: 0 auto;
       padding: 0 16px 40px;
     }
@@ -44,7 +43,7 @@
     /* --- ヘッダー領域 --- */
     .hero-header {
       text-align: center;
-      padding: 40px 16px 24px;
+      padding: 40px 16px 20px;
     }
     .portal-tag {
       display: inline-flex;
@@ -88,31 +87,55 @@
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #3730a3 100%);
       color: #ffffff;
       border-radius: 20px;
-      padding: 34px 28px;
+      padding: 32px 28px;
       margin: 16px 0 44px;
       box-shadow: 0 16px 36px -8px rgba(30, 27, 75, 0.28), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
       overflow: hidden;
       text-align: left;
     }
 
-    /* 背景のソフトなアクセントグロー */
-    .featured-hero-card::after {
-      content: "";
-      position: absolute;
-      top: -30%;
-      right: -10%;
+    /* 内部の2カラムフレックスレイアウト */
+    .featured-card-body {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 28px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .featured-text-col {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* ビジュアル画像カラム */
+    .featured-visual-col {
+      flex-shrink: 0;
       width: 320px;
-      height: 320px;
-      background: radial-gradient(circle, rgba(129, 140, 248, 0.22) 0%, rgba(129, 140, 248, 0) 70%);
-      border-radius: 50%;
-      pointer-events: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .featured-flow-img {
+      width: 100%;
+      height: auto;
+      max-height: 220px;
+      object-fit: contain;
+      filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.3));
+      transition: transform 0.3s ease;
+    }
+
+    .featured-hero-card:hover .featured-flow-img {
+      transform: scale(1.03);
     }
 
     .featured-badge-row {
       display: flex;
       align-items: center;
       gap: 8px;
-      margin-bottom: 14px;
+      margin-bottom: 12px;
     }
     .badge-killer {
       background: #f43f5e;
@@ -132,7 +155,7 @@
     }
 
     .featured-title {
-      font-size: 1.65rem;
+      font-size: 1.6rem;
       font-weight: 900;
       line-height: 1.35;
       color: #ffffff;
@@ -140,28 +163,27 @@
       letter-spacing: -0.01em;
     }
     .featured-lead {
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       color: #e0e7ff;
-      line-height: 1.65;
-      margin-bottom: 22px;
-      max-width: 580px;
+      line-height: 1.6;
+      margin-bottom: 20px;
     }
 
     /* 4色トーンピル */
     .four-tones-row {
       display: flex;
-      gap: 8px;
-      margin-bottom: 24px;
+      gap: 6px;
+      margin-bottom: 22px;
       flex-wrap: wrap;
     }
     .tone-pill {
-      font-size: 0.74rem;
+      font-size: 0.72rem;
       font-weight: 700;
-      padding: 5px 12px;
+      padding: 4px 10px;
       border-radius: 8px;
       display: inline-flex;
       align-items: center;
-      gap: 5px;
+      gap: 4px;
       backdrop-filter: blur(4px);
     }
     .tone-purple { background: rgba(168, 85, 247, 0.2); color: #f3e8ff; border: 1px solid rgba(216, 180, 254, 0.4); }
@@ -172,7 +194,7 @@
     .featured-action-wrap {
       display: flex;
       align-items: center;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     .btn-launch-primary {
@@ -182,9 +204,9 @@
       gap: 8px;
       background: #ffffff;
       color: #312e81;
-      font-size: 0.96rem;
+      font-size: 0.94rem;
       font-weight: 800;
-      padding: 13px 26px;
+      padding: 12px 24px;
       border-radius: 12px;
       text-decoration: none;
       box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
@@ -196,7 +218,7 @@
       box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
     }
     .btn-hint-text {
-      font-size: 0.76rem;
+      font-size: 0.74rem;
       color: #c7d2fe;
     }
 
@@ -296,12 +318,23 @@
       gap: 4px;
     }
 
-    @media (max-width: 640px) {
+    /* スマホ表示時の調整（画像を上または下に積み上げ） */
+    @media (max-width: 720px) {
+      .featured-card-body {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .featured-visual-col {
+        width: 100%;
+        max-width: 280px;
+        margin: 0 auto;
+        order: 2; /* スマホではリード文の後に自然に表示 */
+      }
       .featured-hero-card {
-        padding: 26px 20px;
+        padding: 24px 18px;
       }
       .featured-title {
-        font-size: 1.35rem;
+        font-size: 1.3rem;
       }
       .btn-launch-primary {
         width: 100%;
@@ -325,25 +358,36 @@
         <span class="badge-killer">PICK UP !</span>
         <span class="badge-sub">看板ツール / 会員登録不要</span>
       </div>
-      <h2 class="featured-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1.05rem; font-weight: 600; opacity: 0.9;">― 人間関係ごとの顔を暴く性格診断 ―</span></h2>
-      <p class="featured-lead">
-        人は「友達」「恋人」「職場」「ネット仲間」によって見せる顔が全く違います。<br>
-        URLをシェアして周りの人から12問で回答を集めるだけで、相手ごとに演じ分けているあなたの「社会的仮面（ペルソナ）」を16タイプで可視化・集計します。
-      </p>
 
-      <div class="four-tones-row">
-        <span class="tone-pill tone-purple">🟣 NT 合理・探求</span>
-        <span class="tone-pill tone-green">🟢 NF 理想・共感</span>
-        <span class="tone-pill tone-blue">🔵 SJ 秩序・堅実</span>
-        <span class="tone-pill tone-yellow">🟡 SP 実践・行動</span>
-      </div>
+      <div class="featured-card-body">
+        <!-- 左カラム：説明文＆アクション -->
+        <div class="featured-text-col">
+          <h2 class="featured-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1.02rem; font-weight: 600; opacity: 0.9;">― 人間関係ごとの顔を暴く性格診断 ―</span></h2>
+          <p class="featured-lead">
+            人は「友達」「恋人」「職場」「ネット仲間」によって見せる顔が全く違います。<br>
+            URLをシェアして周りの人から回答を集めるだけで、相手ごとに演じ分けているあなたの「社会的仮面（ペルソナ）」を16タイプで可視化・集計します。
+          </p>
 
-      <div class="featured-action-wrap">
-        <a href="items/persona-16types/" class="btn-launch-primary">
-          <span>他己分析をはじめる（URL発行）</span>
-          <span style="font-size: 1.1rem;">→</span>
-        </a>
-        <span class="btn-hint-text">※ 複数プロファイルの作成・切り替え・削除にも対応</span>
+          <div class="four-tones-row">
+            <span class="tone-pill tone-purple">🟣 NT 合理・探求</span>
+            <span class="tone-pill tone-green">🟢 NF 理想・共感</span>
+            <span class="tone-pill tone-blue">🔵 SJ 秩序・堅実</span>
+            <span class="tone-pill tone-yellow">🟡 SP 実践・行動</span>
+          </div>
+
+          <div class="featured-action-wrap">
+            <a href="items/persona-16types/" class="btn-launch-primary">
+              <span>他己分析をはじめる（URL発行）</span>
+              <span style="font-size: 1.1rem;">→</span>
+            </a>
+            <span class="btn-hint-text">※ 複数プロファイル対応</span>
+          </div>
+        </div>
+
+        <!-- 右カラム：作成いただいたグラフィック -->
+        <div class="featured-visual-col">
+          <img src="assets/images/persona-flow.webp" alt="ペルソナ他己分析の仕組み：URL発行から回答集計まで" class="featured-flow-img" width="384" height="287">
+        </div>
       </div>
     </section>
 
