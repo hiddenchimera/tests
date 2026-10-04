@@ -23,12 +23,11 @@
   <meta name="twitter:card" content="summary_large_image">
 
   <!-- 既存共通CSS ＆ 専用CSS -->
-  <link rel="stylesheet" href="../../assets/common.css">
+  <link rel="stylesheet" href="../../assets/css/common.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="container">
-    <!-- トースト通知 -->
     <div id="toast" class="toast" style="display: none;"></div>
 
     <section id="quiz-card">
@@ -51,9 +50,8 @@
         <button id="generate-btn" class="start-btn-primary">回答募集URLを発行する</button>
       </div>
 
-      <!-- ② ダッシュボード画面（1つ以上のプロファイルが存在するとき） -->
+      <!-- ② ダッシュボード画面 -->
       <div id="dashboard-view" style="display: none;">
-        <!-- プロファイル管理バー -->
         <div class="profile-bar">
           <div class="profile-select-wrap">
             <span class="profile-select-label">対象:</span>
@@ -70,7 +68,6 @@
           <h1 class="dashboard-title"><span id="target-user-name"></span> さんの他己分析</h1>
         </div>
 
-        <!-- シェア用URLボックス -->
         <div class="share-box">
           <p class="share-box-label">友達や仲間に送る回答用URL</p>
           <div class="share-url-row">
@@ -80,7 +77,6 @@
           <p class="share-hint">※LINEやDMで送って答えてもらい、結果URLを送り返してもらってください。</p>
         </div>
 
-        <!-- 関係性フィルタータブ -->
         <div class="relation-tabs" id="relation-tabs" style="display: none;">
           <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
           <button class="tab-btn" data-rel="friend">友達 (<span id="count-friend">0</span>)</button>
@@ -91,22 +87,18 @@
           <button class="tab-btn" data-rel="other">その他 (<span id="count-other">0</span>)</button>
         </div>
 
-        <!-- データ未集計時のプレースホルダー -->
         <div id="empty-state" class="empty-state" style="display: none;">
           <p class="empty-title">まだ回答が届いていません</p>
           <p class="empty-desc">上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！</p>
         </div>
 
-        <!-- データ集計表示エリア -->
         <div id="stats-area" style="display: none;">
-          <!-- 総合判定カード -->
           <div class="result-summary-card">
             <p class="summary-sub" id="current-filter-label">全体の他己評価タイプ</p>
             <h2 class="summary-type" id="dominant-type">----</h2>
             <p class="summary-desc" id="type-description">回答データを集計しています...</p>
           </div>
 
-          <!-- 4軸バランススライダー -->
           <div class="axes-container">
             <div class="axis-row">
               <div class="axis-labels">
@@ -154,20 +146,16 @@
           </div>
         </div>
 
-        <!-- 届いた回答一覧 & 削除管理セクション -->
         <div class="log-section">
           <div class="log-header">
             <h3 class="log-title">届いた回答履歴</h3>
             <button id="delete-selected-btn" class="delete-btn" disabled>選択した回答を削除</button>
           </div>
-          <div id="response-list" class="response-list">
-            <!-- 回答カードが動的に挿入される -->
-          </div>
+          <div id="response-list" class="response-list"></div>
         </div>
 
       </div>
 
-      <!-- 技術仕様・データ保存に関する開閉アコーディオン -->
       <details class="tech-spec-details">
         <summary class="tech-spec-summary">
           データの保存仕様とプライバシーについて
@@ -185,7 +173,6 @@
         </div>
       </details>
 
-      <!-- 免責事項・フッター -->
       <footer class="tool-footer">
         <p class="disclaimer">※本ツールは非公式の性格分析ツールであり、Myers-Briggs Type Indicator（MBTI）および NERIS Analytics Limited（16Personalities）とは一切関係ありません。</p>
         <div class="nav-links-row" style="margin-top: 14px;">
@@ -195,7 +182,7 @@
     </section>
   </main>
 
-  <script src="../../assets/common.js"></script>
+  <script src="../../assets/js/common.js"></script>
   <script src="dashboard.js"></script>
 </body>
 </html>
