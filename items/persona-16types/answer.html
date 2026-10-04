@@ -12,95 +12,114 @@
     gtag('config', 'G-FW7R85YTVX');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>他己分析に回答する｜ペルソナ16タイプ他己分析 - Chimera Test Lab</title>
-
-  <!-- OGP基本設定 -->
-  <meta property="og:title" content="他己分析に回答する｜ペルソナ16タイプ他己分析">
-  <meta property="og:description" content="友達・恋人・同僚から見た印象を回答！人間関係ごとの仮面（ペルソナ）を16タイプで可視化します。">
-  <meta property="og:type" content="website">
+  <title>ペルソナ16タイプ他己分析｜回答ページ - Chimera Test Lab</title>
+  <meta name="description" content="友達や仲間の性格・普段の印象を12問で回答する他己分析ページ。">
 
   <!-- 既存共通CSS ＆ 専用CSS -->
-  <link rel="stylesheet" href="../../assets/common.css">
+  <link rel="stylesheet" href="../../assets/css/common.css">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="container">
-    <div id="toast" class="toast" style="display: none;"></div>
-
     <section id="quiz-card">
-      <!-- ① 回答前：関係性の選択＆名前入力画面 -->
-      <div id="relation-view">
-        <span class="intro-badge">PERSONA 16 TYPES</span>
-        <h1 class="intro-title"><span id="target-name-display">あの人</span> の<br>印象を教えてください</h1>
+      <div id="test-nav-header"></div>
+
+      <!-- ① 開始前画面：関係性と回答者名入力 -->
+      <div id="answer-intro-view">
+        <span class="intro-badge">OTHER-ANALYSIS</span>
+        <h1 class="intro-title"><span id="target-name-display" style="color: #4f46e5;"></span> さんの他己分析</h1>
         <p class="intro-desc">
-          あなたから見た普段の様子や行動パターンについて、全12問で回答してください。<br>
-          直感で当てはまるものを選んでいくだけでOKです（所要時間：約2分）。
+          あなたが普段接している <strong id="target-name-bold"></strong> さんの印象について、直感で12問の質問に答えてください（所要時間：約1分）。
         </p>
 
         <div class="input-group">
-          <label class="input-label">あなたと <span id="target-name-inline">あの人</span> の関係</label>
-          <div class="relation-grid" id="relation-selector">
-            <button type="button" class="rel-select-btn" data-rel="friend">友達</button>
-            <button type="button" class="rel-select-btn" data-rel="partner">恋人・パートナー</button>
+          <label class="input-label">あなたと相手の関係性は？</label>
+          <div class="relation-grid">
+            <button type="button" class="rel-select-btn active" data-rel="friend">友達</button>
+            <button type="button" class="rel-select-btn" data-rel="partner">恋人</button>
             <button type="button" class="rel-select-btn" data-rel="work">職場・学校</button>
-            <button type="button" class="rel-select-btn" data-rel="family">家族・親族</button>
-            <button type="button" class="rel-select-btn" data-rel="hobby">ネット・趣味仲間</button>
+            <button type="button" class="rel-select-btn" data-rel="family">家族</button>
+            <button type="button" class="rel-select-btn" data-rel="hobby">ネット・趣味</button>
             <button type="button" class="rel-select-btn" data-rel="other">その他</button>
           </div>
         </div>
 
-        <div class="input-group" style="margin-top: 18px;">
-          <label for="respondent-name-input" class="input-label">あなたのニックネーム（任意）</label>
-          <input type="text" id="respondent-name-input" class="text-input" placeholder="例: 友人A（空欄なら匿名）" maxlength="12">
+        <div class="input-group" style="margin-top: 16px;">
+          <label for="respondent-name-input" class="input-label">あなたの名前（ニックネーム）</label>
+          <input type="text" id="respondent-name-input" class="text-input" placeholder="例: たろう（空欄でもOK）" maxlength="12">
         </div>
 
-        <button id="start-answer-btn" class="start-btn-primary" style="margin-top: 24px;" disabled>回答をはじめる</button>
+        <button id="start-survey-btn" class="start-btn-primary" style="margin-top: 10px;">診断をはじめる</button>
       </div>
 
-      <!-- ② 診断の設問画面（初期状態は非表示） -->
-      <div id="quiz-view" style="display: none;">
-        <div class="card-header">
-          <p id="progress" class="progress-text">質問 1 / 12</p>
-          <h2 id="question-text" class="question-text">読み込み中…</h2>
+      <!-- ② 設問回答画面 -->
+      <div id="answer-survey-view" style="display: none;">
+        <div class="progress-wrap">
+          <div class="progress-bar-bg">
+            <div id="survey-progress-bar" class="progress-bar-fill"></div>
+          </div>
+          <span id="survey-progress-text" class="progress-text">1 / 12</span>
         </div>
-        <div id="options-container" class="options-group">
-          <!-- answer.js が5段階のボタンを生成 -->
+
+        <div class="question-box">
+          <p id="survey-question-text" class="question-text">質問文が読み込まれます</p>
         </div>
-      </div>
 
-      <!-- ③ 回答完了・URL返信画面（初期状態は非表示） -->
-      <div id="complete-view" style="display: none; text-align: center;">
-        <span class="intro-badge" style="background:#dcfce7; color:#166534;">COMPLETE</span>
-        <h1 class="intro-title" style="margin-top: 8px;">回答が完了しました！</h1>
-        <p class="intro-desc" style="text-align: center;">
-          回答結果を <span id="target-name-complete" style="font-weight:700; color:#0f172a;"></span> さんに届けましょう。<br>
-          下のボタンからLINEで送るか、URLをコピーして渡してください。
-        </p>
-
-        <div class="share-box" style="margin-top: 20px;">
-          <a id="line-send-btn" class="share-btn-primary" style="background:#06c755; margin-bottom:10px;" href="#" target="_blank" rel="noopener">
-            LINEで結果を送る
-          </a>
-          <button id="copy-result-btn" class="option-btn" style="text-align:center; font-weight:700; background:#ffffff; border:1px solid #cbd5e1;">
-            結果URLをコピー
+        <div class="likert-scale">
+          <button class="likert-btn" data-score="1">
+            <span class="likert-num">1</span>
+            <span class="likert-txt">全く当てはまらない</span>
+          </button>
+          <button class="likert-btn" data-score="2">
+            <span class="likert-num">2</span>
+            <span class="likert-txt">あまり当てはまらない</span>
+          </button>
+          <button class="likert-btn" data-score="3">
+            <span class="likert-num">3</span>
+            <span class="likert-txt">どちらともいえない</span>
+          </button>
+          <button class="likert-btn" data-score="4">
+            <span class="likert-num">4</span>
+            <span class="likert-txt">やや当てはまる</span>
+          </button>
+          <button class="likert-btn" data-score="5">
+            <span class="likert-num">5</span>
+            <span class="likert-txt">非常に当てはまる</span>
           </button>
         </div>
+      </div>
 
-        <div style="margin-top: 32px; border-top: 1px solid #f1f5f9; padding-top: 16px;">
-          <p style="font-size: 0.82rem; color: #64748b; margin-bottom: 10px;">あなた自身も診断URLを発行してみませんか？</p>
-          <a href="index.html" class="main-link" style="font-size:0.9rem; font-weight:700; color:#4f46e5; text-decoration:none;">
-            自分の他己分析URLを発行する →
+      <!-- ③ 回答完了画面：結果を相手に送る -->
+      <div id="answer-finish-view" style="display: none;">
+        <span class="intro-badge">COMPLETE</span>
+        <h1 class="intro-title">回答が完了しました！</h1>
+        <p class="intro-desc">
+          ご協力ありがとうございました。<br>
+          以下のボタンを押して、回答結果を <strong id="finish-target-name"></strong> さんに送り返してください。相手の画面で結果が集計されます。
+        </p>
+
+        <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
+          <a id="line-share-btn" href="#" target="_blank" rel="noopener noreferrer" class="start-btn-primary" style="background: #06c755; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+            LINEで結果を送る
           </a>
+          <button id="copy-result-btn" class="copy-btn" style="padding: 12px; font-size: 0.95rem;">結果リンクをコピー（DM等で送信）</button>
+        </div>
+
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.8rem; color: #64748b; line-height: 1.5; text-align: left;">
+          ※ あなたがどの設問にどう答えたかという個別内容は相手には伝わりません（4つの性格傾向バランスのみ反映されます）。
         </div>
       </div>
 
       <footer class="tool-footer">
-        <p class="disclaimer">※本ツールは非公式の性格分析ツールであり、Myers-Briggs Type Indicator（MBTI）および NERIS Analytics Limited（16Personalities）とは一切関係ありません。</p>
+        <p class="disclaimer">※本ツールは非公式の性格分析ツールです。</p>
+        <div class="nav-links-row" style="margin-top: 14px;">
+          <a href="../../" class="main-link">← テスト一覧トップへ</a>
+        </div>
       </footer>
     </section>
   </main>
 
-  <script src="../../assets/common.js"></script>
+  <script src="../../assets/js/common.js"></script>
   <script src="answer.js"></script>
 </body>
 </html>
