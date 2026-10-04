@@ -29,63 +29,30 @@ const TYPE_DESCS = {
   ESFP: "明るいエネルギーで場の空気を盛り上げ、周囲を笑顔にするムードメーカータイプ。"
 };
 
+// アプリデータ管理
+let store = loadStore();
+
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
-  
-  // ストレージからユーザー情報と回答一覧を取得
-  let appData = JSON.parse(localStorage.getItem("persona16_data") || "null");
 
   // --- ① 新規回答の受け取り処理（URLに rid, rel, sc がある場合） ---
   const rid = urlParams.get("rid");
   const rel = urlParams.get("rel");
   const sc = urlParams.get("sc");
+  const uid = urlParams.get("uid");
   const n = urlParams.get("n") || "匿名";
 
   if (rid && rel && sc) {
-    if (!appData) {
-      // 送り主データがまだ無い場合は名前を暫定作成
-      appData = { userName: "あなた", responses: [] };
-    }
-
-    const isDuplicate = appData.responses.some(r => r.id === rid);
-
-    if (isDuplicate) {
-      showToast("この回答はすでに反映済みです");
-    } else {
-      const scores = sc.split(",").map(Number);
-      const computedType = calculateTypeFromScore(scores);
-
-      appData.responses.unshift({
-        id: rid,
-        name: n,
-        relation: rel,
-        scores: scores,
-        type: computedType,
-        createdAt: new Date().toISOString()
-      });
-
-      localStorage.setItem("persona16_data", JSON.stringify(appData));
-      showToast(`${n}さん（${RELATIONS[rel]?.label || "回答"}）のデータを反映しました！`);
-    }
-
+    handleIncomingResponse(rid, rel, sc, uid, n);
     // URLのパラメータを除去してクリーンなURLに戻す
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
   }
 
-  // --- ② 画面初期表示の切り替え ---
-  if (!appData || !appData.userName) {
-    // ユーザー未作成時はセットアップ画面
-    document.getElementById("setup-view").style.display = "block";
-    document.getElementById("dashboard-view").style.display = "none";
-  } else {
-    // セットアップ済み時はダッシュボード表示
-    document.getElementById("setup-view").style.display = "none";
-    document.getElementById("dashboard-view").style.display = "block";
-    initDashboard(appData);
-  }
+  // --- ② 画面初期表示の制御 ---
+  renderApp();
 
-  // --- ③ URL発行ボタンのイベント ---
+  // --- ③ 初回URL発行ボタンイベント ---
   const generateBtn = document.getElementById("generate-btn");
   if (generateBtn) {
     generateBtn.addEventListener("click", () => {
@@ -94,38 +61,191 @@ document.addEventListener("DOMContentLoaded", () => {
         alert("ニックネームを入力してください");
         return;
       }
+      createProfile(nameInput);
+    });
+  }
 
-      appData = {
-        userName: nameInput,
-        responses: []
-      };
-      localStorage.setItem("persona16_data", JSON.stringify(appData));
+  // --- ④ プロファイル新規追加ボタン ---
+  const addProfileBtn = document.getElementById("add-profile-btn");
+  if (addProfileBtn) {
+    addProfileBtn.addEventListener("click", () => {
+      const newName = prompt("新しいプロファイルのニックネームを入力してください（例: 本名用、SNS用など）");
+      if (newName && newName.trim()) {
+        createProfile(newName.trim());
+      }
+    });
+  }
 
-      document.getElementById("setup-view").style.display = "none";
-      document.getElementById("dashboard-view").style.display = "block";
-      initDashboard(appData);
+  // --- ⑤ 現在のプロファイル削除ボタン ---
+  const deleteProfileBtn = document.getElementById("delete-profile-btn");
+  if (deleteProfileBtn) {
+    deleteProfileBtn.addEventListener("click", () => {
+      const current = getCurrentProfile();
+      if (!current) return;
+
+      if (!confirm(`プロファイル「${current.name}」と、このプロファイルに届いたすべての回答データを削除しますか？\n（この操作は取り消せません）`)) {
+        return;
+      }
+
+      store.profiles = store.profiles.filter(p => p.id !== current.id);
+      store.activeProfileId = store.profiles.length > 0 ? store.profiles[0].id : null;
+      saveStore();
+      renderApp();
+      showToast("プロファイルを削除しました");
     });
   }
 });
 
-// ダッシュボード全体の初期化・描画
-function initDashboard(appData) {
-  document.getElementById("target-user-name").textContent = appData.userName;
+// 暗号学的一意ID生成関数
+function generateUUID(prefix = "") {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+    return prefix + crypto.randomUUID();
+  }
+  // HTTPS以外の開発環境フォールバック
+  return prefix + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 9);
+}
 
-  // シェア用URLの生成（answer.htmlへのリンク）
+// ストレージ読み込み＆マイグレーション処理
+function loadStore() {
+  const raw = localStorage.getItem("persona16_data");
+  if (!raw) {
+    return { activeProfileId: null, profiles: [] };
+  }
+
+  const parsed = JSON.parse(raw);
+
+  // 旧データ形式（単一プロファイル構造）からの自動移行
+  if (parsed.userName && Array.isArray(parsed.responses)) {
+    const migratedProfile = {
+      id: generateUUID("p_"),
+      name: parsed.userName,
+      responses: parsed.responses
+    };
+    const newStore = {
+      activeProfileId: migratedProfile.id,
+      profiles: [migratedProfile]
+    };
+    localStorage.setItem("persona16_data", JSON.stringify(newStore));
+    return newStore;
+  }
+
+  return parsed;
+}
+
+function saveStore() {
+  localStorage.setItem("persona16_data", JSON.stringify(store));
+}
+
+function getCurrentProfile() {
+  return store.profiles.find(p => p.id === store.activeProfileId) || null;
+}
+
+function createProfile(name) {
+  const newProfile = {
+    id: generateUUID("p_"),
+    name: name,
+    responses: []
+  };
+  store.profiles.push(newProfile);
+  store.activeProfileId = newProfile.id;
+  saveStore();
+  renderApp();
+  showToast(`プロファイル「${name}」を作成しました`);
+}
+
+// 送られてきた回答の蓄積
+function handleIncomingResponse(rid, rel, sc, uid, n) {
+  let targetProfile = store.profiles.find(p => p.id === uid);
+  if (!targetProfile) {
+    targetProfile = getCurrentProfile() || store.profiles[0];
+  }
+
+  if (!targetProfile) {
+    targetProfile = {
+      id: uid || generateUUID("p_"),
+      name: "あなた",
+      responses: []
+    };
+    store.profiles.push(targetProfile);
+    store.activeProfileId = targetProfile.id;
+  }
+
+  // 重複チェック
+  const isDuplicate = targetProfile.responses.some(r => r.id === rid);
+  if (isDuplicate) {
+    showToast("この回答はすでに反映済みです");
+    return;
+  }
+
+  const scores = sc.split(",").map(Number);
+  const computedType = calculateTypeFromScore(scores);
+
+  targetProfile.responses.unshift({
+    id: rid,
+    name: n,
+    relation: rel,
+    scores: scores,
+    type: computedType,
+    createdAt: new Date().toISOString()
+  });
+
+  store.activeProfileId = targetProfile.id;
+  saveStore();
+  showToast(`${n}さん（${RELATIONS[rel]?.label || "回答"}）のデータを反映しました！`);
+}
+
+// 画面全体の再描画
+function renderApp() {
+  const setupView = document.getElementById("setup-view");
+  const dashboardView = document.getElementById("dashboard-view");
+  const currentProfile = getCurrentProfile();
+
+  if (!currentProfile) {
+    setupView.style.display = "block";
+    dashboardView.style.display = "none";
+  } else {
+    setupView.style.display = "none";
+    dashboardView.style.display = "block";
+    updateProfileSelector();
+    initDashboard(currentProfile);
+  }
+}
+
+// プロファイル選択ドロップダウンの更新
+function updateProfileSelector() {
+  const selector = document.getElementById("profile-selector");
+  selector.innerHTML = "";
+
+  store.profiles.forEach(p => {
+    const opt = document.createElement("option");
+    opt.value = p.id;
+    opt.textContent = `${p.name} (${p.responses.length}件)`;
+    if (p.id === store.activeProfileId) opt.selected = true;
+    selector.appendChild(opt);
+  });
+
+  selector.onchange = () => {
+    store.activeProfileId = selector.value;
+    saveStore();
+    renderApp();
+  };
+}
+
+// ダッシュボード初期化
+function initDashboard(profile) {
+  document.getElementById("target-user-name").textContent = profile.name;
+
   const baseUrl = window.location.href.split("?")[0].replace("index.html", "");
-  const answerUrl = `${baseUrl}answer.html?u=${encodeURIComponent(appData.userName)}`;
+  const answerUrl = `${baseUrl}answer.html?u=${encodeURIComponent(profile.name)}&uid=${profile.id}`;
   const shareInput = document.getElementById("share-url-input");
   shareInput.value = answerUrl;
 
-  // コピー機能
   document.getElementById("copy-url-btn").onclick = () => {
     shareInput.select();
     navigator.clipboard.writeText(answerUrl);
     showToast("回答募集URLをコピーしました！");
   };
 
-  // タブイベントのバインド
   let currentRel = "all";
   const tabBtns = document.querySelectorAll(".tab-btn");
   tabBtns.forEach(btn => {
@@ -133,13 +253,12 @@ function initDashboard(appData) {
       tabBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       currentRel = btn.getAttribute("data-rel");
-      renderStats(appData.responses, currentRel);
+      renderStats(profile.responses, currentRel);
     };
   });
 
-  // 初回描画
-  renderStats(appData.responses, currentRel);
-  renderResponseList(appData);
+  renderStats(profile.responses, currentRel);
+  renderResponseList(profile);
 }
 
 // 統計・集計の描画
@@ -148,7 +267,6 @@ function renderStats(responses, filterRel) {
   const emptyState = document.getElementById("empty-state");
   const statsArea = document.getElementById("stats-area");
 
-  // 全体で回答が1件もない場合
   if (responses.length === 0) {
     tabsContainer.style.display = "none";
     statsArea.style.display = "none";
@@ -158,20 +276,16 @@ function renderStats(responses, filterRel) {
     return;
   }
 
-  // 1件以上あればタブは常に表示
   tabsContainer.style.display = "flex";
 
-  // 各タブの件数バッジ更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "colleague", "senior", "junior", "family"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
     if (countEl) countEl.textContent = responses.filter(item => item.relation === r).length;
   });
 
-  // フィルタリング
   const targetData = filterRel === "all" ? responses : responses.filter(r => r.relation === filterRel);
 
-  // 選択されたタブの回答数が0件の場合（タブは残し、メッセージのみ切り替え）
   if (targetData.length === 0) {
     statsArea.style.display = "none";
     emptyState.style.display = "block";
@@ -180,15 +294,12 @@ function renderStats(responses, filterRel) {
     return;
   }
 
-  // データがある場合は集計エリアを表示
   emptyState.style.display = "none";
   statsArea.style.display = "block";
 
-  // フィルターラベル
   document.getElementById("current-filter-label").textContent = 
     filterRel === "all" ? "全体の他己評価タイプ" : `「${RELATIONS[filterRel]?.label}」から見たタイプ`;
 
-  // 4軸スコアの平均化（各スコアは 1〜5段階）
   const total = targetData.length;
   const avgScores = [0, 0, 0, 0];
   targetData.forEach(r => {
@@ -200,17 +311,15 @@ function renderStats(responses, filterRel) {
     avgScores[idx] = sum / total;
   });
 
-  // 判定タイプ算出
   const dominantType = calculateTypeFromScore(avgScores);
   document.getElementById("dominant-type").textContent = dominantType;
   document.getElementById("type-description").textContent = TYPE_DESCS[dominantType] || "";
 
-  // 4軸スライダー（中央=3.0を基準に0〜100%にマッピング）
   const axes = [
-    { id: "ei", score: avgScores[0] }, // 1:E 〜 5:I
-    { id: "sn", score: avgScores[1] }, // 1:S 〜 5:N
-    { id: "tf", score: avgScores[2] }, // 1:T 〜 5:F
-    { id: "jp", score: avgScores[3] }  // 1:J 〜 5:P
+    { id: "ei", score: avgScores[0] },
+    { id: "sn", score: avgScores[1] },
+    { id: "tf", score: avgScores[2] },
+    { id: "jp", score: avgScores[3] }
   ];
 
   axes.forEach(axis => {
@@ -222,19 +331,19 @@ function renderStats(responses, filterRel) {
   });
 }
 
-// 回答履歴一覧の描画 & 削除処理
-function renderResponseList(appData) {
+// 回答履歴一覧＆削除
+function renderResponseList(profile) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
   container.innerHTML = "";
 
-  if (appData.responses.length === 0) {
+  if (profile.responses.length === 0) {
     container.innerHTML = `<p style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:12px;">履歴はありません</p>`;
     deleteBtn.disabled = true;
     return;
   }
 
-  appData.responses.forEach(item => {
+  profile.responses.forEach(item => {
     const card = document.createElement("div");
     card.className = "response-card";
 
@@ -254,7 +363,6 @@ function renderResponseList(appData) {
     container.appendChild(card);
   });
 
-  // チェックボックスの状態監視
   const checkboxes = container.querySelectorAll(".select-checkbox");
   checkboxes.forEach(cb => {
     cb.addEventListener("change", () => {
@@ -263,25 +371,23 @@ function renderResponseList(appData) {
     });
   });
 
-  // 削除ボタンイベント
   deleteBtn.onclick = () => {
     const selectedIds = Array.from(container.querySelectorAll(".select-checkbox:checked")).map(cb => cb.dataset.id);
     if (selectedIds.length === 0) return;
 
     if (!confirm(`選択した ${selectedIds.length} 件の回答を削除しますか？\n（この操作は取り消せません）`)) return;
 
-    appData.responses = appData.responses.filter(r => !selectedIds.includes(r.id));
-    localStorage.setItem("persona16_data", JSON.stringify(appData));
+    profile.responses = profile.responses.filter(r => !selectedIds.includes(r.id));
+    saveStore();
 
-    // 再描画
-    renderResponseList(appData);
+    renderResponseList(profile);
     const activeTabRel = document.querySelector(".tab-btn.active")?.getAttribute("data-rel") || "all";
-    renderStats(appData.responses, activeTabRel);
+    renderStats(profile.responses, activeTabRel);
+    updateProfileSelector();
     showToast("回答を削除しました");
   };
 }
 
-// 4軸スコア（1〜5の配列）から16タイプ文字を判定
 function calculateTypeFromScore(scores) {
   const e_or_i = scores[0] >= 3.0 ? "I" : "E";
   const s_or_n = scores[1] >= 3.0 ? "N" : "S";
@@ -290,7 +396,6 @@ function calculateTypeFromScore(scores) {
   return `${e_or_i}${s_or_n}${t_or_f}${j_or_p}`;
 }
 
-// トースト通知の表示
 function showToast(msg) {
   const toast = document.getElementById("toast");
   toast.textContent = msg;
