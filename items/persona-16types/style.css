@@ -215,30 +215,31 @@
   line-height: 1.5;
 }
 
-/* --- 関係性タブ --- */
+/* --- 関係性タブ（折り返し対応＆すっきり配置） --- */
 .relation-tabs {
   display: flex;
-  gap: 6px;
-  overflow-x: auto;
-  padding-bottom: 8px;
-  margin-bottom: 16px;
-  scrollbar-width: none;
-}
-
-.relation-tabs::-webkit-scrollbar {
-  display: none;
+  flex-wrap: wrap;       /* 横幅に応じて自然に改行 */
+  gap: 8px 6px;          /* 行間8px、横間隔6px */
+  justify-content: flex-start;
+  margin-bottom: 18px;
 }
 
 .tab-btn {
-  padding: 6px 12px;
-  font-size: 0.82rem;
+  padding: 6px 11px;
+  font-size: 0.8rem;
   font-weight: 600;
   border: 1px solid #e2e8f0;
   background: #ffffff;
   color: #64748b;
   border-radius: 9999px;
   cursor: pointer;
-  white-space: nowrap;
+  white-space: nowrap;   /* ボタン内の文字と数字は改行させない */
+  transition: all 0.15s ease;
+}
+
+.tab-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
 }
 
 .tab-btn.active {
