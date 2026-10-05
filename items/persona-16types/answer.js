@@ -107,6 +107,9 @@ document.addEventListener("DOMContentLoaded", () => {
       currentQuestionIndex--;
       renderQuestion();
     } else {
+      // 導入画面に戻る場合は進捗バーを初期化
+      document.getElementById("quiz-progress").style.width = "0%";
+      document.getElementById("quiz-progress-num").textContent = `問 1 / ${QUESTIONS_MASTER.length}`;
       document.getElementById("quiz-screen").style.display = "none";
       document.getElementById("intro-screen").style.display = "block";
     }
