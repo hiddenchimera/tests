@@ -43,7 +43,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (rid && rel && sc) {
     handleIncomingResponse(rid, rel, sc, uid, n);
-    // クエリを除去して app.html のクリーンなURLに戻す
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
   }
@@ -253,7 +252,7 @@ function updateProfileSelector() {
   };
 }
 
-// ダッシュボード初期化（回答募集URLを app.html と同一階層の answer.html 宛てに生成）
+// ダッシュボード初期化
 function initDashboard(profile) {
   document.getElementById("target-user-name").textContent = profile.name;
 
@@ -285,12 +284,29 @@ function initDashboard(profile) {
   renderResponseList(profile);
 }
 
-// 統計・集計の描画
-function renderStats(responses, filterRel) {
+// 単一リストの平均スコアおよび16タイプを算出するヘルパー
+function computeGroupMetrics(items) {
+  if (!items || items.length === 0) return null;
+  const avgScores = [0, 0, 0, 0];
+  items.forEach(r => {
+    r.scores.forEach((s, idx) => {
+      avgScores[idx] += s;
+    });
+  });
+  avgScores.forEach((sum, idx) => {
+    avgScores[idx] = sum / items.length;
+  });
+  const type = calculateTypeFromScore(avgScores);
+  return { avgScores, type, count: items.length };
+}
+
+// 統計・集計の描画（★ メインカードとミニカード群の相互入れ替えに対応）
+function renderStats(responses, activeRel = "all") {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
   const statsArea = document.getElementById("stats-area");
   const summaryCard = document.querySelector(".result-summary-card");
+  const miniCardsContainer = document.getElementById("relation-mini-cards");
 
   if (responses.length === 0) {
     tabsContainer.style.display = "none";
@@ -303,59 +319,107 @@ function renderStats(responses, filterRel) {
 
   tabsContainer.style.display = "flex";
 
+  // タブのバッジ件数更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
     if (countEl) countEl.textContent = responses.filter(item => item.relation === r).length;
   });
 
-  const targetData = filterRel === "all" ? responses : responses.filter(r => r.relation === filterRel);
-
-  if (targetData.length === 0) {
-    statsArea.style.display = "none";
-    emptyState.style.display = "block";
-    emptyState.querySelector(".empty-title").textContent = `「${RELATIONS[filterRel]?.label || filterRel}」からの回答はまだありません`;
-    emptyState.querySelector(".empty-desc").textContent = "他のタブを選択するか、この関係性の人にURLをシェアして回答を集めてみましょう。";
-    return;
-  }
-
   emptyState.style.display = "none";
   statsArea.style.display = "block";
 
-  document.getElementById("current-filter-label").textContent = 
-    filterRel === "all" ? "全体の他己評価タイプ" : `「${RELATIONS[filterRel]?.label}」から見たタイプ`;
+  // --- ① メインカードのデータ判定 ---
+  const mainData = activeRel === "all" ? responses : responses.filter(r => r.relation === activeRel);
+  const mainMetrics = computeGroupMetrics(mainData);
 
-  const total = targetData.length;
-  const avgScores = [0, 0, 0, 0];
-  targetData.forEach(r => {
-    r.scores.forEach((s, idx) => {
-      avgScores[idx] += s;
+  const mainLabel = activeRel === "all" ? "全体から見たタイプ" : `「${RELATIONS[activeRel]?.label}」から見たタイプ`;
+  document.getElementById("current-filter-label").textContent = mainLabel;
+
+  if (!mainMetrics) {
+    // 該当データがまだ0件のとき
+    document.getElementById("dominant-type").textContent = "―";
+    document.getElementById("type-description").textContent = "この関係性からの回答はまだありません。";
+    summaryCard.className = "result-summary-card theme-sj";
+
+    ["ei", "sn", "tf", "jp"].forEach(id => {
+      document.getElementById(`bar-${id}`).style.left = "50%";
+      document.getElementById(`val-${id}`).textContent = "50% : 50%";
     });
-  });
-  avgScores.forEach((sum, idx) => {
-    avgScores[idx] = sum / total;
-  });
+  } else {
+    document.getElementById("dominant-type").textContent = mainMetrics.type;
+    document.getElementById("type-description").textContent = TYPE_DESCS[mainMetrics.type] || "";
+    const colorCat = getColorCategoryClass(mainMetrics.type);
+    summaryCard.className = `result-summary-card theme-${colorCat}`;
 
-  const dominantType = calculateTypeFromScore(avgScores);
-  document.getElementById("dominant-type").textContent = dominantType;
-  document.getElementById("type-description").textContent = TYPE_DESCS[dominantType] || "";
+    const axes = [
+      { id: "ei", score: mainMetrics.avgScores[0] },
+      { id: "sn", score: mainMetrics.avgScores[1] },
+      { id: "tf", score: mainMetrics.avgScores[2] },
+      { id: "jp", score: mainMetrics.avgScores[3] }
+    ];
 
-  const colorCat = getColorCategoryClass(dominantType);
-  summaryCard.className = `result-summary-card theme-${colorCat}`;
+    axes.forEach(axis => {
+      const rightPercent = Math.round(((axis.score - 1) / 4) * 100);
+      const leftPercent = 100 - rightPercent;
+      document.getElementById(`bar-${axis.id}`).style.left = `${rightPercent}%`;
+      document.getElementById(`val-${axis.id}`).textContent = `${leftPercent}% : ${rightPercent}%`;
+    });
+  }
 
-  const axes = [
-    { id: "ei", score: avgScores[0] },
-    { id: "sn", score: avgScores[1] },
-    { id: "tf", score: avgScores[2] },
-    { id: "jp", score: avgScores[3] }
-  ];
+  // --- ② 関係性ミニカード群（小計）の生成＆入れ替え処理 ---
+  miniCardsContainer.innerHTML = "";
 
-  axes.forEach(axis => {
-    const rightPercent = Math.round(((axis.score - 1) / 4) * 100);
-    const leftPercent = 100 - rightPercent;
+  // 全6区分
+  const allRelKeys = ["friend", "partner", "work", "family", "hobby", "other"];
 
-    document.getElementById(`bar-${axis.id}`).style.left = `${rightPercent}%`;
-    document.getElementById(`val-${axis.id}`).textContent = `${leftPercent}% : ${rightPercent}%`;
+  // ミニカードに並べるリスト：現在メインに表示している項目以外を並べる
+  let miniCardKeys = [];
+  if (activeRel === "all") {
+    // 全体がメインなら、ミニカードは全6区分
+    miniCardKeys = allRelKeys.map(k => ({ key: k, label: `${RELATIONS[k].label}から見たタイプ` }));
+  } else {
+    // 特定の関係性がメインなら、先頭に「全体」を置き、残りの他5区分を並べる
+    miniCardKeys.push({ key: "all", label: "全体から見たタイプ" });
+    allRelKeys.filter(k => k !== activeRel).forEach(k => {
+      miniCardKeys.push({ key: k, label: `${RELATIONS[k].label}から見たタイプ` });
+    });
+  }
+
+  miniCardKeys.forEach(item => {
+    const groupItems = item.key === "all" ? responses : responses.filter(r => r.relation === item.key);
+    const metrics = computeGroupMetrics(groupItems);
+
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "mini-summary-card";
+
+    let typeStr = "―";
+    let themeClass = "mini-theme-empty";
+
+    if (metrics) {
+      typeStr = metrics.type;
+      themeClass = `mini-theme-${getColorCategoryClass(metrics.type)}`;
+    }
+
+    card.classList.add(themeClass);
+
+    card.innerHTML = `
+      <span class="mini-card-title">${item.label}</span>
+      <span class="mini-card-type">${typeStr}</span>
+      <span class="mini-card-count">(${groupItems.length}件)</span>
+    `;
+
+    // ミニカードをクリックした時、その項目をメインカードへ切り替え（タブとも連動）
+    card.addEventListener("click", () => {
+      const tabBtns = document.querySelectorAll(".tab-btn");
+      tabBtns.forEach(b => {
+        b.classList.toggle("active", b.getAttribute("data-rel") === item.key);
+      });
+      renderStats(responses, item.key);
+    });
+
+    miniCardsContainer.appendChild(card);
   });
 }
 
