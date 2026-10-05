@@ -142,7 +142,7 @@ function renderQuestion() {
   const progressNum = currentQuestionIndex + 1;
   const total = questions.length;
 
-  document.getElementById("quiz-progress").style.width = `${(progressNum / total) * 100}%`;
+  document.getElementById("quiz-progress").style.width = `${Math.sqrt(progressNum / total) * 100}%`;
   document.getElementById("quiz-progress-num").textContent = `問 ${progressNum} / ${total}`;
   document.getElementById("question-text").textContent = q.text;
   document.getElementById("btn-next-question").textContent = (currentQuestionIndex === total - 1) ? "回答を完了する →" : "次へ進む →";
