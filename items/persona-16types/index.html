@@ -22,7 +22,7 @@
   <meta property="og:url" content="https://tests.hiddenchimera.com/items/persona-16types/">
   <meta name="twitter:card" content="summary_large_image">
 
-  <!-- 既存共通CSS ＆ 専用CSS -->
+  <!-- スタイルシート -->
   <link rel="stylesheet" href="../../assets/css/common.css">
   <link rel="stylesheet" href="style.css">
 </head>
@@ -31,13 +31,14 @@
     <div id="toast" class="toast" style="display: none;"></div>
 
     <section id="quiz-card">
+      <!-- 共通ヘッダー（ナビ等が必要な場合用） -->
       <div id="test-nav-header"></div>
 
       <!-- ① 初期状態：プロファイル未作成のとき -->
       <div id="setup-view" style="display: none;">
         <span class="intro-badge">PERSONA 16 TYPES</span>
-        <h1 class="intro-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1rem; color: #64748b; font-weight: normal;">人間関係ごとの顔を暴く性格診断</span></h1>
-        <p class="intro-desc">
+        <h1 class="intro-title" style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px;">ペルソナ16タイプ他己分析<br><span style="font-size: 1rem; color: #64748b; font-weight: normal;">人間関係ごとの顔を暴く性格診断</span></h1>
+        <p class="intro-desc" style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
           人は相手（友達、恋人、職場、家族、趣味仲間）によって見せる顔が無意識に変わります。<br>
           周りの人にこの診断を解いてもらい、客観的に映る「あなたの社会的仮面」を集計・分析しましょう。
         </p>
@@ -47,7 +48,7 @@
           <input type="text" id="user-name-input" class="text-input" placeholder="例: キメラ" maxlength="15">
         </div>
 
-        <button id="generate-btn" class="start-btn-primary">回答募集URLを発行する</button>
+        <button id="generate-btn" class="copy-btn" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 10px;">回答募集URLを発行する</button>
       </div>
 
       <!-- ② ダッシュボード画面 -->
@@ -175,14 +176,14 @@
 
       <footer class="tool-footer">
         <p class="disclaimer">※本ツールは非公式の性格分析ツールであり、Myers-Briggs Type Indicator（MBTI）および NERIS Analytics Limited（16Personalities）とは一切関係ありません。</p>
-        <div class="nav-links-row" style="margin-top: 14px;">
-          <a href="../../" class="main-link">← 他の診断を見る（トップへ）</a>
+        <div style="margin-top: 12px;">
+          <a href="../../" class="footer-nav-link">← 他の診断を見る（トップへ）</a>
         </div>
       </footer>
     </section>
   </main>
 
-  <script src="../../assets/js/common.js"></script>
+  <!-- ページ専用スクリプト -->
   <script src="dashboard.js"></script>
 </body>
 </html>
