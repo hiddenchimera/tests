@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-7MNC1PLLZ7"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-7MNC1PLLZ7');
+    gtag('config', 'G-FW7R85YTVX');
+  </script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>他己分析結果｜ペルソナ16タイプ他己分析 - Chimera Test Lab</title>
+  <meta name="description" content="ペルソナ16タイプ他己分析の判定結果閲覧ページ。">
+
+  <!-- OGP基本設定（共通キービジュアル） -->
+  <meta property="og:title" content="ペルソナ16タイプ他己分析 結果ページ">
+  <meta property="og:description" content="周りから見た社会的仮面（ペルソナ）を16タイプで可視化する無料他己分析ツール。">
+  <meta property="og:type" content="article">
+  <meta property="og:url" content="https://tests.hiddenchimera.com/items/persona-16types/">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <!-- スタイルシート -->
+  <link rel="stylesheet" href="../../assets/css/common.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <main class="container">
+    <section id="quiz-card">
+      <div id="test-nav-header"></div>
+
+      <!-- 不正パラメータ時のエラー表示 -->
+      <div id="view-error" style="display: none; padding: 40px 16px; text-align: center;">
+        <span class="intro-badge" style="background:#fee2e2; color:#dc2626; border-color:#fca5a5;">ERROR</span>
+        <h1 class="intro-title" style="margin-top: 10px;">結果が見つかりませんでした</h1>
+        <p class="intro-desc">指定されたURLが正しくないか、データ形式が破損しています。</p>
+        <a href="app.html" class="start-btn-primary" style="max-width: 300px; margin: 0 auto;">自分も他己分析をはじめる</a>
+      </div>
+
+      <!-- 正常表示エリア -->
+      <div id="view-content" style="display: none;">
+        <div style="text-align: center; margin-bottom: 20px;">
+          <span class="intro-badge">RESULT VIEW</span>
+          <h1 class="intro-title" style="margin-top: 4px; margin-bottom: 4px;">
+            <span id="view-target-name" style="color: #4f46e5;"></span> さんの他己分析結果
+          </h1>
+          <p style="font-size: 0.8rem; color: #64748b;">
+            周りの人（回答数: <strong id="view-total-count">0</strong> 件）から集まった印象のサマリーです
+          </p>
+        </div>
+
+        <!-- メイン判定カード（大） -->
+        <div id="view-summary-card" class="result-summary-card theme-sj">
+          <p class="summary-sub">全体の社会的仮面（総合判定）</p>
+          <h2 class="summary-type" id="view-dominant-type">----</h2>
+          <p class="summary-desc" id="view-type-description">集計結果を読み込んでいます...</p>
+        </div>
+
+        <!-- 関係性ごとの小計ミニカード群 -->
+        <div style="text-align: left; margin: 18px 0 8px;">
+          <span style="font-size: 0.82rem; font-weight: 800; color: #334155;">関係性ごとの見え方（ペルソナ）</span>
+        </div>
+        <div id="view-mini-cards" class="mini-cards-grid"></div>
+
+        <!-- 4軸バランススライダー -->
+        <div class="axes-container" style="margin-top: 20px;">
+          <div class="axis-row">
+            <div class="axis-labels">
+              <span class="left-trait">外向 (E)</span>
+              <span class="axis-val" id="view-val-ei">50% : 50%</span>
+              <span class="right-trait">内向 (I)</span>
+            </div>
+            <div class="axis-bar-wrap">
+              <div class="axis-indicator" id="view-bar-ei" style="left: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="axis-row">
+            <div class="axis-labels">
+              <span class="left-trait">感覚 (S)</span>
+              <span class="axis-val" id="view-val-sn">50% : 50%</span>
+              <span class="right-trait">直観 (N)</span>
+            </div>
+            <div class="axis-bar-wrap">
+              <div class="axis-indicator" id="view-bar-sn" style="left: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="axis-row">
+            <div class="axis-labels">
+              <span class="left-trait">思考 (T)</span>
+              <span class="axis-val" id="view-val-tf">50% : 50%</span>
+              <span class="right-trait">感情 (F)</span>
+            </div>
+            <div class="axis-bar-wrap">
+              <div class="axis-indicator" id="view-bar-tf" style="left: 50%;"></div>
+            </div>
+          </div>
+
+          <div class="axis-row">
+            <div class="axis-labels">
+              <span class="left-trait">判断 (J)</span>
+              <span class="axis-val" id="view-val-jp">50% : 50%</span>
+              <span class="right-trait">知覚 (P)</span>
+            </div>
+            <div class="axis-bar-wrap">
+              <div class="axis-indicator" id="view-bar-jp" style="left: 50%;"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- CTAエリア（自分もやってみる導線） -->
+        <div style="background: linear-gradient(135deg, #1e1b4b, #312e81); border-radius: 14px; padding: 24px 20px; color: #ffffff; text-align: center; margin: 28px 0 16px;">
+          <h2 style="font-size: 1.15rem; font-weight: 800; margin-bottom: 6px; color: #ffffff;">あなたも周りからの見え方を診断してみませんか？</h2>
+          <p style="font-size: 0.82rem; color: #c7d2fe; line-height: 1.5; margin-bottom: 16px;">
+            友達・恋人・職場ごとの仮面（ペルソナ）を16タイプで可視化。登録不要・完全無料でURLを発行できます。
+          </p>
+          <a href="app.html" class="start-btn-primary" style="background: #ffffff; color: #312e81; font-weight: 800; max-width: 320px; margin: 0 auto; display: inline-block;">
+            自分も他己分析URLを発行する →
+          </a>
+        </div>
+      </div>
+
+      <footer class="tool-footer">
+        <p class="disclaimer">※本ツールは非公式の性格分析ツールであり、Myers-Briggs Type Indicator（MBTI）および NERIS Analytics Limited（16Personalities）とは一切関係ありません。</p>
+        <div style="margin-top: 12px;">
+          <a href="../../" class="footer-nav-link">← テスト一覧トップへ</a>
+        </div>
+      </footer>
+    </section>
+  </main>
+
+  <script src="../../assets/js/common.js"></script>
+  <script>
+    const TYPE_DESCS = {
+      INTJ: "高い分析力と戦略的思考で、物事の本質を的確に見抜く冷静沈着な策士タイプ。",
+      INTP: "探求心に富み、独自の理論と知的好奇心で論理を突き詰める研究者タイプ。",
+      ENTJ: "明確なビジョンと決断力で周囲を引っ張る、生まれながらのリーダータイプ。",
+      ENTP: "柔軟な発想と鋭いディベート力で、新しいアイデアを次々と生み出す変革者タイプ。",
+      INFJ: "深い洞察力と強い信念を持ち、静かに人を導く理想主義タイプ。",
+      INFP: "感受性が豊かで誠実、自分独自の価値観や世界観を大切にする表現者タイプ。",
+      ENFJ: "情熱と高い共感力で人々を巻き込み、調和をもたらすサポータータイプ。",
+      ENFP: "好奇心旺盛で人懐っこく、周囲に刺激とポジティブな活力を与える自由人タイプ。",
+      ISTJ: "責任感にあふれ、堅実かつ確実にルールや約束を守る信頼の守護者タイプ。",
+      ISFJ: "細やかな気配りと献身的な姿勢で、周りの人を陰から支える調和タイプ。",
+      ESTJ: "現実的で秩序を重んじ、物事をテキパキと効率的に管理・実行する推進タイプ。",
+      ESFJ: "誰に対しても温かく親切で、コミュニティの和を第一に考える気配り上手タイプ。",
+      ISTP: "観察力に長け、冷静な判断と実践的なスキルで状況を切り拓く職人タイプ。",
+      ISFP: "穏やかで飾らず、日常の美しさや心地よい空気感を大切にする芸術肌タイプ。",
+      ESTP: "リスクを恐れず今この瞬間を楽しみ、素早い行動で局面を動かすチャレンジャータイプ。",
+      ESFP: "明るいエネルギーで場の空気を盛り上げ、周囲を笑顔にするムードメーカータイプ。"
+    };
+
+    function getColorCategoryClass(typeStr) {
+      if (!typeStr || typeStr.length < 4) return "sj";
+      const s_n = typeStr[1];
+      const t_f = typeStr[2];
+      const j_p = typeStr[3];
+      if (s_n === "N" && t_f === "T") return "nt";
+      if (s_n === "N" && t_f === "F") return "nf";
+      if (s_n === "S" && j_p === "J") return "sj";
+      if (s_n === "S" && j_p === "P") return "sp";
+      return "sj";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedData = urlParams.get("d");
+
+      if (!encodedData) {
+        document.getElementById("view-error").style.display = "block";
+        return;
+      }
+
+      try {
+        const decodedStr = decodeURIComponent(Array.prototype.map.call(atob(encodedData), (c) => {
+          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        const data = JSON.parse(decodedStr);
+
+        // 表示の反映
+        document.getElementById("view-target-name").textContent = data.n || "あの人";
+        document.getElementById("view-total-count").textContent = data.c || 0;
+        document.getElementById("view-dominant-type").textContent = data.t;
+        document.getElementById("view-type-description").textContent = TYPE_DESCS[data.t] || "";
+
+        const colorCat = getColorCategoryClass(data.t);
+        document.getElementById("view-summary-card").className = `result-summary-card theme-${colorCat}`;
+
+        // 4軸スライダー反映
+        const axes = ["ei", "sn", "tf", "jp"];
+        data.sc.forEach((score, idx) => {
+          const id = axes[idx];
+          const rightPct = Math.round(((score - 1) / 4) * 100);
+          const leftPct = 100 - rightPct;
+          document.getElementById(`view-bar-${id}`).style.left = `${rightPct}%`;
+          document.getElementById(`view-val-${id}`).textContent = `${leftPct}% : ${rightPct}%`;
+        });
+
+        // 関係性ミニカード描画
+        const miniContainer = document.getElementById("view-mini-cards");
+        miniContainer.innerHTML = "";
+        const relConfigs = [
+          { k: "friend", l: "友達" },
+          { k: "partner", l: "恋人" },
+          { k: "work", l: "職場・学校" },
+          { k: "family", l: "家族" },
+          { k: "hobby", l: "ネット・趣味" },
+          { k: "other", l: "その他" }
+        ];
+
+        relConfigs.forEach(item => {
+          const relData = data.r[item.k];
+          const card = document.createElement("div");
+          card.className = "mini-summary-card";
+
+          let typeStr = "―";
+          let themeClass = "mini-theme-empty";
+
+          if (relData) {
+            typeStr = relData.type;
+            themeClass = `mini-theme-${getColorCategoryClass(relData.type)}`;
+          }
+
+          card.classList.add(themeClass);
+          card.innerHTML = `
+            <span class="mini-card-title">${item.l}</span>
+            <span class="mini-card-type">${typeStr}</span>
+            <span class="mini-card-count">(${relData ? relData.count : 0}件)</span>
+          `;
+          miniContainer.appendChild(card);
+        });
+
+        document.getElementById("view-content").style.display = "block";
+      } catch (e) {
+        console.error("データデコードエラー:", e);
+        document.getElementById("view-error").style.display = "block";
+      }
+    });
+  </script>
+</body>
+</html>
