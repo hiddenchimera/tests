@@ -253,6 +253,24 @@ function updateProfileSelector() {
   };
 }
 
+// ★ カスタムタイプ照合ヘルパー（例: "I---" や "-N-J"）
+function matchCustomTypePattern(targetType, pattern) {
+  if (!targetType || !pattern) return true;
+  const p = pattern.trim().toUpperCase();
+  if (p.length === 0) return true;
+
+  for (let i = 0; i < 4; i++) {
+    const pChar = p[i];
+    if (!pChar || pChar === "-" || pChar === "_" || pChar === " ") {
+      continue; // ワイルドカードは任意合致
+    }
+    if (targetType[i] !== pChar) {
+      return false;
+    }
+  }
+  return true;
+}
+
 // ダッシュボード初期化
 function initDashboard(profile) {
   document.getElementById("target-user-name").textContent = profile.name;
@@ -276,7 +294,10 @@ function initDashboard(profile) {
   const keywordInput = document.getElementById("filter-keyword");
   const dateClearBtn = document.getElementById("date-filter-clear-btn");
   const limitPills = document.querySelectorAll("#filter-limit-group .filter-pill");
+  const customLimitInput = document.getElementById("filter-limit-custom");
   const catPills = document.querySelectorAll("#filter-category-group .filter-pill");
+  const customTypeRow = document.getElementById("custom-type-row");
+  const customTypeInput = document.getElementById("filter-custom-type");
 
   let currentRel = "all";
   let currentLimit = "all";
@@ -289,7 +310,7 @@ function initDashboard(profile) {
     dateFilterBox.style.display = "none";
   }
 
-  // ★ 統合フィルター処理関数（期間・キーワード・タイプ系統・件数制限）
+  // ★ 統合フィルター処理関数
   const getFilteredResponses = () => {
     let result = [...profile.responses];
 
@@ -315,17 +336,27 @@ function initDashboard(profile) {
       });
     }
 
-    // ③ 判定タイプ系統（nt, nf, sj, sp）
-    if (currentCat !== "all") {
+    // ③ タイプ系統（4系統 または カスタムパターン）
+    if (currentCat === "custom") {
+      const pattern = customTypeInput.value;
+      result = result.filter(r => matchCustomTypePattern(r.type, pattern));
+    } else if (currentCat !== "all") {
       result = result.filter(r => getColorCategoryClass(r.type) === currentCat);
     }
 
-    // ④ 直近件数（降順に並んでいるため先頭N件を抽出）
-    if (currentLimit !== "all") {
-      const limitNum = parseInt(currentLimit, 10);
-      if (!isNaN(limitNum)) {
-        result = result.slice(0, limitNum);
-      }
+    // ④ 直近件数（クイックボタン または 自由入力N件）
+    let limitNum = null;
+    const customLimitVal = customLimitInput.value.trim();
+    if (customLimitVal) {
+      const parsed = parseInt(customLimitVal, 10);
+      if (!isNaN(parsed) && parsed > 0) limitNum = parsed;
+    } else if (currentLimit !== "all") {
+      const parsed = parseInt(currentLimit, 10);
+      if (!isNaN(parsed)) limitNum = parsed;
+    }
+
+    if (limitNum !== null) {
+      result = result.slice(0, limitNum);
     }
 
     return result;
@@ -339,7 +370,9 @@ function initDashboard(profile) {
       dateEndInput.value || 
       keywordInput.value.trim() || 
       currentLimit !== "all" || 
-      currentCat !== "all"
+      customLimitInput.value.trim() ||
+      currentCat !== "all" ||
+      (currentCat === "custom" && customTypeInput.value.trim())
     );
 
     renderStats(filteredResponses, currentRel, profile.responses.length > 0, isFiltered);
@@ -361,18 +394,31 @@ function initDashboard(profile) {
   dateStartInput.onchange = refreshDashboardView;
   dateEndInput.onchange = refreshDashboardView;
 
-  // キーワード入力イベント（リアルタイム）
+  // キーワード入力イベント
   keywordInput.oninput = refreshDashboardView;
 
-  // 直近件数ピルクリックイベント
+  // 直近件数クイックボタン
   limitPills.forEach(pill => {
     pill.onclick = () => {
       limitPills.forEach(p => p.classList.remove("active"));
       pill.classList.add("active");
       currentLimit = pill.getAttribute("data-limit");
+      customLimitInput.value = ""; // 自由入力をクリア
       refreshDashboardView();
     };
   });
+
+  // 直近件数自由入力イベント
+  customLimitInput.oninput = () => {
+    if (customLimitInput.value.trim()) {
+      limitPills.forEach(p => p.classList.remove("active"));
+      currentLimit = "custom";
+    } else {
+      limitPills[0].classList.add("active");
+      currentLimit = "all";
+    }
+    refreshDashboardView();
+  };
 
   // タイプ系統ピルクリックイベント
   catPills.forEach(pill => {
@@ -380,9 +426,20 @@ function initDashboard(profile) {
       catPills.forEach(p => p.classList.remove("active"));
       pill.classList.add("active");
       currentCat = pill.getAttribute("data-cat");
+
+      if (currentCat === "custom") {
+        customTypeRow.style.display = "flex";
+        customTypeInput.focus();
+      } else {
+        customTypeRow.style.display = "none";
+      }
+
       refreshDashboardView();
     };
   });
+
+  // カスタムタイプ入力イベント
+  customTypeInput.oninput = refreshDashboardView;
 
   // 一括リセットボタン
   dateClearBtn.onclick = () => {
@@ -390,7 +447,10 @@ function initDashboard(profile) {
     dateEndInput.value = "";
     keywordInput.value = "";
     currentLimit = "all";
+    customLimitInput.value = "";
     currentCat = "all";
+    customTypeInput.value = "";
+    customTypeRow.style.display = "none";
 
     limitPills.forEach(p => p.classList.toggle("active", p.getAttribute("data-limit") === "all"));
     catPills.forEach(p => p.classList.toggle("active", p.getAttribute("data-cat") === "all"));
