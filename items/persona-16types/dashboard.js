@@ -1,4 +1,4 @@
-// 関係性マッピング定義（案A対応）
+// 関係性マッピング定義
 const RELATIONS = {
   friend: { label: "友達", class: "rel-friend" },
   partner: { label: "恋人", class: "rel-partner" },
@@ -45,12 +45,38 @@ document.addEventListener("DOMContentLoaded", () => {
     handleIncomingResponse(rid, rel, sc, uid, n);
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
+    // 回答受け取り時は直接ダッシュボードを表示
+    renderApp("dashboard");
+  } else {
+    // 通常アクセス時はイントロ（トップ画面）を表示
+    renderApp("intro");
   }
 
-  // --- ② 画面初期表示の制御 ---
-  renderApp();
+  // --- ② イントロ画面の「はじめる」ボタン ---
+  const startAppBtn = document.getElementById("start-app-btn");
+  if (startAppBtn) {
+    startAppBtn.addEventListener("click", () => {
+      const current = getCurrentProfile();
+      if (current) {
+        renderApp("dashboard");
+      } else {
+        renderApp("setup");
+      }
+    });
+  }
 
-  // --- ③ 初回URL発行ボタンイベント ---
+  // --- ③ 画面切り替え（戻るボタン） ---
+  const backToSetUp = document.getElementById("back-to-intro-from-setup");
+  if (backToSetUp) {
+    backToSetUp.addEventListener("click", () => renderApp("intro"));
+  }
+
+  const backToDash = document.getElementById("back-to-intro-from-dash");
+  if (backToDash) {
+    backToDash.addEventListener("click", () => renderApp("intro"));
+  }
+
+  // --- ④ 初回URL発行ボタンイベント ---
   const generateBtn = document.getElementById("generate-btn");
   if (generateBtn) {
     generateBtn.addEventListener("click", () => {
@@ -63,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- ④ プロファイル新規追加ボタン ---
+  // --- ⑤ プロファイル新規追加ボタン ---
   const addProfileBtn = document.getElementById("add-profile-btn");
   if (addProfileBtn) {
     addProfileBtn.addEventListener("click", () => {
@@ -74,7 +100,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- ⑤ 現在のプロファイル削除ボタン ---
+  // --- ⑥ 現在のプロファイル削除ボタン ---
   const deleteProfileBtn = document.getElementById("delete-profile-btn");
   if (deleteProfileBtn) {
     deleteProfileBtn.addEventListener("click", () => {
@@ -88,7 +114,7 @@ document.addEventListener("DOMContentLoaded", () => {
       store.profiles = store.profiles.filter(p => p.id !== current.id);
       store.activeProfileId = store.profiles.length > 0 ? store.profiles[0].id : null;
       saveStore();
-      renderApp();
+      renderApp("intro");
       showToast("プロファイルを削除しました");
     });
   }
@@ -133,23 +159,25 @@ function loadStore() {
     return { activeProfileId: null, profiles: [] };
   }
 
-  const parsed = JSON.parse(raw);
-
-  if (parsed.userName && Array.isArray(parsed.responses)) {
-    const migratedProfile = {
-      id: generateUUID("p_"),
-      name: parsed.userName,
-      responses: parsed.responses
-    };
-    const newStore = {
-      activeProfileId: migratedProfile.id,
-      profiles: [migratedProfile]
-    };
-    localStorage.setItem("persona16_data", JSON.stringify(newStore));
-    return newStore;
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed.userName && Array.isArray(parsed.responses)) {
+      const migratedProfile = {
+        id: generateUUID("p_"),
+        name: parsed.userName,
+        responses: parsed.responses
+      };
+      const newStore = {
+        activeProfileId: migratedProfile.id,
+        profiles: [migratedProfile]
+      };
+      localStorage.setItem("persona16_data", JSON.stringify(newStore));
+      return newStore;
+    }
+    return parsed;
+  } catch (e) {
+    return { activeProfileId: null, profiles: [] };
   }
-
-  return parsed;
 }
 
 function saveStore() {
@@ -169,7 +197,7 @@ function createProfile(name) {
   store.profiles.push(newProfile);
   store.activeProfileId = newProfile.id;
   saveStore();
-  renderApp();
+  renderApp("dashboard");
   showToast(`プロファイル「${name}」を作成しました`);
 }
 
@@ -213,17 +241,37 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
   showToast(`${n}さん（${RELATIONS[rel]?.label || "回答"}）のデータを反映しました！`);
 }
 
-// 画面全体の再描画
-function renderApp() {
+// 画面切り替え制御（viewMode: "intro" | "setup" | "dashboard"）
+function renderApp(viewMode = "intro") {
+  const introView = document.getElementById("intro-view");
   const setupView = document.getElementById("setup-view");
   const dashboardView = document.getElementById("dashboard-view");
   const currentProfile = getCurrentProfile();
 
-  if (!currentProfile) {
+  // 画面の表示・非表示リセット
+  introView.style.display = "none";
+  setupView.style.display = "none";
+  dashboardView.style.display = "none";
+
+  if (viewMode === "intro") {
+    introView.style.display = "block";
+    const startBtn = document.getElementById("start-app-btn");
+    const hintText = document.getElementById("existing-profile-hint");
+
+    if (currentProfile) {
+      startBtn.textContent = `ダッシュボードを開く（${currentProfile.name}）`;
+      hintText.style.display = "block";
+    } else {
+      startBtn.textContent = "他己分析をはじめる";
+      hintText.style.display = "none";
+    }
+  } else if (viewMode === "setup") {
     setupView.style.display = "block";
-    dashboardView.style.display = "none";
-  } else {
-    setupView.style.display = "none";
+  } else if (viewMode === "dashboard") {
+    if (!currentProfile) {
+      setupView.style.display = "block";
+      return;
+    }
     dashboardView.style.display = "block";
     updateProfileSelector();
     initDashboard(currentProfile);
@@ -246,7 +294,7 @@ function updateProfileSelector() {
   selector.onchange = () => {
     store.activeProfileId = selector.value;
     saveStore();
-    renderApp();
+    renderApp("dashboard");
   };
 }
 
@@ -354,7 +402,7 @@ function renderStats(responses, filterRel) {
   });
 }
 
-// 回答履歴一覧＆削除（★ 日付を YYYY/MM/DD 形式で表示）
+// 回答履歴一覧＆削除
 function renderResponseList(profile) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
