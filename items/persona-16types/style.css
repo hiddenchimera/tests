@@ -1260,12 +1260,12 @@
   margin-bottom: 8px;
 }
 
-/* ★ 放物線イージング（ease-out / cubic-bezier）を適用 */
+/* ★ 共通アニメーション（0.35s cubic-bezier(0.16, 1, 0.3, 1)）に完全準拠 ★ */
 .quiz-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #4f46e5, #0ea5e9);
   border-radius: 9999px;
-  transition: width 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .quiz-progress-text {
