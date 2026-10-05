@@ -1,9 +1,4 @@
 // 全16問の設問データ（各軸4問：肯定2問 ＋ 逆転2問）
-// axis 0: E(+) / I(-)
-// axis 1: S(+) / N(-)
-// axis 2: T(+) / F(-)
-// axis 3: J(+) / P(-)
-// 回答スコア: 1(全く) 〜 5(非常に)
 const surveyQuestions = [
   // --- E vs I (外向・内向) ---
   { id: 1, axis: 0, text: "大勢で集まる場や飲み会では、輪の中心になって会話を盛り上げる方だ", reverse: false },
@@ -32,20 +27,21 @@ const surveyQuestions = [
 
 let selectedRelation = "friend";
 let currentQIndex = 0;
-const axisScores = [0, 0, 0, 0];
-const axisCounts = [0, 0, 0, 0];
+// 各問の回答値を保持する配列（未回答は null）
+let userAnswers = new Array(surveyQuestions.length).fill(null);
+let targetUserName = "あの人";
+let targetUserId = "";
 
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
-  const targetUserName = urlParams.get("u") || "あの人";
-  const targetUserId = urlParams.get("uid") || "";
+  targetUserName = urlParams.get("u") || "あの人";
+  targetUserId = urlParams.get("uid") || "";
 
   // 画面内の名前を反映
   document.getElementById("target-name-display").textContent = targetUserName;
   document.getElementById("target-name-bold").textContent = targetUserName;
   document.getElementById("finish-target-name").textContent = targetUserName;
 
-  // 設問画面の上部リマインド枠に対象者名を反映
   const reminderEl = document.getElementById("target-name-reminder");
   if (reminderEl) {
     reminderEl.textContent = targetUserName;
@@ -64,9 +60,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // 診断開始ボタン
   const startBtn = document.getElementById("start-survey-btn");
   startBtn.addEventListener("click", () => {
-    // ★ 開始時に全16問の出題順をランダムシャッフル
-    if (typeof shuffleArray === "function") {
-      shuffleArray(surveyQuestions);
+    // 初回開始時のみ設問をシャッフル
+    if (userAnswers.every(ans => ans === null)) {
+      if (typeof shuffleArray === "function") {
+        shuffleArray(surveyQuestions);
+      }
     }
     document.getElementById("answer-intro-view").style.display = "none";
     document.getElementById("answer-survey-view").style.display = "block";
@@ -78,8 +76,31 @@ document.addEventListener("DOMContentLoaded", () => {
   likertButtons.forEach(btn => {
     btn.addEventListener("click", () => {
       const val = Number(btn.getAttribute("data-score"));
-      handleSurveyAnswer(val, targetUserName, targetUserId);
+      userAnswers[currentQIndex] = val;
+      // 回答したら自動で次へ
+      proceedNext();
     });
+  });
+
+  // 「← 前に戻る」ボタン
+  const prevBtn = document.getElementById("btn-prev-q");
+  prevBtn.addEventListener("click", () => {
+    if (currentQIndex === 0) {
+      // 1問目で戻るを押した場合：初期設定画面（関係性・名前入力）へ戻る
+      document.getElementById("answer-survey-view").style.display = "none";
+      document.getElementById("answer-intro-view").style.display = "block";
+    } else {
+      currentQIndex--;
+      renderSurveyQuestion();
+    }
+  });
+
+  // 「次へ進む →」ボタン（すでに入力済みの設問をスキップして進む場合）
+  const nextBtn = document.getElementById("btn-next-q");
+  nextBtn.addEventListener("click", () => {
+    if (userAnswers[currentQIndex] !== null) {
+      proceedNext();
+    }
   });
 });
 
@@ -89,45 +110,81 @@ function renderSurveyQuestion() {
   document.getElementById("survey-progress-text").textContent = `${currentQIndex + 1} / ${surveyQuestions.length}`;
   const pct = ((currentQIndex + 1) / surveyQuestions.length) * 100;
   document.getElementById("survey-progress-bar").style.width = `${pct}%`;
+
+  // 戻るボタンのラベル調整（1問目は「← 関係性の選択に戻る」）
+  const prevBtn = document.getElementById("btn-prev-q");
+  if (currentQIndex === 0) {
+    prevBtn.textContent = "← 関係性の選択に戻る";
+  } else {
+    prevBtn.textContent = "← 前の質問に戻る";
+  }
+
+  // 選択済みスコアのハイライト復元 & 次へ進むボタンの表示制御
+  const savedVal = userAnswers[currentQIndex];
+  const likertButtons = document.querySelectorAll(".likert-btn");
+  const nextBtn = document.getElementById("btn-next-q");
+
+  likertButtons.forEach(btn => {
+    const score = Number(btn.getAttribute("data-score"));
+    if (savedVal !== null && score === savedVal) {
+      btn.classList.add("selected");
+    } else {
+      btn.classList.remove("selected");
+    }
+  });
+
+  // 既に回答済みの設問であれば「次へ進む →」ボタンを表示
+  if (savedVal !== null && currentQIndex < surveyQuestions.length - 1) {
+    nextBtn.style.visibility = "visible";
+  } else {
+    nextBtn.style.visibility = "hidden";
+  }
 }
 
-function handleSurveyAnswer(val, userName, userId) {
-  const q = surveyQuestions[currentQIndex];
-  // 逆転項目の計算（1〜5尺度：1→5, 2→4, 3→3, 4→2, 5→1）
-  const actualScore = q.reverse ? (6 - val) : val;
-
-  axisScores[q.axis] += actualScore;
-  axisCounts[q.axis]++;
-  currentQIndex++;
-
-  if (currentQIndex < surveyQuestions.length) {
+function proceedNext() {
+  if (currentQIndex < surveyQuestions.length - 1) {
+    currentQIndex++;
     renderSurveyQuestion();
   } else {
-    // 診断終了：4軸の平均スコアを算出（1.0〜5.0）
-    const finalScores = axisScores.map((sum, idx) => {
-      return (sum / axisCounts[idx]).toFixed(1);
-    });
-
-    const respondentName = document.getElementById("respondent-name-input").value.trim() || "匿名";
-    const responseId = "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
-
-    // 返信先URLを app.html 宛てに組み立て
-    const currentPath = window.location.pathname;
-    const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
-    const returnUrl = `${window.location.origin}${basePath}app.html?rid=${responseId}&rel=${selectedRelation}&sc=${finalScores.join(",")}&uid=${userId}&n=${encodeURIComponent(respondentName)}`;
-
-    // 画面切り替え
-    document.getElementById("answer-survey-view").style.display = "none";
-    document.getElementById("answer-finish-view").style.display = "block";
-
-    // LINEシェアボタン
-    const lineText = encodeURIComponent(`${userName}さんの他己分析に回答しました！結果はこちらから確認してね：\n${returnUrl}`);
-    document.getElementById("line-share-btn").href = `https://line.me/R/msg/text/?${lineText}`;
-
-    // コピーボタン
-    document.getElementById("copy-result-btn").onclick = () => {
-      navigator.clipboard.writeText(returnUrl);
-      alert("結果URLをコピーしました！LINEやDMで相手に送ってください。");
-    };
+    finishSurvey();
   }
+}
+
+function finishSurvey() {
+  // 全16問の集計計算
+  const axisScores = [0, 0, 0, 0];
+  const axisCounts = [0, 0, 0, 0];
+
+  surveyQuestions.forEach((q, idx) => {
+    const val = userAnswers[idx];
+    const actualScore = q.reverse ? (6 - val) : val;
+    axisScores[q.axis] += actualScore;
+    axisCounts[q.axis]++;
+  });
+
+  const finalScores = axisScores.map((sum, idx) => {
+    return (sum / axisCounts[idx]).toFixed(1);
+  });
+
+  const respondentName = document.getElementById("respondent-name-input").value.trim() || "匿名";
+  const responseId = "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
+
+  // 返信先URLを app.html 宛てに組み立て
+  const currentPath = window.location.pathname;
+  const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
+  const returnUrl = `${window.location.origin}${basePath}app.html?rid=${responseId}&rel=${selectedRelation}&sc=${finalScores.join(",")}&uid=${targetUserId}&n=${encodeURIComponent(respondentName)}`;
+
+  // 画面切り替え
+  document.getElementById("answer-survey-view").style.display = "none";
+  document.getElementById("answer-finish-view").style.display = "block";
+
+  // LINEシェアボタン
+  const lineText = encodeURIComponent(`${targetUserName}さんの他己分析に回答しました！結果はこちらから確認してね：\n${returnUrl}`);
+  document.getElementById("line-share-btn").href = `https://line.me/R/msg/text/?${lineText}`;
+
+  // コピーボタン
+  document.getElementById("copy-result-btn").onclick = () => {
+    navigator.clipboard.writeText(returnUrl);
+    alert("結果URLをコピーしました！LINEやDMで相手に送ってください。");
+  };
 }
