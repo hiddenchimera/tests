@@ -12,12 +12,12 @@
     gtag('config', 'G-FW7R85YTVX');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ペルソナ16タイプ他己分析｜人間関係ごとの社会的仮面を暴く - Chimera Test Lab</title>
-  <meta name="description" content="友達・恋人・職場ごとの仮面（ペルソナ）を16タイプで可視化。周りの人から見たあなたの本当の印象を暴く無料他己分析ツール。">
+  <title>ペルソナ16タイプ他己分析｜人間関係ごとの社会的仮面を暴く無料性格診断 - Chimera Test Lab</title>
+  <meta name="description" content="友達・恋人・職場の相手から自分はどう見えている？URLをシェアして周りの人から16問で回答を集めるだけで、人間関係ごとに演じ分けている「社会的仮面（ペルソナ）」を16タイプで可視化・集計する無料の他己分析ツール。登録不要ですぐに使えます。">
 
   <!-- OGP基本設定 -->
-  <meta property="og:title" content="ペルソナ16タイプ他己分析｜Chimera Test Lab">
-  <meta property="og:description" content="友達・恋人・職場ごとの仮面（ペルソナ）を16タイプで可視化。周りの人から見たあなたの印象を暴く無料他己分析ツール。">
+  <meta property="og:title" content="ペルソナ16タイプ他己分析｜人間関係ごとの社会的仮面を暴く無料性格診断">
+  <meta property="og:description" content="周りの人から自分はどう見えている？友達・恋人・職場ごとの仮面を16タイプで可視化する登録不要の無料他己分析ツール。">
   <meta property="og:type" content="article">
   <meta property="og:url" content="https://tests.hiddenchimera.com/items/persona-16types/">
   <meta name="twitter:card" content="summary_large_image">
@@ -25,62 +25,300 @@
   <!-- スタイルシート -->
   <link rel="stylesheet" href="../../assets/css/common.css">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* LP専用の読ませるレイアウトスタイル */
+    .lp-article-wrap {
+      text-align: left;
+      line-height: 1.8;
+      color: #334155;
+    }
+    .lp-hero-box {
+      text-align: center;
+      padding: 10px 0 24px;
+      border-bottom: 1px solid #e2e8f0;
+      margin-bottom: 28px;
+    }
+    .lp-main-title {
+      font-size: 1.7rem;
+      font-weight: 900;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      line-height: 1.35;
+      margin: 12px 0 10px;
+    }
+    .lp-sub-copy {
+      font-size: 0.95rem;
+      color: #64748b;
+      margin-bottom: 20px;
+    }
+    .lp-cta-block {
+      background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
+      color: #ffffff;
+      border-radius: 16px;
+      padding: 24px 20px;
+      text-align: center;
+      margin: 28px 0;
+      box-shadow: 0 10px 25px -5px rgba(49, 46, 129, 0.3);
+    }
+    .lp-cta-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      margin-bottom: 8px;
+      color: #ffffff;
+    }
+    .lp-cta-desc {
+      font-size: 0.85rem;
+      color: #e0e7ff;
+      margin-bottom: 18px;
+    }
+    .btn-lp-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #ffffff;
+      color: #312e81;
+      font-size: 1rem;
+      font-weight: 800;
+      padding: 14px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.15);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .btn-lp-primary:hover {
+      background: #f8fafc;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.22);
+    }
+    .lp-section-heading {
+      font-size: 1.28rem;
+      font-weight: 800;
+      color: #0f172a;
+      border-left: 4px solid #4f46e5;
+      padding-left: 12px;
+      margin: 36px 0 16px;
+      line-height: 1.4;
+    }
+    .lp-paragraph {
+      font-size: 0.92rem;
+      margin-bottom: 16px;
+    }
+    .lp-card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .lp-info-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px;
+    }
+    .lp-info-card h3 {
+      font-size: 0.95rem;
+      font-weight: 800;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .lp-info-card p {
+      font-size: 0.82rem;
+      color: #64748b;
+      line-height: 1.6;
+      margin: 0;
+    }
+    .lp-flow-item {
+      display: flex;
+      gap: 14px;
+      margin-bottom: 16px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+    .lp-flow-num {
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      background: #4f46e5;
+      color: #ffffff;
+      font-weight: 800;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.82rem;
+    }
+    .faq-item {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 14px 16px;
+      margin-bottom: 12px;
+    }
+    .faq-q {
+      font-weight: 800;
+      font-size: 0.92rem;
+      color: #0f172a;
+      margin-bottom: 6px;
+    }
+    .faq-a {
+      font-size: 0.86rem;
+      color: #475569;
+      margin: 0;
+    }
+  </style>
 </head>
 <body>
   <main class="container">
-    <section id="quiz-card">
+    <section id="quiz-card" class="lp-article-wrap">
       <div id="test-nav-header"></div>
 
-      <div style="text-align: center; margin-bottom: 24px;">
-        <span class="intro-badge">OTHER-ANALYSIS TOOL</span>
-        <h1 class="intro-title" style="margin-top: 6px; margin-bottom: 10px; font-size: 1.6rem; font-weight: 800;">
-          ペルソナ16タイプ他己分析
-        </h1>
-        <p class="intro-desc" style="line-height: 1.6; font-size: 0.9rem; color: #64748b;">
-          人間関係ごとに演じ分けている「社会的仮面（ペルソナ）」を暴く性格診断。<br>
-          友達・恋人・仕事仲間から見た、あなたの普段の顔を16タイプで客観的に可視化します。
+      <!-- ヒーローヘッダー -->
+      <header class="lp-hero-box">
+        <span class="intro-badge">OTHER-ANALYSIS LAB</span>
+        <h1 class="lp-main-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1.05rem; color: #64748b; font-weight: 700;">― 人間関係ごとの顔を暴く性格診断 ―</span></h1>
+        <p class="lp-sub-copy">
+          自分ひとりで答える診断では見えない、「他人の目に映るあなたの社会的仮面」を解き明かします。
         </p>
-      </div>
 
-      <!-- 特徴・ポイント解説 -->
-      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 18px; text-align: left; margin-bottom: 24px;">
-        <h2 style="font-size: 0.95rem; font-weight: 800; color: #1e293b; margin-top: 0; margin-bottom: 12px;">
-          💡 この他己分析の特徴
-        </h2>
-        <ul style="font-size: 0.82rem; color: #475569; line-height: 1.7; padding-left: 20px; margin: 0;">
-          <li><strong>人間関係ごとに顔を分解:</strong> 「友達から見た私」「職場から見た私」など関係性別のペルソナを個別に集計。</li>
-          <li><strong>中立バイアスを排除した4段階評価:</strong> 「どちらともいえない」をなくした4択（全16問・約2分）で、直感でスピーディに回答してもらえます。</li>
-          <li><strong>安心のプライバシー保護:</strong> 個々の質問にどう答えたかは出題者には一切伝わらず、性格傾向のバランスのみが安全に集計されます。</li>
-          <li><strong>登録不要・完全無料:</strong> ニックネームを入力してURLを発行するだけで、今すぐ友達やSNSで募集を開始できます。</li>
-        </ul>
-      </div>
+        <!-- メタ情報 -->
+        <div class="intro-meta-box" style="margin-bottom: 0;">
+          <div class="intro-meta-item">
+            <span class="meta-label">設問数</span>
+            <span class="meta-val">全 16 問</span>
+          </div>
+          <div class="intro-meta-item">
+            <span class="meta-label">所要時間</span>
+            <span class="meta-val">約 2 分</span>
+          </div>
+          <div class="intro-meta-item">
+            <span class="meta-label">利用登録</span>
+            <span class="meta-val">不要・無料</span>
+          </div>
+        </div>
+      </header>
 
-      <!-- 診断開始CTA -->
-      <div style="text-align: center; margin-bottom: 20px;">
-        <a href="app.html" class="copy-btn" style="display: inline-block; width: 100%; max-width: 360px; padding: 14px; font-size: 1rem; border-radius: 10px; text-decoration: none; box-sizing: border-box;">
-          他己分析URLを発行する（無料）
+      <!-- ファーストビューCTA -->
+      <div class="lp-cta-block">
+        <h2 class="lp-cta-title">あなたの他己分析URLを発行</h2>
+        <p class="lp-cta-desc">ニックネームを入力してURLを発行し、LINEやDMで友達・仲間に送るだけ。登録不要・完全無料。</p>
+        <a href="app.html" class="btn-lp-primary">
+          <span>他己分析をはじめる（無料）</span>
+          <span style="font-size: 1.1rem;">→</span>
         </a>
       </div>
 
-      <!-- 使い方ステップ -->
-      <div style="border-top: 1px dashed #e2e8f0; padding-top: 20px; text-align: left; margin-top: 24px;">
-        <h3 style="font-size: 0.88rem; font-weight: 800; color: #334155; margin-bottom: 12px;">簡単な 3 ステップ</h3>
-        <ol style="font-size: 0.8rem; color: #64748b; line-height: 1.6; padding-left: 20px; margin: 0;">
-          <li><strong>URLを発行:</strong> あなたのニックネームを入力して、回答募集用の専用リンクを発行します。</li>
-          <li><strong>仲間に送る:</strong> LINEやDMでリンクを送り、あなたの普段の印象について答えてもらいます。</li>
-          <li><strong>結果をチェック:</strong> 届いた回答がリアルタイムでダッシュボードに反映され、関係性ごとのタイプが暴かれます。</li>
-        </ol>
+      <!-- 1. 他己分析とは -->
+      <h2 class="lp-section-heading">「他己分析」とは？なぜ自己診断だけでは不十分なのか</h2>
+      <p class="lp-paragraph">
+        心理テストや性格診断の多くは「自分で自分を採点する（自己分析）」形式です。しかし、人は無意識のうちに「こうありたい理想の自分」を選んでしまったり、自分自身の客観的な癖に気づけなかったりします。
+      </p>
+      <p class="lp-paragraph">
+        心理学における「ジョハリの窓」の考え方にある通り、自分自身が自覚している領域だけでなく、<strong>「他人にしか見えていない自分（盲点の窓）」を知ることこそが、本当の強みや人間関係の摩擦の原因を解き明かす鍵</strong>になります。
+      </p>
+
+      <!-- 2. 人間関係ごとの社会的仮面（ペルソナ） -->
+      <h2 class="lp-section-heading">人間関係ごとに変わる「社会的仮面（ペルソナ）」を可視化</h2>
+      <p class="lp-paragraph">
+        人は誰しも、接する相手によって異なる顔を使い分けて生きています。親友の前で見せるリラックスした素顔と、職場で同僚に見せるビジネスライクな顔、恋人の前で甘える顔がすべて同一人物であるはずがありません。
+      </p>
+      <div class="lp-card-grid">
+        <div class="lp-info-card">
+          <h3>👥 友達から見たあなた</h3>
+          <p>ノリや空気感、飾らないフランクな場で見せる素のコミュニケーション傾向。</p>
+        </div>
+        <div class="lp-info-card">
+          <h3>💼 職場・学校から見たあなた</h3>
+          <p>タスク処理や規律、責任感など、公の場で発揮されている実務的なスタンス。</p>
+        </div>
+        <div class="lp-info-card">
+          <h3>❤️️ 恋人から見たあなた</h3>
+          <p>感情の共有や心理的距離感、親密な関係性において無意識に出るパーソナルな顔。</p>
+        </div>
+        <div class="lp-info-card">
+          <h3>🌐 ネット・趣味から見たあなた</h3>
+          <p>共通の関心事や知的好奇心の場で前面に出る、純粋な探求・行動パターン。</p>
+        </div>
+      </div>
+      <p class="lp-paragraph">
+        本ツールでは、回答者が選んだ関係性（友達、恋人、職場、家族、趣味、その他）ごとに評価を自動で分類・集計します。
+      </p>
+
+      <!-- 3. 診断の仕組み -->
+      <h2 class="lp-section-heading">16タイプ判定の仕組み（4軸の心理特性）</h2>
+      <p class="lp-paragraph">
+        回答者は、あなたに関する全16問の設問に直感で答えます。「どちらともいえない」を排除した4段階評価により、テンポよく迷わずに回答できる設計となっています。回答データから以下の4つの指標バランスを算出し、総合タイプ（16タイプ）を判定します。
+      </p>
+      <ul>
+        <li><strong>外向 (E) vs 内向 (I)：</strong> 社交的で発信を好むか、落ち着いて物思いに耽るか</li>
+        <li><strong>感覚 (S) vs 直観 (N)：</strong> 現実的・具体的な事実を重視するか、抽象的なアイデアを好むか</li>
+        <li><strong>思考 (T) vs 感情 (F)：</strong> 論理と客観性で判断するか、共感と人情を優先するか</li>
+        <li><strong>判断 (J) vs 知覚 (P)：</strong> 計画的・秩序立てて動くか、柔軟・臨機応変に動くか</li>
+      </ul>
+
+      <!-- 4. 使い方 3ステップ -->
+      <h2 class="lp-section-heading">かんたん 3ステップの利用手順</h2>
+      <div class="lp-flow-item">
+        <span class="lp-flow-num">1</span>
+        <div>
+          <strong style="display:block; font-size:0.95rem; color:#0f172a; margin-bottom:4px;">ニックネームを決めてURLを発行</strong>
+          <span style="font-size:0.84rem; color:#64748b;">本名でもハンドルネームでもOK。ツールを開いて名前を入力するだけで専用URLが即時発行されます。</span>
+        </div>
+      </div>
+      <div class="lp-flow-item">
+        <span class="lp-flow-num">2</span>
+        <div>
+          <strong style="display:block; font-size:0.95rem; color:#0f172a; margin-bottom:4px;">LINEやDMでURLを友達・仲間にシェア</strong>
+          <span style="font-size:0.84rem; color:#64748b;">相手は会員登録不要・約2分で16問に回答できます。回答完了後に生成されるURLを送り返してもらいます。</span>
+        </div>
+      </div>
+      <div class="lp-flow-item">
+        <span class="lp-flow-num">3</span>
+        <div>
+          <strong style="display:block; font-size:0.95rem; color:#0f172a; margin-bottom:4px;">ダッシュボードで関係性ごとの顔を分析</strong>
+          <span style="font-size:0.84rem; color:#64748b;">受け取ったURLを開くだけで自動集計。「友達から見た自分」や「職場から見た自分」のタイプとパラメータが可視化されます。</span>
+        </div>
       </div>
 
-      <footer class="tool-footer">
+      <!-- 5. よくある質問 (FAQ) -->
+      <h2 class="lp-section-heading">よくある質問 (FAQ)</h2>
+      <div class="faq-item">
+        <div class="faq-q">Q. 友達に回答内容（どの問にどう答えたか）を見られますか？</div>
+        <p class="faq-a">A. いいえ、見られません。集計されるのは4軸の総合パラメータのみであり、各設問にどう回答したかという具体的な個別回答は相手にも表示されません。</p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Q. 別のスマホやPCにデータを引き継ぐことはできますか？</div>
+        <p class="faq-a">A. はい、可能です。ダッシュボード上部の「🔄 引継・保存」メニューから、バックアップファイルの保存や引継ぎコードのコピーができ、別端末へ安全にデータを移行・復元できます。</p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Q. 料金はかかりますか？会員登録は必要ですか？</div>
+        <p class="faq-a">A. 完全無料で利用できます。メールアドレス登録やログインなどの手続きは一切不要で、すぐに発行できます。</p>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Q. 自分の入力したデータがサーバーに送信・流出する心配はありますか？</div>
+        <p class="faq-a">A. サーバーへのデータ送信は一切行われません。すべてのデータはお使いのブラウザ内（LocalStorage）にのみ安全に保持されます。</p>
+      </div>
+
+      <!-- ボトムCTA -->
+      <div class="lp-cta-block" style="margin-top: 36px;">
+        <h2 class="lp-cta-title">さっそく他己分析をはじめましょう</h2>
+        <p class="lp-cta-desc">あなたの隠された社会的仮面（ペルソナ）を客観的な視点から解き明かします。</p>
+        <a href="app.html" class="btn-lp-primary">
+          <span>他己分析をはじめる（URL発行へ）</span>
+          <span style="font-size: 1.1rem;">→</span>
+        </a>
+      </div>
+
+      <footer class="tool-footer" style="margin-top: 36px;">
         <p class="disclaimer">※本ツールは非公式の性格分析ツールであり、Myers-Briggs Type Indicator（MBTI）および NERIS Analytics Limited（16Personalities）とは一切関係ありません。</p>
-        <div style="margin-top: 12px; text-align: center;">
-          <a href="../../" class="footer-nav-link">← テスト一覧トップへ</a>
+        <div style="margin-top: 14px;">
+          <a href="../../" class="footer-nav-link">← テストポータルトップへ戻る</a>
         </div>
       </footer>
     </section>
   </main>
-
-  <script src="../../assets/js/common.js"></script>
 </body>
 </html>
