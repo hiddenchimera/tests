@@ -451,7 +451,7 @@ function initDashboard(profile) {
     refreshDashboardView();
   };
 
-  // ★ SNS共有モーダルイベントの初期化
+  // SNS共有機能の初期化
   initShareFeature(profile);
 
   refreshDashboardView();
@@ -724,7 +724,7 @@ function renderResponseList(profile, visibleResponses = null) {
   };
 }
 
-// ★ SNS共有機能の初期化（URLエンコード・X共有・Canvas画像生成）
+// ★ SNS共有機能の初期化（Web Share APIによる画像付き投稿連動）
 function initShareFeature(profile) {
   const openModalBtn = document.getElementById("open-share-modal-btn");
   const shareModal = document.getElementById("share-modal");
@@ -758,7 +758,6 @@ function initShareFeature(profile) {
       r: relSummary
     };
 
-    // JSON文字列をUTF-8 Base64エンコード
     const jsonStr = JSON.stringify(sharePayload);
     const encodedData = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
       return String.fromCharCode('0x' + p1);
@@ -768,17 +767,45 @@ function initShareFeature(profile) {
     const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
     const viewUrl = `${window.location.origin}${basePath}view.html?d=${encodeURIComponent(encodedData)}`;
 
-    // ② Xでポストするリンクの設定
     const notableRels = [];
     if (relSummary.friend) notableRels.push(`友達: ${relSummary.friend.type}`);
     if (relSummary.partner) notableRels.push(`恋人: ${relSummary.partner.type}`);
     if (relSummary.work) notableRels.push(`職場: ${relSummary.work.type}`);
     const relText = notableRels.length > 0 ? `（${notableRels.slice(0, 2).join(' / ')}）` : "";
 
-    const tweetText = encodeURIComponent(
-      `周りから見た私の他己分析結果は【${totalMetrics.type}】でした！${relText}\n人間関係ごとに演じ分けている仮面（ペルソナ）を暴く性格診断。\n\n#ペルソナ16タイプ他己分析 #ChimeraTestLab\n`
-    );
-    btnShareX.href = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(viewUrl)}`;
+    const tweetText = `周りから見た私の他己分析結果は【${totalMetrics.type}】でした！${relText}\n人間関係ごとに演じ分けている仮面（ペルソナ）を暴く性格診断。\n\n#ペルソナ16タイプ他己分析 #ChimeraTestLab\n${viewUrl}`;
+
+    // ② Xでポストするアクション（スマホ標準の画像付き共有シートを起動）
+    btnShareX.onclick = async (e) => {
+      e.preventDefault();
+
+      const canvas = document.getElementById("share-card-canvas");
+      drawShareCardToCanvas(sharePayload, canvas);
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+        const file = new File([blob], `persona16_${sharePayload.n}.png`, { type: "image/png" });
+
+        // スマホで画像ファイル付き共有（Web Share API）が可能な場合
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({
+              text: tweetText,
+              files: [file]
+            });
+            return;
+          } catch (err) {
+            // ユーザーキャンセル時は何もしない
+            if (err.name === 'AbortError') return;
+          }
+        }
+
+        // 非対応端末（PC等）の場合：画像をダウンロードしつつX投稿画面を新規タブで起動
+        generateAndDownloadShareCard(sharePayload);
+        const tweetIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
+        window.open(tweetIntentUrl, "_blank", "noopener,noreferrer");
+      }, "image/png");
+    };
 
     // ③ 閲覧URLコピーボタン
     btnCopyUrl.onclick = () => {
@@ -803,9 +830,8 @@ function initShareFeature(profile) {
   };
 }
 
-// ★ Canvasを使った高精細OGP風カード画像（1200×630px）の自動生成＆ダウンロード
-function generateAndDownloadShareCard(payload) {
-  const canvas = document.getElementById("share-card-canvas");
+// ★ Canvasへのカード描画ロジック（共通関数）
+function drawShareCardToCanvas(payload, canvas) {
   const ctx = canvas.getContext("2d");
 
   // 背景（モダンダークグラデーション）
@@ -831,7 +857,7 @@ function generateAndDownloadShareCard(payload) {
   ctx.font = "bold 44px -apple-system, sans-serif";
   ctx.fillText(`${payload.n} さんの他己分析結果`, 60, 145);
 
-  // 総合タイプ表示（巨大レタリング）
+  // 総合タイプ表示
   ctx.fillStyle = "#c7d2fe";
   ctx.font = "bold 22px -apple-system, sans-serif";
   ctx.fillText(`全体の社会的仮面（回答数: ${payload.c}件）`, 60, 210);
@@ -846,7 +872,7 @@ function generateAndDownloadShareCard(payload) {
   const desc = TYPE_DESCS[payload.t] || "";
   ctx.fillText(desc.length > 36 ? desc.substring(0, 36) + "…" : desc, 60, 370);
 
-  // 関係性ごとの小計カード群（右半分にグリッド描画）
+  // 関係性ごとの小計カード群（右半分グリッド描画）
   const startX = 660;
   const startY = 160;
   const cardW = 230;
@@ -869,19 +895,16 @@ function generateAndDownloadShareCard(payload) {
     const x = startX + col * (cardW + gapX);
     const y = startY + row * (cardH + gapY);
 
-    // ミニカード背景
     ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
     ctx.fillRect(x, y, cardW, cardH);
     ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
     ctx.lineWidth = 1.5;
     ctx.strokeRect(x, y, cardW, cardH);
 
-    // ラベル
     ctx.fillStyle = "#94a3b8";
     ctx.font = "bold 18px -apple-system, sans-serif";
     ctx.fillText(item.l, x + 16, y + 32);
 
-    // 判定タイプ
     const data = payload.r[item.k];
     const typeStr = data ? data.type : "―";
     const countStr = data ? `(${data.count}件)` : "(0件)";
@@ -899,8 +922,13 @@ function generateAndDownloadShareCard(payload) {
   ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
   ctx.font = "bold 20px -apple-system, sans-serif";
   ctx.fillText("Chimera Test Lab ｜ tests.hiddenchimera.com", 60, 565);
+}
 
-  // ダウンロード実行
+// 結果カード画像のダウンロード実行関数
+function generateAndDownloadShareCard(payload) {
+  const canvas = document.getElementById("share-card-canvas");
+  drawShareCardToCanvas(payload, canvas);
+
   const link = document.createElement("a");
   link.download = `persona16_${encodeURIComponent(payload.n)}_result.png`;
   link.href = canvas.toDataURL("image/png");
