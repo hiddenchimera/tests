@@ -74,19 +74,7 @@
           <p class="share-hint">※LINEやDMで送って答えてもらい、結果URLを送り返してもらってください。</p>
         </div>
 
-        <!-- ★ 期間絞り込みフィルターバー ★ -->
-        <div class="date-filter-box" id="date-filter-box" style="display: none;">
-          <div class="date-filter-header">
-            <span class="date-filter-title">📅 期間で絞り込み</span>
-            <button type="button" id="date-filter-clear-btn" class="btn-date-clear">解除</button>
-          </div>
-          <div class="date-input-row">
-            <input type="date" id="date-start" class="date-input" aria-label="開始日">
-            <span class="date-separator">〜</span>
-            <input type="date" id="date-end" class="date-input" aria-label="終了日">
-          </div>
-        </div>
-
+        <!-- 関係性タブ -->
         <div class="relation-tabs" id="relation-tabs" style="display: none;">
           <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
           <button class="tab-btn" data-rel="friend">友達 (<span id="count-friend">0</span>)</button>
@@ -161,6 +149,20 @@
           </div>
         </div>
 
+        <!-- ★ 期間絞り込みフィルターバー（スライダーと届いた回答履歴の間に配置） ★ -->
+        <div class="date-filter-box" id="date-filter-box" style="display: none; margin-top: 10px; margin-bottom: 20px;">
+          <div class="date-filter-header">
+            <span class="date-filter-title">📅 期間で絞り込み</span>
+            <button type="button" id="date-filter-clear-btn" class="btn-date-clear">解除</button>
+          </div>
+          <div class="date-input-row">
+            <input type="date" id="date-start" class="date-input" aria-label="開始日">
+            <span class="date-separator">〜</span>
+            <input type="date" id="date-end" class="date-input" aria-label="終了日">
+          </div>
+        </div>
+
+        <!-- 回答履歴一覧セクション -->
         <div class="log-section">
           <div class="log-header">
             <h3 class="log-title">届いた回答履歴</h3>
