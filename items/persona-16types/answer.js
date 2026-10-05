@@ -142,6 +142,7 @@ function renderQuestion() {
   const progressNum = currentQuestionIndex + 1;
   const total = questions.length;
 
+  // 設問1（回答0問）で0%、回答済みに応じて平方根でイージング計算
   document.getElementById("quiz-progress").style.width = `${Math.sqrt(currentQuestionIndex / total) * 100}%`;
   document.getElementById("quiz-progress-num").textContent = `問 ${progressNum} / ${total}`;
   document.getElementById("question-text").textContent = q.text;
@@ -213,6 +214,14 @@ function finishQuiz() {
   const urlInput = document.getElementById("result-url-input");
   urlInput.value = resultUrl;
 
+  // LINE送信ボタンにURLとメッセージをバインド
+  const lineShareBtn = document.getElementById("line-share-btn");
+  if (lineShareBtn) {
+    const lineText = encodeURIComponent(`${targetUserName}さんの他己分析に回答しました！\n以下のURLを開いて結果を確認してね👇\n${resultUrl}`);
+    lineShareBtn.href = `https://line.me/R/msg/text/?${lineText}`;
+  }
+
+  // 結果URLコピーボタン
   const copyBtn = document.getElementById("copy-result-url-btn");
   copyBtn.onclick = () => {
     urlInput.select();
