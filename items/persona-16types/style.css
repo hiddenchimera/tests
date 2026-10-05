@@ -14,6 +14,7 @@
 
 .text-input {
   width: 100%;
+  box-sizing: border-box;
   padding: 12px 14px;
   border-radius: 8px;
   border: 1px solid #cbd5e1;
@@ -28,6 +29,20 @@
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
+/* --- バッジ表示（共通バッジ） --- */
+.intro-badge {
+  display: inline-block;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  color: #4f46e5;
+  background: #eef2ff;
+  border: 1px solid #c7d2fe;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  margin-bottom: 10px;
+}
+
 /* --- プロファイル切り替えバー --- */
 .profile-bar {
   display: flex;
@@ -38,7 +53,7 @@
   border: 1px solid #e2e8f0;
   border-radius: 10px;
   padding: 8px 12px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
 }
 
 .profile-select-wrap {
@@ -147,9 +162,10 @@
   font-weight: 700;
   cursor: pointer;
   white-space: nowrap;
+  transition: background-color 0.2s;
 }
 
-.copy-btn:active {
+.copy-btn:hover {
   background: #4338ca;
 }
 
@@ -185,11 +201,17 @@
 }
 
 /* --- ダッシュボード見出し --- */
+.dashboard-header {
+  text-align: left;
+  margin-bottom: 16px;
+}
+
 .dashboard-title {
-  font-size: 1.4rem;
+  font-size: 1.45rem;
   font-weight: 800;
   color: #0f172a;
-  margin-bottom: 16px;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 
 /* --- 空状態 --- */
@@ -215,7 +237,7 @@
   line-height: 1.5;
 }
 
-/* --- 関係性タブ（折り返し対応＆すっきり配置） --- */
+/* --- 関係性タブ --- */
 .relation-tabs {
   display: flex;
   flex-wrap: wrap;
@@ -251,34 +273,35 @@
 /* --- 総合判定カード（4系統カラーテーマ） --- */
 .result-summary-card {
   border-radius: 14px;
-  padding: 20px;
+  padding: 24px 20px;
   text-align: center;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   border: 1px solid transparent;
   transition: all 0.3s ease;
 }
 
 .summary-sub {
-  font-size: 0.8rem;
+  font-size: 0.82rem;
   font-weight: 700;
   letter-spacing: 0.05em;
   margin-bottom: 4px;
 }
 
 .summary-type {
-  font-size: 2.3rem;
+  font-size: 2.4rem;
   font-weight: 900;
   letter-spacing: 0.06em;
-  margin-bottom: 8px;
+  margin: 4px 0 8px;
 }
 
 .summary-desc {
   font-size: 0.88rem;
   color: #475569;
   line-height: 1.5;
+  margin: 0;
 }
 
-/* 紫系（NT: 直観・思考） */
+/* 紫系（NT） */
 .theme-nt {
   background: linear-gradient(135deg, #f5f3ff, #faf5ff);
   border-color: #ddd6fe;
@@ -286,7 +309,7 @@
 .theme-nt .summary-sub { color: #7c3aed; }
 .theme-nt .summary-type { color: #5b21b6; }
 
-/* 緑系（NF: 直観・感情） */
+/* 緑系（NF） */
 .theme-nf {
   background: linear-gradient(135deg, #f0fdf4, #f7fee7);
   border-color: #bbf7d0;
@@ -294,7 +317,7 @@
 .theme-nf .summary-sub { color: #16a34a; }
 .theme-nf .summary-type { color: #14532d; }
 
-/* 青系（SJ: 感覚・判断） */
+/* 青系（SJ） */
 .theme-sj {
   background: linear-gradient(135deg, #f0f9ff, #f8fafc);
   border-color: #bae6fd;
@@ -302,7 +325,7 @@
 .theme-sj .summary-sub { color: #0284c7; }
 .theme-sj .summary-type { color: #0c4a6e; }
 
-/* 黄・アンバー系（SP: 感覚・知覚） */
+/* 黄系（SP） */
 .theme-sp {
   background: linear-gradient(135deg, #fffbeb, #fefce8);
   border-color: #fde68a;
@@ -314,7 +337,7 @@
 .axes-container {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   margin-bottom: 24px;
 }
 
@@ -376,6 +399,7 @@
   font-size: 0.95rem;
   font-weight: 700;
   color: #0f172a;
+  margin: 0;
 }
 
 .delete-btn {
@@ -387,6 +411,11 @@
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.delete-btn:hover:not(:disabled) {
+  background: #fecaca;
 }
 
 .delete-btn:disabled {
@@ -474,7 +503,7 @@
   color: #334155;
 }
 
-/* 関係性別のバッジ色分け */
+/* 関係性別バッジカラー */
 .rel-friend { background: #e0e7ff; color: #3730a3; }
 .rel-partner { background: #fce7f3; color: #9d174d; }
 .rel-work { background: #e0f2fe; color: #0369a1; }
@@ -482,7 +511,7 @@
 .rel-hobby { background: #f3e8ff; color: #6b21a8; }
 .rel-other { background: #f1f5f9; color: #475569; }
 
-/* 回答履歴のタイプバッジ */
+/* タイプバッジ（4色） */
 .response-type {
   font-weight: 800;
   font-size: 0.82rem;
@@ -499,7 +528,7 @@
   color: #94a3b8;
 }
 
-/* 回答者個別のパラメータ詳細エリア */
+/* 回答者個別パラメータ詳細エリア */
 .response-detail {
   display: none;
   background: #ffffff;
@@ -563,7 +592,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* --- 技術仕様・データ保存アコーディオン（目立たない控えめなデザイン） --- */
+/* --- 技術仕様・データ保存アコーディオン --- */
 .tech-spec-details {
   margin-top: 36px;
   text-align: left;
@@ -613,7 +642,7 @@
   margin-bottom: 0;
 }
 
-/* フッター */
+/* --- フッター & ナビリンク --- */
 .tool-footer {
   margin-top: 24px;
   border-top: 1px solid #f1f5f9;
@@ -624,35 +653,25 @@
   font-size: 0.72rem;
   color: #94a3b8;
   line-height: 1.4;
+  margin-bottom: 12px;
 }
 
-/* --- 回答者：関係性選択グリッド --- */
-.relation-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 8px;
-}
-
-.rel-select-btn {
-  background-color: #f8fafc;
-  color: #334155;
-  border: 1px solid #cbd5e1;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 0.88rem;
-  font-weight: 600;
-  cursor: pointer;
+.footer-nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #4f46e5;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
   transition: all 0.15s ease;
 }
 
-.rel-select-btn:hover {
-  background-color: #f1f5f9;
-  border-color: #94a3b8;
-}
-
-.rel-select-btn.active {
-  background-color: #e0e7ff;
-  border-color: #4f46e5;
-  color: #3730a3;
-  box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.2);
+.footer-nav-link:hover {
+  background: #eef2ff;
+  border-color: #c7d2fe;
 }
