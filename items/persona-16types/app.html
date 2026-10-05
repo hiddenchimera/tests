@@ -147,9 +147,16 @@
               </div>
             </div>
           </div>
+
+          <!-- ★ 結果をSNSで共有するボタン ★ -->
+          <div style="margin: 18px 0 24px; text-align: center;">
+            <button type="button" id="open-share-modal-btn" class="btn-share-result-primary">
+              📢 この他己分析結果をSNSで共有する
+            </button>
+          </div>
         </div>
 
-        <!-- ★ 統合絞り込みフィルターバー ★ -->
+        <!-- 統合絞り込みフィルターバー -->
         <div class="date-filter-box" id="date-filter-box" style="display: none; margin-top: 10px; margin-bottom: 20px;">
           <div class="date-filter-header">
             <span class="date-filter-title">🔍 回答の絞り込み</span>
@@ -172,7 +179,7 @@
             <input type="text" id="filter-keyword" class="filter-text-input" placeholder="回答者名やひとことメモで検索…">
           </div>
 
-          <!-- ③ 件数指定（クイックボタン ＋ 自由入力欄） -->
+          <!-- ③ 件数指定 -->
           <div class="filter-sub-group" style="margin-top: 8px;">
             <span class="filter-sub-label">件数:</span>
             <div class="filter-pill-group" id="filter-limit-group">
@@ -188,7 +195,7 @@
             </div>
           </div>
 
-          <!-- ④ タイプ系統指定（4色系統 ＋ カスタム指定） -->
+          <!-- ④ タイプ系統指定 -->
           <div class="filter-sub-group" style="margin-top: 8px;">
             <span class="filter-sub-label">系統:</span>
             <div class="filter-pill-group" id="filter-category-group">
@@ -201,7 +208,7 @@
             </div>
           </div>
 
-          <!-- カスタムタイプ4文字入力欄（「カスタム」選択時のみ表示） -->
+          <!-- カスタムタイプ4文字入力欄 -->
           <div class="custom-type-row" id="custom-type-row" style="display: none; margin-top: 8px;">
             <span class="filter-sub-label">指定:</span>
             <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
@@ -250,6 +257,41 @@
         </div>
       </footer>
     </section>
+
+    <!-- ★ SNS共有モーダル ★ -->
+    <div id="share-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h3 class="modal-title">他己分析結果をシェア</h3>
+          <button type="button" id="close-share-modal-btn" class="btn-modal-close">×</button>
+        </div>
+
+        <p class="modal-desc">
+          総合判定と各関係性（友達・職場など）のサマリー結果をSNSで共有できます。<br>
+          <span style="font-size: 0.74rem; color: #94a3b8;">※ 個別の回答者名や自由メモなどの履歴データは一切共有されません。</span>
+        </p>
+
+        <!-- 画像保存用Canvas（裏で描画） -->
+        <canvas id="share-card-canvas" width="1200" height="630" style="display: none;"></canvas>
+
+        <div class="share-actions-grid">
+          <!-- ① Xでポスト -->
+          <a id="btn-share-x" href="#" target="_blank" rel="noopener noreferrer" class="btn-sns-action btn-sns-x">
+            <span>𝕏 でポストする</span>
+          </a>
+
+          <!-- ② 結果URLをコピー -->
+          <button type="button" id="btn-copy-share-url" class="btn-sns-action btn-sns-copy">
+            🔗 閲覧用URLをコピー
+          </button>
+
+          <!-- ③ 画像を生成・保存 -->
+          <button type="button" id="btn-download-image" class="btn-sns-action btn-sns-image">
+            📷 結果カード画像を保存（PNG）
+          </button>
+        </div>
+      </div>
+    </div>
   </main>
 
   <script src="../../assets/js/common.js"></script>
