@@ -31,27 +31,89 @@
     <div id="toast" class="toast" style="display: none;"></div>
 
     <section id="quiz-card">
-      <!-- 共通ヘッダー（ナビ等が必要な場合用） -->
+      <!-- 共通ヘッダー -->
       <div id="test-nav-header"></div>
 
-      <!-- ① 初期状態：プロファイル未作成のとき -->
-      <div id="setup-view" style="display: none;">
+      <!-- ⓪ トップ画面（診断概要・イントロ画面） -->
+      <div id="intro-view">
         <span class="intro-badge">PERSONA 16 TYPES</span>
-        <h1 class="intro-title" style="font-size: 1.6rem; font-weight: 900; margin-bottom: 8px;">ペルソナ16タイプ他己分析<br><span style="font-size: 1rem; color: #64748b; font-weight: normal;">人間関係ごとの顔を暴く性格診断</span></h1>
-        <p class="intro-desc" style="font-size: 0.88rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
-          人は相手（友達、恋人、職場、家族、趣味仲間）によって見せる顔が無意識に変わります。<br>
-          周りの人にこの診断を解いてもらい、客観的に映る「あなたの社会的仮面」を集計・分析しましょう。
+        <h1 class="intro-title" style="font-size: 1.65rem; font-weight: 900; margin-bottom: 12px; line-height: 1.35;">
+          ペルソナ16タイプ他己分析<br>
+          <span style="font-size: 0.98rem; color: #64748b; font-weight: 600;">― 人間関係ごとの顔を暴く性格診断 ―</span>
+        </h1>
+        <p class="intro-desc" style="font-size: 0.88rem; color: #475569; line-height: 1.7; margin-bottom: 20px;">
+          人は「友達」「恋人」「職場」「ネット仲間」によって見せる顔が全く違います。<br>
+          URLをシェアして周りの人から印象を回答してもらうだけで、相手ごとに演じ分けているあなたの「社会的仮面（ペルソナ）」を16タイプで可視化・集計する無料の他己分析ツールです。
+        </p>
+
+        <!-- 特徴バッジ -->
+        <div class="intro-meta-box">
+          <div class="intro-meta-item">
+            <span class="meta-label">設問数</span>
+            <span class="meta-val">全 12 問</span>
+          </div>
+          <div class="intro-meta-item">
+            <span class="meta-label">所要時間</span>
+            <span class="meta-val">約 1 分</span>
+          </div>
+          <div class="intro-meta-item">
+            <span class="meta-label">利用登録</span>
+            <span class="meta-val">不要・無料</span>
+          </div>
+        </div>
+
+        <!-- 3ステップ説明 -->
+        <div class="intro-flow-box">
+          <div class="flow-step-item">
+            <span class="flow-num">1</span>
+            <div>
+              <strong>ニックネームを決めてURLを発行</strong>
+              <p>本名でもハンドルネームでもOK。複数プロファイルの作成も可能です。</p>
+            </div>
+          </div>
+          <div class="flow-step-item">
+            <span class="flow-num">2</span>
+            <div>
+              <strong>友達や仲間にURLをシェア</strong>
+              <p>相手は12問（約1分）の質問に答えて、結果URLを送り返すだけ。</p>
+            </div>
+          </div>
+          <div class="flow-step-item">
+            <span class="flow-num">3</span>
+            <div>
+              <strong>関係性ごとの顔をダッシュボードで分析</strong>
+              <p>「友達から見た自分」や「職場から見た自分」のタイプとパラメータが集計されます。</p>
+            </div>
+          </div>
+        </div>
+
+        <button id="start-app-btn" class="start-btn-primary" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 10px;">
+          他己分析をはじめる
+        </button>
+        <p id="existing-profile-hint" style="display: none; font-size: 0.76rem; color: #6366f1; margin-top: 8px; font-weight: 600;">
+          ※作成済みのプロファイルへ移動します
+        </p>
+      </div>
+
+      <!-- ① プロファイル未作成のとき（ニックネーム入力画面） -->
+      <div id="setup-view" style="display: none;">
+        <span class="intro-badge">STEP 1</span>
+        <h2 class="intro-title" style="font-size: 1.45rem; font-weight: 800; margin-bottom: 8px;">プロファイルの作成</h2>
+        <p class="intro-desc" style="font-size: 0.86rem; color: #64748b; line-height: 1.6; margin-bottom: 20px;">
+          周囲の人から呼ばれているニックネームを入力してください。<br>
+          （後から本名用・SNS用など複数のプロファイルを追加することも可能です）
         </p>
 
         <div class="input-group">
           <label for="user-name-input" class="input-label">あなたのニックネーム</label>
-          <input type="text" id="user-name-input" class="text-input" placeholder="例: キメラ" maxlength="15">
+          <input type="text" id="user-name-input" class="text-input" placeholder="例: たろう、キメラ" maxlength="15">
         </div>
 
         <button id="generate-btn" class="copy-btn" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 10px;">回答募集URLを発行する</button>
+        <button id="back-to-intro-from-setup" class="btn-text-back" style="margin-top: 14px;">← 説明トップへ戻る</button>
       </div>
 
-      <!-- ② ダッシュボード画面 -->
+      <!-- ② ダッシュボード画面（集計・URL発行・回答履歴） -->
       <div id="dashboard-view" style="display: none;">
         <div class="profile-bar">
           <div class="profile-select-wrap">
@@ -155,8 +217,12 @@
           <div id="response-list" class="response-list"></div>
         </div>
 
+        <div style="margin-top: 24px; text-align: center;">
+          <button id="back-to-intro-from-dash" class="btn-text-back">← 診断トップ（説明画面）を見る</button>
+        </div>
       </div>
 
+      <!-- 技術仕様アコーディオン -->
       <details class="tech-spec-details">
         <summary class="tech-spec-summary">
           データの保存仕様とプライバシーについて
@@ -166,7 +232,7 @@
             本ツールはバックエンドサーバーを持たない<strong>完全クライアントサイド（静的Webアプリ）</strong>として設計されています。
           </p>
           <ul>
-            <li><strong>データ保持先:</strong> あなたのプロファイルおよび回答データは、当サーバーではなくお使いのブラウザ内部（LocalStorage）にのみ安全に暗号化されず平文保存されます。</li>
+            <li><strong>データ保持先:</strong> あなたのプロファイルおよび回答データは、当サーバーではなくお使いのブラウザ内部（LocalStorage）にのみ平文保存されます。</li>
             <li><strong>端末・ブラウザ間の非同期:</strong> 別の端末（PCからスマホ等）や異なるブラウザ（SafariとChrome等）、シークレット/プライベートモード間ではデータは共有・引き継ぎされません。</li>
             <li><strong>キャッシュクリアの注意:</strong> ブラウザの履歴やCookie・サイトデータを手動で完全消去した場合、保存されていたプロファイルや集計履歴もすべて消失しますのでご注意ください。</li>
             <li><strong>プライバシー保護:</strong> 入力されたニックネームや回答スコアが外部サーバーへ送信・記録されることは一切ありません。</li>
