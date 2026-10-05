@@ -34,7 +34,7 @@ let store = loadStore();
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
 
-  // --- ① 新規回答の受け取り処理（URLに rid, rel, sc がある場合） ---
+  // --- ① 新規回答の受け取り処理 ---
   const rid = urlParams.get("rid");
   const rel = urlParams.get("rel");
   const sc = urlParams.get("sc");
@@ -47,7 +47,7 @@ document.addEventListener("DOMContentLoaded", () => {
     window.history.replaceState({}, document.title, cleanUrl);
   }
 
-  // --- ② 画面初期表示の制御 ---
+  // --- ② 画面初期表示 ---
   renderApp();
 
   // --- ③ 初回URL発行ボタンイベント ---
@@ -207,7 +207,7 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
     relation: rel,
     scores: scores,
     type: computedType,
-    memo: "", // 初期メモは空文字
+    memo: "",
     createdAt: new Date().toISOString()
   });
 
@@ -253,6 +253,21 @@ function updateProfileSelector() {
   };
 }
 
+// ★ 日付範囲による回答リストの絞り込みヘルパー
+function filterResponsesByDate(responses, startDateStr, endDateStr) {
+  if (!startDateStr && !endDateStr) return responses;
+
+  const start = startDateStr ? new Date(`${startDateStr}T00:00:00`) : null;
+  const end = endDateStr ? new Date(`${endDateStr}T23:59:59.999`) : null;
+
+  return responses.filter(r => {
+    const rDate = new Date(r.createdAt);
+    if (start && rDate < start) return false;
+    if (end && rDate > end) return false;
+    return true;
+  });
+}
+
 // ダッシュボード初期化
 function initDashboard(profile) {
   document.getElementById("target-user-name").textContent = profile.name;
@@ -270,19 +285,54 @@ function initDashboard(profile) {
     showToast("回答募集URLをコピーしました！");
   };
 
+  const dateFilterBox = document.getElementById("date-filter-box");
+  const dateStartInput = document.getElementById("date-start");
+  const dateEndInput = document.getElementById("date-end");
+  const dateClearBtn = document.getElementById("date-filter-clear-btn");
+
   let currentRel = "all";
+
+  // 日付フィルターの表示制御（回答が1件以上ある場合のみ表示）
+  if (profile.responses.length > 0) {
+    dateFilterBox.style.display = "block";
+  } else {
+    dateFilterBox.style.display = "none";
+  }
+
+  // 表示の統合更新関数
+  const refreshDashboardView = () => {
+    const sVal = dateStartInput.value;
+    const eVal = dateEndInput.value;
+    const filteredResponses = filterResponsesByDate(profile.responses, sVal, eVal);
+    const isDateFiltered = !!(sVal || eVal);
+
+    renderStats(filteredResponses, currentRel, profile.responses.length > 0, isDateFiltered);
+    renderResponseList(profile, filteredResponses);
+  };
+
+  // 関係性タブクリック
   const tabBtns = document.querySelectorAll(".tab-btn");
   tabBtns.forEach(btn => {
     btn.onclick = () => {
       tabBtns.forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
       currentRel = btn.getAttribute("data-rel");
-      renderStats(profile.responses, currentRel);
+      refreshDashboardView();
     };
   });
 
-  renderStats(profile.responses, currentRel);
-  renderResponseList(profile);
+  // 日付変更イベント
+  dateStartInput.onchange = refreshDashboardView;
+  dateEndInput.onchange = refreshDashboardView;
+
+  // クリアボタン
+  dateClearBtn.onclick = () => {
+    dateStartInput.value = "";
+    dateEndInput.value = "";
+    refreshDashboardView();
+  };
+
+  refreshDashboardView();
 }
 
 // 単一リストの平均スコアおよび16タイプを算出するヘルパー
@@ -302,33 +352,50 @@ function computeGroupMetrics(items) {
 }
 
 // 統計・集計の描画
-function renderStats(responses, activeRel = "all") {
+function renderStats(responses, activeRel = "all", hasTotalResponses = true, isDateFiltered = false) {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
   const statsArea = document.getElementById("stats-area");
   const summaryCard = document.querySelector(".result-summary-card");
   const miniCardsContainer = document.getElementById("relation-mini-cards");
 
-  if (responses.length === 0) {
+  if (!hasTotalResponses) {
+    // 回答が一切ないとき
     tabsContainer.style.display = "none";
     statsArea.style.display = "none";
     emptyState.style.display = "block";
-    emptyState.querySelector(".empty-title").textContent = "まだ回答が届いていません";
-    emptyState.querySelector(".empty-desc").textContent = "上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！";
+    document.getElementById("empty-state-title").textContent = "まだ回答が届いていません";
+    document.getElementById("empty-state-desc").textContent = "上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！";
+    return;
+  }
+
+  // 期間絞り込みによって該当0件になったとき
+  if (responses.length === 0 && isDateFiltered) {
+    tabsContainer.style.display = "flex";
+    statsArea.style.display = "none";
+    emptyState.style.display = "block";
+    document.getElementById("empty-state-title").textContent = "指定された期間の回答はありません";
+    document.getElementById("empty-state-desc").textContent = "日付範囲を変更するか、「解除」ボタンを押して全期間を表示してください。";
+
+    // タブ件数は0に更新
+    document.getElementById("count-all").textContent = 0;
+    ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
+      const countEl = document.getElementById(`count-${r}`);
+      if (countEl) countEl.textContent = 0;
+    });
     return;
   }
 
   tabsContainer.style.display = "flex";
+  emptyState.style.display = "none";
+  statsArea.style.display = "block";
 
-  // タブのバッジ件数更新
+  // タブのバッジ件数更新（絞り込み後の件数を反映）
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
     if (countEl) countEl.textContent = responses.filter(item => item.relation === r).length;
   });
-
-  emptyState.style.display = "none";
-  statsArea.style.display = "block";
 
   // --- ① メインカードのデータ判定 ---
   const mainData = activeRel === "all" ? responses : responses.filter(r => r.relation === activeRel);
@@ -411,26 +478,29 @@ function renderStats(responses, activeRel = "all") {
       tabBtns.forEach(b => {
         b.classList.toggle("active", b.getAttribute("data-rel") === item.key);
       });
-      renderStats(responses, item.key);
+      activeRel = item.key;
+      renderStats(responses, activeRel, hasTotalResponses, isDateFiltered);
     });
 
     miniCardsContainer.appendChild(card);
   });
 }
 
-// ★ 回答履歴一覧＆削除＆ひとことメモ管理
-function renderResponseList(profile) {
+// 回答履歴一覧＆削除＆ひとことメモ管理
+function renderResponseList(profile, visibleResponses = null) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
   container.innerHTML = "";
 
-  if (profile.responses.length === 0) {
-    container.innerHTML = `<p style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:12px;">履歴はありません</p>`;
+  const list = visibleResponses !== null ? visibleResponses : profile.responses;
+
+  if (list.length === 0) {
+    container.innerHTML = `<p style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:12px;">表示できる履歴はありません</p>`;
     deleteBtn.disabled = true;
     return;
   }
 
-  profile.responses.forEach(item => {
+  list.forEach(item => {
     const card = document.createElement("div");
     card.className = "response-card";
 
@@ -463,7 +533,6 @@ function renderResponseList(profile) {
       `;
     }).join("");
 
-    // メモ表示用HTMLの組み立て
     const memoHtml = currentMemo 
       ? `<span class="response-memo-tag" title="ひとことメモ（タップで編集）">${escapeHtml(currentMemo)}<span class="memo-edit-pen">✏️</span></span>`
       : `<button type="button" class="btn-add-memo" title="ひとことメモを追加">＋メモ</button>`;
@@ -494,14 +563,12 @@ function renderResponseList(profile) {
       </div>
     `;
 
-    // パラメータ開閉イベント
     const toggleTrigger = card.querySelector(".response-name-clickable");
     toggleTrigger.addEventListener("click", (e) => {
       e.stopPropagation();
       card.classList.toggle("open");
     });
 
-    // ★ ひとことメモの追加・編集イベント
     const memoWrap = card.querySelector(".memo-wrap");
     memoWrap.addEventListener("click", (e) => {
       e.stopPropagation();
@@ -510,7 +577,7 @@ function renderResponseList(profile) {
         const trimmed = promptVal.trim().substring(0, 12);
         item.memo = trimmed;
         saveStore();
-        renderResponseList(profile);
+        renderResponseList(profile, visibleResponses);
         showToast(trimmed ? "メモを保存しました" : "メモを削除しました");
       }
     });
@@ -535,9 +602,7 @@ function renderResponseList(profile) {
     profile.responses = profile.responses.filter(r => !selectedIds.includes(r.id));
     saveStore();
 
-    renderResponseList(profile);
-    const activeTabRel = document.querySelector(".tab-btn.active")?.getAttribute("data-rel") || "all";
-    renderStats(profile.responses, activeTabRel);
+    initDashboard(profile);
     updateProfileSelector();
     showToast("回答を削除しました");
   };
