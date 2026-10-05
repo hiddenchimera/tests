@@ -724,7 +724,7 @@ function renderResponseList(profile, visibleResponses = null) {
   };
 }
 
-// ★ SNS共有機能の初期化（Web Share APIによる画像付き投稿連動）
+// SNS共有機能の初期化
 function initShareFeature(profile) {
   const openModalBtn = document.getElementById("open-share-modal-btn");
   const shareModal = document.getElementById("share-modal");
@@ -741,7 +741,6 @@ function initShareFeature(profile) {
       return;
     }
 
-    // ① サマリーデータの集計とURLエンコード（個別ログは一切含めない）
     const totalMetrics = computeGroupMetrics(profile.responses);
     const relSummary = {};
     ["friend", "partner", "work", "family", "hobby", "other"].forEach(k => {
@@ -775,7 +774,6 @@ function initShareFeature(profile) {
 
     const tweetText = `周りから見た私の他己分析結果は【${totalMetrics.type}】でした！${relText}\n人間関係ごとに演じ分けている仮面（ペルソナ）を暴く性格診断。\n\n#ペルソナ16タイプ他己分析 #ChimeraTestLab\n${viewUrl}`;
 
-    // ② Xでポストするアクション（スマホ標準の画像付き共有シートを起動）
     btnShareX.onclick = async (e) => {
       e.preventDefault();
 
@@ -786,7 +784,6 @@ function initShareFeature(profile) {
         if (!blob) return;
         const file = new File([blob], `persona16_${sharePayload.n}.png`, { type: "image/png" });
 
-        // スマホで画像ファイル付き共有（Web Share API）が可能な場合
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
             await navigator.share({
@@ -795,25 +792,21 @@ function initShareFeature(profile) {
             });
             return;
           } catch (err) {
-            // ユーザーキャンセル時は何もしない
             if (err.name === 'AbortError') return;
           }
         }
 
-        // 非対応端末（PC等）の場合：画像をダウンロードしつつX投稿画面を新規タブで起動
         generateAndDownloadShareCard(sharePayload);
         const tweetIntentUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(tweetText)}`;
         window.open(tweetIntentUrl, "_blank", "noopener,noreferrer");
       }, "image/png");
     };
 
-    // ③ 閲覧URLコピーボタン
     btnCopyUrl.onclick = () => {
       navigator.clipboard.writeText(viewUrl);
       showToast("閲覧専用URLをコピーしました！");
     };
 
-    // ④ 結果カード画像のダウンロード
     btnDownloadImage.onclick = () => {
       generateAndDownloadShareCard(sharePayload);
     };
@@ -830,55 +823,146 @@ function initShareFeature(profile) {
   };
 }
 
-// ★ Canvasへのカード描画ロジック（共通関数）
+// 角丸四角形描画ヘルパー
+function drawRoundedRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.arcTo(x + width, y, x + width, y + radius, radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.arcTo(x + width, y + height, x + width - radius, y + height, radius);
+  ctx.lineTo(x + radius, y + height);
+  ctx.arcTo(x, y + height, x, y + height - radius, radius);
+  ctx.lineTo(x, y + radius);
+  ctx.arcTo(x, y, x + radius, y, radius);
+  ctx.closePath();
+}
+
+// ★ Canvasへのカード描画（添付2枚目の実サイトデザインに完全準拠）
 function drawShareCardToCanvas(payload, canvas) {
   const ctx = canvas.getContext("2d");
+  const W = 1200;
+  const H = 630;
 
-  // 背景（モダンダークグラデーション）
-  const bgGrad = ctx.createLinearGradient(0, 0, 1200, 630);
-  bgGrad.addColorStop(0, "#0f172a");
-  bgGrad.addColorStop(0.5, "#1e1b4b");
-  bgGrad.addColorStop(1, "#312e81");
-  ctx.fillStyle = bgGrad;
-  ctx.fillRect(0, 0, 1200, 630);
+  // 1. 全体背景（Webサイトのライトグレー）
+  ctx.fillStyle = "#f8fafc";
+  ctx.fillRect(0, 0, W, H);
 
-  // 外枠の微細グロー
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
-  ctx.lineWidth = 4;
-  ctx.strokeRect(30, 30, 1140, 570);
+  // 2. 実サイトのドットパターン（グリッド状の淡いドット）
+  ctx.fillStyle = "#cbd5e1";
+  for (let x = 15; x < W; x += 30) {
+    for (let y = 15; y < H; y += 30) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1.2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
 
-  // ヘッダーバッジ
-  ctx.fillStyle = "#818cf8";
-  ctx.font = "bold 24px -apple-system, sans-serif";
-  ctx.fillText("OTHER-ANALYSIS LAB ｜ ペルソナ16タイプ他己分析", 60, 85);
+  // 3. メインのホワイトカード（中央配置）
+  const cardX = 40;
+  const cardY = 30;
+  const cardW = 1120;
+  const cardH = 570;
+  const cardR = 24;
 
-  // メインタイトル（名前）
+  // カードの影
+  ctx.shadowColor = "rgba(15, 23, 42, 0.08)";
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetX = 0;
+  ctx.shadowOffsetY = 8;
+
   ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 44px -apple-system, sans-serif";
-  ctx.fillText(`${payload.n} さんの他己分析結果`, 60, 145);
+  drawRoundedRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.fill();
 
-  // 総合タイプ表示
-  ctx.fillStyle = "#c7d2fe";
-  ctx.font = "bold 22px -apple-system, sans-serif";
-  ctx.fillText(`全体の社会的仮面（回答数: ${payload.c}件）`, 60, 210);
+  // 枠線
+  ctx.shadowColor = "transparent"; // シャドウ解除
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1.5;
+  drawRoundedRect(ctx, cardX, cardY, cardW, cardH, cardR);
+  ctx.stroke();
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 110px -apple-system, sans-serif";
-  ctx.fillText(payload.t, 60, 320);
+  // 4. 左上：DASHBOARD バッジ（紫のピル）
+  const badgeX = cardX + 36;
+  const badgeY = cardY + 28;
+  ctx.fillStyle = "#eef2ff";
+  drawRoundedRect(ctx, badgeX, badgeY, 110, 26, 13);
+  ctx.fill();
+  ctx.strokeStyle = "#c7d2fe";
+  ctx.lineWidth = 1;
+  drawRoundedRect(ctx, badgeX, badgeY, 110, 26, 13);
+  ctx.stroke();
 
-  // タイプ解説文
-  ctx.fillStyle = "#e0e7ff";
-  ctx.font = "500 24px -apple-system, sans-serif";
+  ctx.fillStyle = "#4f46e5";
+  ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText("DASHBOARD", badgeX + 55, badgeY + 13);
+
+  // 5. 大見出し「〇〇 さんの他己分析」
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText(`${payload.n} さんの他己分析`, badgeX, badgeY + 62);
+
+  // 右上のブランドロゴテキスト
+  ctx.textAlign = "right";
+  ctx.fillStyle = "#94a3b8";
+  ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText("Chimera Test Lab ｜ ペルソナ16タイプ他己分析", cardX + cardW - 36, badgeY + 14);
+
+  // 6. メイン判定カード（大）
+  const sumX = badgeX;
+  const sumY = badgeY + 84;
+  const sumW = 500;
+  const sumH = 240;
+  const sumR = 16;
+
+  // テーマ色判定
+  const colorCat = getColorCategoryClass(payload.t);
+  let themeBg = "#f0fdf4";
+  let themeBorder = "#bbf7d0";
+  let themeSub = "#16a34a";
+  let themeMain = "#15803d";
+
+  if (colorCat === "nt") {
+    themeBg = "#faf5ff"; themeBorder = "#ddd6fe"; themeSub = "#7c3aed"; themeMain = "#6b21a8";
+  } else if (colorCat === "sj") {
+    themeBg = "#f0f9ff"; themeBorder = "#bae6fd"; themeSub = "#0284c7"; themeMain = "#0369a1";
+  } else if (colorCat === "sp") {
+    themeBg = "#fffbeb"; themeBorder = "#fde68a"; themeSub = "#d97706"; themeMain = "#b45309";
+  }
+
+  ctx.fillStyle = themeBg;
+  drawRoundedRect(ctx, sumX, sumY, sumW, sumH, sumR);
+  ctx.fill();
+  ctx.strokeStyle = themeBorder;
+  ctx.lineWidth = 1.5;
+  drawRoundedRect(ctx, sumX, sumY, sumW, sumH, sumR);
+  ctx.stroke();
+
+  // カード内テキスト
+  ctx.textAlign = "center";
+  ctx.fillStyle = themeSub;
+  ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText(`全体から見たタイプ (${payload.c}件の回答)`, sumX + sumW / 2, sumY + 38);
+
+  ctx.fillStyle = themeMain;
+  ctx.font = "900 64px -apple-system, BlinkMacSystemFont, sans-serif";
+  ctx.fillText(payload.t, sumX + sumW / 2, sumY + 115);
+
+  ctx.fillStyle = "#475569";
+  ctx.font = "500 15px -apple-system, BlinkMacSystemFont, sans-serif";
   const desc = TYPE_DESCS[payload.t] || "";
-  ctx.fillText(desc.length > 36 ? desc.substring(0, 36) + "…" : desc, 60, 370);
+  ctx.fillText(desc.length > 28 ? desc.substring(0, 28) + "…" : desc, sumX + sumW / 2, sumY + 185);
 
-  // 関係性ごとの小計カード群（右半分グリッド描画）
-  const startX = 660;
-  const startY = 160;
-  const cardW = 230;
-  const cardH = 95;
-  const gapX = 20;
-  const gapY = 16;
+  // 7. 関係性ミニカード群（6分割・右半分エリア）
+  const rightAreaX = sumX + sumW + 28;
+  const rightAreaY = sumY;
+  const miniW = 160;
+  const miniH = 110;
+  const gapMiniX = 16;
+  const gapMiniY = 20;
 
   const relKeys = [
     { k: "friend", l: "友達" },
@@ -890,38 +974,114 @@ function drawShareCardToCanvas(payload, canvas) {
   ];
 
   relKeys.forEach((item, idx) => {
-    const col = idx % 2;
-    const row = Math.floor(idx / 2);
-    const x = startX + col * (cardW + gapX);
-    const y = startY + row * (cardH + gapY);
+    const col = idx % 3;
+    const row = Math.floor(idx / 3);
+    const mX = rightAreaX + col * (miniW + gapMiniX);
+    const mY = rightAreaY + row * (miniH + gapMiniY);
 
-    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-    ctx.fillRect(x, y, cardW, cardH);
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(x, y, cardW, cardH);
+    const relData = payload.r[item.k];
 
+    // ミニカードのスタイル決定
+    let mBg = "#f8fafc";
+    let mBorder = "#e2e8f0";
+    let mTypeColor = "#cbd5e1";
+
+    if (relData) {
+      const rCat = getColorCategoryClass(relData.type);
+      if (rCat === "nf") { mBg = "#f0fdf4"; mBorder = "#bbf7d0"; mTypeColor = "#15803d"; }
+      else if (rCat === "nt") { mBg = "#faf5ff"; mBorder = "#e9d5ff"; mTypeColor = "#6b21a8"; }
+      else if (rCat === "sj") { mBg = "#f0f9ff"; mBorder = "#bae6fd"; mTypeColor = "#0369a1"; }
+      else if (rCat === "sp") { mBg = "#fffbeb"; mBorder = "#fde68a"; mTypeColor = "#b45309"; }
+    }
+
+    ctx.fillStyle = mBg;
+    drawRoundedRect(ctx, mX, mY, miniW, miniH, 12);
+    ctx.fill();
+    ctx.strokeStyle = mBorder;
+    ctx.lineWidth = 1.2;
+    drawRoundedRect(ctx, mX, mY, miniW, miniH, 12);
+    ctx.stroke();
+
+    // タイトル
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#64748b";
+    ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(item.l, mX + miniW / 2, mY + 26);
+
+    // タイプ文字
+    ctx.fillStyle = mTypeColor;
+    ctx.font = "900 24px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(relData ? relData.type : "―", mX + miniW / 2, mY + 62);
+
+    // 件数
     ctx.fillStyle = "#94a3b8";
-    ctx.font = "bold 18px -apple-system, sans-serif";
-    ctx.fillText(item.l, x + 16, y + 32);
-
-    const data = payload.r[item.k];
-    const typeStr = data ? data.type : "―";
-    const countStr = data ? `(${data.count}件)` : "(0件)";
-
-    ctx.fillStyle = data ? "#38bdf8" : "#64748b";
-    ctx.font = "900 32px -apple-system, sans-serif";
-    ctx.fillText(typeStr, x + 16, y + 74);
-
-    ctx.fillStyle = "#94a3b8";
-    ctx.font = "bold 16px -apple-system, sans-serif";
-    ctx.fillText(countStr, x + 120, y + 74);
+    ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(relData ? `(${relData.count}件)` : "(0件)", mX + miniW / 2, mY + 88);
   });
 
-  // フッタークレジット
-  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-  ctx.font = "bold 20px -apple-system, sans-serif";
-  ctx.fillText("Chimera Test Lab ｜ tests.hiddenchimera.com", 60, 565);
+  // 8. 下部：4軸パラメータスライダー（実サイトのデザインを完全再現）
+  const axesY = sumY + sumH + 24;
+  const axisRowW = (cardW - 72 - 24) / 2;
+  const axisRowH = 46;
+
+  const axisData = [
+    { left: "外向 (E)", right: "内向 (I)", score: payload.sc[0], x: badgeX, y: axesY },
+    { left: "感覚 (S)", right: "直観 (N)", score: payload.sc[1], x: badgeX + axisRowW + 24, y: axesY },
+    { left: "思考 (T)", right: "感情 (F)", score: payload.sc[2], x: badgeX, y: axesY + 54 },
+    { left: "判断 (J)", right: "知覚 (P)", score: payload.sc[3], x: badgeX + axisRowW + 24, y: axesY + 54 }
+  ];
+
+  axisData.forEach(ax => {
+    // 枠
+    ctx.fillStyle = "#f8fafc";
+    drawRoundedRect(ctx, ax.x, ax.y, axisRowW, axisRowH, 8);
+    ctx.fill();
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    drawRoundedRect(ctx, ax.x, ax.y, axisRowW, axisRowH, 8);
+    ctx.stroke();
+
+    const rightPct = Math.round(((ax.score - 1) / 4) * 100);
+    const leftPct = 100 - rightPct;
+
+    // 左ラベル
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#4f46e5";
+    ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(ax.left, ax.x + 14, ax.y + 18);
+
+    // 比率
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#64748b";
+    ctx.font = "600 12px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(`${leftPct}% : ${rightPct}%`, ax.x + axisRowW / 2, ax.y + 18);
+
+    // 右ラベル
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#0ea5e9";
+    ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
+    ctx.fillText(ax.right, ax.x + axisRowW - 14, ax.y + 18);
+
+    // スライダーバー背景
+    const barX = ax.x + 14;
+    const barY = ax.y + 28;
+    const barW = axisRowW - 28;
+    const barH = 6;
+
+    ctx.fillStyle = "#e2e8f0";
+    drawRoundedRect(ctx, barX, barY, barW, barH, 3);
+    ctx.fill();
+
+    // インジケーターの丸
+    const indX = barX + (barW * rightPct) / 100;
+    ctx.beginPath();
+    ctx.arc(indX, barY + 3, 6, 0, Math.PI * 2);
+    ctx.fillStyle = "#4f46e5";
+    ctx.fill();
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+  });
 }
 
 // 結果カード画像のダウンロード実行関数
