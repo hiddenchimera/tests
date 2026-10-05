@@ -149,7 +149,7 @@
           </div>
         </div>
 
-        <!-- ★ 統合絞り込みフィルターバー（期間・検索・直近件数・タイプ系統） ★ -->
+        <!-- ★ 統合絞り込みフィルターバー ★ -->
         <div class="date-filter-box" id="date-filter-box" style="display: none; margin-top: 10px; margin-bottom: 20px;">
           <div class="date-filter-header">
             <span class="date-filter-title">🔍 回答の絞り込み</span>
@@ -166,13 +166,13 @@
             </div>
           </div>
 
-          <!-- ② キーワード検索（名前・ひとことメモ） -->
+          <!-- ② キーワード検索 -->
           <div class="filter-sub-group" style="margin-top: 8px;">
             <span class="filter-sub-label">検索:</span>
             <input type="text" id="filter-keyword" class="filter-text-input" placeholder="回答者名やひとことメモで検索…">
           </div>
 
-          <!-- ③ 直近件数クイックボタン -->
+          <!-- ③ 件数指定（クイックボタン ＋ 自由入力欄） -->
           <div class="filter-sub-group" style="margin-top: 8px;">
             <span class="filter-sub-label">件数:</span>
             <div class="filter-pill-group" id="filter-limit-group">
@@ -180,10 +180,15 @@
               <button type="button" class="filter-pill" data-limit="3">直近3件</button>
               <button type="button" class="filter-pill" data-limit="5">直近5件</button>
               <button type="button" class="filter-pill" data-limit="10">直近10件</button>
+              <div class="custom-limit-wrap">
+                <span class="custom-limit-txt">直近</span>
+                <input type="number" id="filter-limit-custom" class="custom-limit-input" placeholder="N" min="1" max="999">
+                <span class="custom-limit-txt">件</span>
+              </div>
             </div>
           </div>
 
-          <!-- ④ 判定タイプ系統ボタン -->
+          <!-- ④ タイプ系統指定（4色系統 ＋ カスタム指定） -->
           <div class="filter-sub-group" style="margin-top: 8px;">
             <span class="filter-sub-label">系統:</span>
             <div class="filter-pill-group" id="filter-category-group">
@@ -192,6 +197,16 @@
               <button type="button" class="filter-pill pill-nf" data-cat="nf">🟢 NF系</button>
               <button type="button" class="filter-pill pill-sj" data-cat="sj">🔵 SJ系</button>
               <button type="button" class="filter-pill pill-sp" data-cat="sp">🟡 SP系</button>
+              <button type="button" class="filter-pill pill-custom" data-cat="custom">⚙️ カスタム</button>
+            </div>
+          </div>
+
+          <!-- カスタムタイプ4文字入力欄（「カスタム」選択時のみ表示） -->
+          <div class="custom-type-row" id="custom-type-row" style="display: none; margin-top: 8px;">
+            <span class="filter-sub-label">指定:</span>
+            <div style="flex: 1; display: flex; align-items: center; gap: 8px;">
+              <input type="text" id="filter-custom-type" class="filter-text-input" placeholder="例: I---, -N-J, E--P, INT-" maxlength="4" style="text-transform: uppercase; font-family: monospace; letter-spacing: 0.12em; font-weight: 700;">
+              <span class="custom-type-hint">※「-」や「_」は任意</span>
             </div>
           </div>
         </div>
