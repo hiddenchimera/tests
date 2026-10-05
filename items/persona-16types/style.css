@@ -61,6 +61,7 @@
   align-items: center;
   gap: 6px;
   flex: 1;
+  min-width: 0;
 }
 
 .profile-select-label {
@@ -72,6 +73,7 @@
 
 .profile-select {
   flex: 1;
+  min-width: 0;
   padding: 6px 8px;
   font-size: 0.85rem;
   font-weight: 600;
@@ -85,6 +87,7 @@
 .profile-actions {
   display: flex;
   gap: 6px;
+  flex-shrink: 0;
 }
 
 .btn-icon-sub {
@@ -97,10 +100,12 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
 .btn-icon-sub:hover {
   background: #f1f5f9;
+  border-color: #94a3b8;
 }
 
 .btn-icon-danger {
@@ -113,6 +118,7 @@
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
 .btn-icon-danger:hover {
@@ -312,14 +318,12 @@
   color: #ffffff;
 }
 
-/* タイプ系統ピル */
 .filter-pill.pill-nt.active { background: #7c3aed; border-color: #7c3aed; }
 .filter-pill.pill-nf.active { background: #16a34a; border-color: #16a34a; }
 .filter-pill.pill-sj.active { background: #0284c7; border-color: #0284c7; }
 .filter-pill.pill-sp.active { background: #d97706; border-color: #d97706; }
 .filter-pill.pill-custom.active { background: #0f172a; border-color: #0f172a; }
 
-/* 自由件数入力欄 */
 .custom-limit-wrap {
   display: inline-flex;
   align-items: center;
@@ -353,7 +357,6 @@
   border-color: #4f46e5;
 }
 
-/* カスタムタイプ4文字行 */
 .custom-type-row {
   display: flex;
   align-items: center;
@@ -464,7 +467,7 @@
   border-color: #4f46e5;
 }
 
-/* --- 総合判定カード（4系統カラーテーマ） --- */
+/* --- 総合判定カード --- */
 .result-summary-card {
   border-radius: 14px;
   padding: 24px 20px;
@@ -495,35 +498,19 @@
   margin: 0;
 }
 
-/* 紫系（NT） */
-.theme-nt {
-  background: linear-gradient(135deg, #f5f3ff, #faf5ff);
-  border-color: #ddd6fe;
-}
+.theme-nt { background: linear-gradient(135deg, #f5f3ff, #faf5ff); border-color: #ddd6fe; }
 .theme-nt .summary-sub { color: #7c3aed; }
 .theme-nt .summary-type { color: #5b21b6; }
 
-/* 緑系（NF） */
-.theme-nf {
-  background: linear-gradient(135deg, #f0fdf4, #f7fee7);
-  border-color: #bbf7d0;
-}
+.theme-nf { background: linear-gradient(135deg, #f0fdf4, #f7fee7); border-color: #bbf7d0; }
 .theme-nf .summary-sub { color: #16a34a; }
 .theme-nf .summary-type { color: #14532d; }
 
-/* 青系（SJ） */
-.theme-sj {
-  background: linear-gradient(135deg, #f0f9ff, #f8fafc);
-  border-color: #bae6fd;
-}
+.theme-sj { background: linear-gradient(135deg, #f0f9ff, #f8fafc); border-color: #bae6fd; }
 .theme-sj .summary-sub { color: #0284c7; }
 .theme-sj .summary-type { color: #0c4a6e; }
 
-/* 黄系（SP） */
-.theme-sp {
-  background: linear-gradient(135deg, #fffbeb, #fefce8);
-  border-color: #fde68a;
-}
+.theme-sp { background: linear-gradient(135deg, #fffbeb, #fefce8); border-color: #fde68a; }
 .theme-sp .summary-sub { color: #d97706; }
 .theme-sp .summary-type { color: #78350f; }
 
@@ -656,7 +643,7 @@
   transition: left 0.3s ease;
 }
 
-/* ★ SNS共有ボタンスタイル ★ */
+/* --- SNS共有ボタン --- */
 .btn-share-result-primary {
   display: inline-flex;
   align-items: center;
@@ -681,7 +668,7 @@
   box-shadow: 0 8px 24px rgba(49, 46, 129, 0.35);
 }
 
-/* ★ 共有モーダルスタイル ★ */
+/* --- モーダル共通スタイル --- */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -695,6 +682,7 @@
   align-items: center;
   justify-content: center;
   padding: 16px;
+  box-sizing: border-box;
 }
 
 .modal-content {
@@ -706,6 +694,7 @@
   text-align: left;
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   animation: modalScaleIn 0.2s ease forwards;
+  box-sizing: border-box;
 }
 
 @keyframes modalScaleIn {
@@ -797,6 +786,44 @@
   background: #e0e7ff;
 }
 
+/* ★ バックアップ・引継ぎモーダル用スタイル ★ */
+.backup-tab-row {
+  display: flex;
+  border-bottom: 2px solid #e2e8f0;
+  margin-bottom: 16px;
+  gap: 8px;
+}
+
+.backup-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  padding: 8px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backup-tab-btn.active {
+  color: #4f46e5;
+  border-bottom-color: #4f46e5;
+}
+
+.file-input-custom {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  font-size: 0.8rem;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #334155;
+  cursor: pointer;
+}
+
 /* --- 回答履歴・削除管理 --- */
 .log-section {
   border-top: 1px solid #e2e8f0;
@@ -847,7 +874,6 @@
   overflow: visible;
 }
 
-/* 回答カード本体 */
 .response-card {
   background: #f8fafc;
   border: 1px solid #e2e8f0;
@@ -907,7 +933,6 @@
   color: #4f46e5;
 }
 
-/* ひとことメモのスタイル */
 .memo-wrap {
   display: inline-flex;
   align-items: center;
@@ -1003,7 +1028,6 @@
   white-space: nowrap;
 }
 
-/* 回答者個別パラメータ詳細エリア */
 .response-detail {
   display: none;
   background: #ffffff;
@@ -1067,7 +1091,7 @@
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
-/* --- 技術仕様・データ保存アコーディオン --- */
+/* --- 技術仕様アコーディオン --- */
 .tech-spec-details {
   margin-top: 36px;
   text-align: left;
@@ -1169,7 +1193,7 @@
   text-decoration: underline;
 }
 
-/* --- 回答画面（answer.html）：関係性選択ボタングリッド --- */
+/* --- 回答画面ボタングリッド --- */
 .relation-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
