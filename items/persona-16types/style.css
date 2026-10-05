@@ -282,6 +282,7 @@
 .filter-pill-group {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 6px;
   flex: 1;
 }
@@ -316,6 +317,58 @@
 .filter-pill.pill-nf.active { background: #16a34a; border-color: #16a34a; }
 .filter-pill.pill-sj.active { background: #0284c7; border-color: #0284c7; }
 .filter-pill.pill-sp.active { background: #d97706; border-color: #d97706; }
+.filter-pill.pill-custom.active { background: #0f172a; border-color: #0f172a; }
+
+/* 自由件数入力欄 */
+.custom-limit-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 9999px;
+  padding: 2px 8px;
+}
+
+.custom-limit-txt {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.custom-limit-input {
+  width: 44px;
+  padding: 2px 4px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  text-align: center;
+  background: #ffffff;
+  color: #0f172a;
+  outline: none;
+}
+
+.custom-limit-input:focus {
+  border-color: #4f46e5;
+}
+
+/* カスタムタイプ4文字行 */
+.custom-type-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 8px;
+  padding: 8px 12px;
+}
+
+.custom-type-hint {
+  font-size: 0.7rem;
+  color: #94a3b8;
+  white-space: nowrap;
+}
 
 /* --- トースト通知 --- */
 .toast {
@@ -669,7 +722,6 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  /* 展開時に見切れないよう自然に伸縮 */
   max-height: none;
   overflow: visible;
 }
