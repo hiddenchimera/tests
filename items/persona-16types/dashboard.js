@@ -207,6 +207,7 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
     relation: rel,
     scores: scores,
     type: computedType,
+    memo: "", // 初期メモは空文字
     createdAt: new Date().toISOString()
   });
 
@@ -371,7 +372,6 @@ function renderStats(responses, activeRel = "all") {
 
   const allRelKeys = ["friend", "partner", "work", "family", "hobby", "other"];
 
-  // ★ 「〜から見たタイプ」を省略し、関係性ラベル単体にして省スペース化
   let miniCardKeys = [];
   if (activeRel === "all") {
     miniCardKeys = allRelKeys.map(k => ({ key: k, label: RELATIONS[k].label }));
@@ -418,7 +418,7 @@ function renderStats(responses, activeRel = "all") {
   });
 }
 
-// 回答履歴一覧＆削除
+// ★ 回答履歴一覧＆削除＆ひとことメモ管理
 function renderResponseList(profile) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
@@ -437,6 +437,7 @@ function renderResponseList(profile) {
     const relConfig = RELATIONS[item.relation] || { label: "その他", class: "rel-other" };
     const dateStr = formatDate(item.createdAt);
     const colorCat = getColorCategoryClass(item.type);
+    const currentMemo = item.memo || "";
 
     const axisConfigs = [
       { left: "外向 (E)", right: "内向 (I)", score: item.scores[0] },
@@ -462,6 +463,11 @@ function renderResponseList(profile) {
       `;
     }).join("");
 
+    // メモ表示用HTMLの組み立て
+    const memoHtml = currentMemo 
+      ? `<span class="response-memo-tag" title="ひとことメモ（タップで編集）">${escapeHtml(currentMemo)}<span class="memo-edit-pen">✏️</span></span>`
+      : `<button type="button" class="btn-add-memo" title="ひとことメモを追加">＋メモ</button>`;
+
     card.innerHTML = `
       <div class="response-card-main">
         <div class="response-info-left">
@@ -471,6 +477,9 @@ function renderResponseList(profile) {
             ${escapeHtml(item.name)}
             <span class="response-toggle-arrow">▼</span>
           </span>
+          <div class="memo-wrap" data-id="${item.id}">
+            ${memoHtml}
+          </div>
         </div>
         <div class="response-info-right">
           <span class="response-type type-${colorCat}">${item.type}</span>
@@ -485,10 +494,25 @@ function renderResponseList(profile) {
       </div>
     `;
 
+    // パラメータ開閉イベント
     const toggleTrigger = card.querySelector(".response-name-clickable");
     toggleTrigger.addEventListener("click", (e) => {
       e.stopPropagation();
       card.classList.toggle("open");
+    });
+
+    // ★ ひとことメモの追加・編集イベント
+    const memoWrap = card.querySelector(".memo-wrap");
+    memoWrap.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const promptVal = prompt("この回答へのひとことメモを入力してください（最大12文字・空欄で削除）", currentMemo);
+      if (promptVal !== null) {
+        const trimmed = promptVal.trim().substring(0, 12);
+        item.memo = trimmed;
+        saveStore();
+        renderResponseList(profile);
+        showToast(trimmed ? "メモを保存しました" : "メモを削除しました");
+      }
     });
 
     container.appendChild(card);
