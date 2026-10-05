@@ -175,29 +175,34 @@ function createProfile(name) {
   showToast(`プロファイル「${name}」を作成しました`);
 }
 
-// 送られてきた回答の蓄積
+// ★ 送られてきた回答の蓄積（本人識別チェックを厳格化）
 function handleIncomingResponse(rid, rel, sc, uid, n) {
-  let targetProfile = store.profiles.find(p => p.id === uid);
-  if (!targetProfile) {
-    targetProfile = getCurrentProfile() || store.profiles[0];
-  }
-
-  if (!targetProfile) {
-    targetProfile = {
-      id: uid || generateUUID("p_"),
-      name: "あなた",
-      responses: []
-    };
-    store.profiles.push(targetProfile);
-    store.activeProfileId = targetProfile.id;
-  }
-
-  const isDuplicate = targetProfile.responses.some(r => r.id === rid);
-  if (isDuplicate) {
-    showToast("この回答はすでに反映済みです");
+  if (!uid) {
+    alert("エラー: 出題者IDが含まれていない無効な回答URLです。");
     return;
   }
 
+  // 1. このブラウザ内に該当する出題者プロファイルが存在するか照合
+  const targetProfile = store.profiles.find(p => p.id === uid);
+
+  // 2. 一致するプロファイルが見つからない場合（＝回答者自身や第三者が踏んだ場合）
+  if (!targetProfile) {
+    alert(
+      `【確認】\nこのリンクは、回答を募集した出題者本人（URLを発行した端末）専用の受け取りリンクです。\n\n現在の端末には該当する出題者データが見つかりませんでした。\nこのURLを出題者にLINEやDMで送り返してください。`
+    );
+    return; // ★ 他のプロファイルへの誤登録・勝手なプロファイル新規作成を完全防止
+  }
+
+  // 3. すでに反映済みかチェック
+  const isDuplicate = targetProfile.responses.some(r => r.id === rid);
+  if (isDuplicate) {
+    showToast("この回答はすでに反映済みです");
+    store.activeProfileId = targetProfile.id;
+    saveStore();
+    return;
+  }
+
+  // 4. 正当な出題者のプロファイルにのみ回答を反映
   const scores = sc.split(",").map(Number);
   const computedType = calculateTypeFromScore(scores);
 
@@ -211,6 +216,7 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
     createdAt: new Date().toISOString()
   });
 
+  // 対象プロファイルを表示状態にする
   store.activeProfileId = targetProfile.id;
   saveStore();
   showToast(`${n}さん（${RELATIONS[rel]?.label || "回答"}）のデータを反映しました！`);
@@ -303,18 +309,15 @@ function initDashboard(profile) {
   let currentLimit = "all";
   let currentCat = "all";
 
-  // 回答が1件以上ある場合のみフィルター枠を表示
   if (profile.responses.length > 0) {
     dateFilterBox.style.display = "block";
   } else {
     dateFilterBox.style.display = "none";
   }
 
-  // 統合フィルター処理関数
   const getFilteredResponses = () => {
     let result = [...profile.responses];
 
-    // ① 日付期間
     const sVal = dateStartInput.value;
     const eVal = dateEndInput.value;
     if (sVal) {
@@ -326,7 +329,6 @@ function initDashboard(profile) {
       result = result.filter(r => new Date(r.createdAt) <= end);
     }
 
-    // ② キーワード検索
     const kw = keywordInput.value.trim().toLowerCase();
     if (kw) {
       result = result.filter(r => {
@@ -336,7 +338,6 @@ function initDashboard(profile) {
       });
     }
 
-    // ③ タイプ系統
     if (currentCat === "custom") {
       const pattern = customTypeInput.value;
       result = result.filter(r => matchCustomTypePattern(r.type, pattern));
@@ -344,7 +345,6 @@ function initDashboard(profile) {
       result = result.filter(r => getColorCategoryClass(r.type) === currentCat);
     }
 
-    // ④ 直近件数
     let limitNum = null;
     const customLimitVal = customLimitInput.value.trim();
     if (customLimitVal) {
@@ -362,7 +362,6 @@ function initDashboard(profile) {
     return result;
   };
 
-  // 表示の統合更新関数
   const refreshDashboardView = () => {
     const filteredResponses = getFilteredResponses();
     const isFiltered = !!(
@@ -379,7 +378,6 @@ function initDashboard(profile) {
     renderResponseList(profile, filteredResponses);
   };
 
-  // 関係性タブクリック
   const tabBtns = document.querySelectorAll(".tab-btn");
   tabBtns.forEach(btn => {
     btn.onclick = () => {
@@ -390,7 +388,6 @@ function initDashboard(profile) {
     };
   });
 
-  // フィルター変更イベント群
   dateStartInput.onchange = refreshDashboardView;
   dateEndInput.onchange = refreshDashboardView;
   keywordInput.oninput = refreshDashboardView;
@@ -451,13 +448,10 @@ function initDashboard(profile) {
     refreshDashboardView();
   };
 
-  // SNS共有機能の初期化
   initShareFeature(profile);
-
   refreshDashboardView();
 }
 
-// 単一リストの平均スコアおよび16タイプを算出するヘルパー
 function computeGroupMetrics(items) {
   if (!items || items.length === 0) return null;
   const avgScores = [0, 0, 0, 0];
@@ -473,7 +467,6 @@ function computeGroupMetrics(items) {
   return { avgScores, type, count: items.length };
 }
 
-// 統計・集計の描画
 function renderStats(responses, activeRel = "all", hasTotalResponses = true, isFiltered = false) {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
@@ -602,7 +595,6 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
   });
 }
 
-// 回答履歴一覧＆削除＆ひとことメモ管理
 function renderResponseList(profile, visibleResponses = null) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
@@ -724,7 +716,6 @@ function renderResponseList(profile, visibleResponses = null) {
   };
 }
 
-// SNS共有機能の初期化
 function initShareFeature(profile) {
   const openModalBtn = document.getElementById("open-share-modal-btn");
   const shareModal = document.getElementById("share-modal");
@@ -823,7 +814,6 @@ function initShareFeature(profile) {
   };
 }
 
-// 角丸四角形描画ヘルパー
 function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.beginPath();
   ctx.moveTo(x + radius, y);
@@ -838,17 +828,14 @@ function drawRoundedRect(ctx, x, y, width, height, radius) {
   ctx.closePath();
 }
 
-// ★ Canvasへのカード描画（添付2枚目の実サイトデザインに完全準拠）
 function drawShareCardToCanvas(payload, canvas) {
   const ctx = canvas.getContext("2d");
   const W = 1200;
   const H = 630;
 
-  // 1. 全体背景（Webサイトのライトグレー）
   ctx.fillStyle = "#f8fafc";
   ctx.fillRect(0, 0, W, H);
 
-  // 2. 実サイトのドットパターン（グリッド状の淡いドット）
   ctx.fillStyle = "#cbd5e1";
   for (let x = 15; x < W; x += 30) {
     for (let y = 15; y < H; y += 30) {
@@ -858,14 +845,12 @@ function drawShareCardToCanvas(payload, canvas) {
     }
   }
 
-  // 3. メインのホワイトカード（中央配置）
   const cardX = 40;
   const cardY = 30;
   const cardW = 1120;
   const cardH = 570;
   const cardR = 24;
 
-  // カードの影
   ctx.shadowColor = "rgba(15, 23, 42, 0.08)";
   ctx.shadowBlur = 24;
   ctx.shadowOffsetX = 0;
@@ -875,14 +860,12 @@ function drawShareCardToCanvas(payload, canvas) {
   drawRoundedRect(ctx, cardX, cardY, cardW, cardH, cardR);
   ctx.fill();
 
-  // 枠線
-  ctx.shadowColor = "transparent"; // シャドウ解除
+  ctx.shadowColor = "transparent";
   ctx.strokeStyle = "#e2e8f0";
   ctx.lineWidth = 1.5;
   drawRoundedRect(ctx, cardX, cardY, cardW, cardH, cardR);
   ctx.stroke();
 
-  // 4. 左上：DASHBOARD バッジ（紫のピル）
   const badgeX = cardX + 36;
   const badgeY = cardY + 28;
   ctx.fillStyle = "#eef2ff";
@@ -899,26 +882,22 @@ function drawShareCardToCanvas(payload, canvas) {
   ctx.textBaseline = "middle";
   ctx.fillText("DASHBOARD", badgeX + 55, badgeY + 13);
 
-  // 5. 大見出し「〇〇 さんの他己分析」
   ctx.textAlign = "left";
   ctx.fillStyle = "#0f172a";
   ctx.font = "bold 32px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.fillText(`${payload.n} さんの他己分析`, badgeX, badgeY + 62);
 
-  // 右上のブランドロゴテキスト
   ctx.textAlign = "right";
   ctx.fillStyle = "#94a3b8";
   ctx.font = "bold 15px -apple-system, BlinkMacSystemFont, sans-serif";
   ctx.fillText("Chimera Test Lab ｜ ペルソナ16タイプ他己分析", cardX + cardW - 36, badgeY + 14);
 
-  // 6. メイン判定カード（大）
   const sumX = badgeX;
   const sumY = badgeY + 84;
   const sumW = 500;
   const sumH = 240;
   const sumR = 16;
 
-  // テーマ色判定
   const colorCat = getColorCategoryClass(payload.t);
   let themeBg = "#f0fdf4";
   let themeBorder = "#bbf7d0";
@@ -941,7 +920,6 @@ function drawShareCardToCanvas(payload, canvas) {
   drawRoundedRect(ctx, sumX, sumY, sumW, sumH, sumR);
   ctx.stroke();
 
-  // カード内テキスト
   ctx.textAlign = "center";
   ctx.fillStyle = themeSub;
   ctx.font = "bold 16px -apple-system, BlinkMacSystemFont, sans-serif";
@@ -956,7 +934,6 @@ function drawShareCardToCanvas(payload, canvas) {
   const desc = TYPE_DESCS[payload.t] || "";
   ctx.fillText(desc.length > 28 ? desc.substring(0, 28) + "…" : desc, sumX + sumW / 2, sumY + 185);
 
-  // 7. 関係性ミニカード群（6分割・右半分エリア）
   const rightAreaX = sumX + sumW + 28;
   const rightAreaY = sumY;
   const miniW = 160;
@@ -981,7 +958,6 @@ function drawShareCardToCanvas(payload, canvas) {
 
     const relData = payload.r[item.k];
 
-    // ミニカードのスタイル決定
     let mBg = "#f8fafc";
     let mBorder = "#e2e8f0";
     let mTypeColor = "#cbd5e1";
@@ -1002,24 +978,20 @@ function drawShareCardToCanvas(payload, canvas) {
     drawRoundedRect(ctx, mX, mY, miniW, miniH, 12);
     ctx.stroke();
 
-    // タイトル
     ctx.textAlign = "center";
     ctx.fillStyle = "#64748b";
     ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(item.l, mX + miniW / 2, mY + 26);
 
-    // タイプ文字
     ctx.fillStyle = mTypeColor;
     ctx.font = "900 24px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(relData ? relData.type : "―", mX + miniW / 2, mY + 62);
 
-    // 件数
     ctx.fillStyle = "#94a3b8";
     ctx.font = "bold 12px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(relData ? `(${relData.count}件)` : "(0件)", mX + miniW / 2, mY + 88);
   });
 
-  // 8. 下部：4軸パラメータスライダー（実サイトのデザインを完全再現）
   const axesY = sumY + sumH + 24;
   const axisRowW = (cardW - 72 - 24) / 2;
   const axisRowH = 46;
@@ -1032,7 +1004,6 @@ function drawShareCardToCanvas(payload, canvas) {
   ];
 
   axisData.forEach(ax => {
-    // 枠
     ctx.fillStyle = "#f8fafc";
     drawRoundedRect(ctx, ax.x, ax.y, axisRowW, axisRowH, 8);
     ctx.fill();
@@ -1044,25 +1015,21 @@ function drawShareCardToCanvas(payload, canvas) {
     const rightPct = Math.round(((ax.score - 1) / 4) * 100);
     const leftPct = 100 - rightPct;
 
-    // 左ラベル
     ctx.textAlign = "left";
     ctx.fillStyle = "#4f46e5";
     ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(ax.left, ax.x + 14, ax.y + 18);
 
-    // 比率
     ctx.textAlign = "center";
     ctx.fillStyle = "#64748b";
     ctx.font = "600 12px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(`${leftPct}% : ${rightPct}%`, ax.x + axisRowW / 2, ax.y + 18);
 
-    // 右ラベル
     ctx.textAlign = "right";
     ctx.fillStyle = "#0ea5e9";
     ctx.font = "bold 13px -apple-system, BlinkMacSystemFont, sans-serif";
     ctx.fillText(ax.right, ax.x + axisRowW - 14, ax.y + 18);
 
-    // スライダーバー背景
     const barX = ax.x + 14;
     const barY = ax.y + 28;
     const barW = axisRowW - 28;
@@ -1072,7 +1039,6 @@ function drawShareCardToCanvas(payload, canvas) {
     drawRoundedRect(ctx, barX, barY, barW, barH, 3);
     ctx.fill();
 
-    // インジケーターの丸
     const indX = barX + (barW * rightPct) / 100;
     ctx.beginPath();
     ctx.arc(indX, barY + 3, 6, 0, Math.PI * 2);
@@ -1084,7 +1050,6 @@ function drawShareCardToCanvas(payload, canvas) {
   });
 }
 
-// 結果カード画像のダウンロード実行関数
 function generateAndDownloadShareCard(payload) {
   const canvas = document.getElementById("share-card-canvas");
   drawShareCardToCanvas(payload, canvas);
