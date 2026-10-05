@@ -34,6 +34,44 @@
       color: #4338ca;
       margin-bottom: 12px;
     }
+
+    /* 設問ナビゲーション（戻る・進む） */
+    .survey-nav-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 14px;
+      padding-top: 12px;
+      border-top: 1px dashed #e2e8f0;
+    }
+
+    .btn-survey-nav {
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      color: #475569;
+      font-size: 0.82rem;
+      font-weight: 700;
+      padding: 8px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-survey-nav:hover {
+      background: #eef2ff;
+      border-color: #c7d2fe;
+      color: #4338ca;
+    }
+
+    /* 選択済み状態のリッカートボタン */
+    .likert-btn.selected {
+      background: #eef2ff;
+      border-color: #6366f1;
+      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+    }
   </style>
 </head>
 <body>
@@ -78,7 +116,7 @@
           <span id="survey-progress-text" class="progress-text">1 / 16</span>
         </div>
 
-        <!-- ★ 回答中の対象者リマインド枠（常時固定表示） -->
+        <!-- 回答中の対象者リマインド枠 -->
         <div style="text-align: center;">
           <div class="target-reminder-box">
             <span>👤 <strong id="target-name-reminder">あの人</strong> さんを思い浮かべて答えてください</span>
@@ -110,6 +148,12 @@
             <span class="likert-num">5</span>
             <span class="likert-txt">非常に当てはまる</span>
           </button>
+        </div>
+
+        <!-- ★ 前に戻る / 次へ進む ナビゲーションバー -->
+        <div class="survey-nav-row" id="survey-nav-row">
+          <button type="button" id="btn-prev-q" class="btn-survey-nav">← 前に戻る</button>
+          <button type="button" id="btn-next-q" class="btn-survey-nav" style="visibility: hidden;">次へ進む →</button>
         </div>
       </div>
 
