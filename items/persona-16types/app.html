@@ -90,12 +90,17 @@
         </div>
 
         <div id="stats-area" style="display: none;">
+          <!-- メイン判定カード（大） -->
           <div class="result-summary-card">
             <p class="summary-sub" id="current-filter-label">全体の他己評価タイプ</p>
             <h2 class="summary-type" id="dominant-type">----</h2>
             <p class="summary-desc" id="type-description">回答データを集計しています...</p>
           </div>
 
+          <!-- 関係性ごとの小計ミニカード群（新設） -->
+          <div id="relation-mini-cards" class="mini-cards-grid"></div>
+
+          <!-- 4軸バランススライダー -->
           <div class="axes-container">
             <div class="axis-row">
               <div class="axis-labels">
