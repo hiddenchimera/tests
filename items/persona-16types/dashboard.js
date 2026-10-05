@@ -253,7 +253,7 @@ function updateProfileSelector() {
   };
 }
 
-// ★ カスタムタイプ照合ヘルパー（例: "I---" や "-N-J"）
+// カスタムタイプ照合ヘルパー
 function matchCustomTypePattern(targetType, pattern) {
   if (!targetType || !pattern) return true;
   const p = pattern.trim().toUpperCase();
@@ -262,7 +262,7 @@ function matchCustomTypePattern(targetType, pattern) {
   for (let i = 0; i < 4; i++) {
     const pChar = p[i];
     if (!pChar || pChar === "-" || pChar === "_" || pChar === " ") {
-      continue; // ワイルドカードは任意合致
+      continue;
     }
     if (targetType[i] !== pChar) {
       return false;
@@ -310,7 +310,7 @@ function initDashboard(profile) {
     dateFilterBox.style.display = "none";
   }
 
-  // ★ 統合フィルター処理関数
+  // 統合フィルター処理関数
   const getFilteredResponses = () => {
     let result = [...profile.responses];
 
@@ -326,7 +326,7 @@ function initDashboard(profile) {
       result = result.filter(r => new Date(r.createdAt) <= end);
     }
 
-    // ② キーワード検索（回答者名 または ひとことメモ）
+    // ② キーワード検索
     const kw = keywordInput.value.trim().toLowerCase();
     if (kw) {
       result = result.filter(r => {
@@ -336,7 +336,7 @@ function initDashboard(profile) {
       });
     }
 
-    // ③ タイプ系統（4系統 または カスタムパターン）
+    // ③ タイプ系統
     if (currentCat === "custom") {
       const pattern = customTypeInput.value;
       result = result.filter(r => matchCustomTypePattern(r.type, pattern));
@@ -344,7 +344,7 @@ function initDashboard(profile) {
       result = result.filter(r => getColorCategoryClass(r.type) === currentCat);
     }
 
-    // ④ 直近件数（クイックボタン または 自由入力N件）
+    // ④ 直近件数
     let limitNum = null;
     const customLimitVal = customLimitInput.value.trim();
     if (customLimitVal) {
@@ -390,25 +390,21 @@ function initDashboard(profile) {
     };
   });
 
-  // 日付変更イベント
+  // フィルター変更イベント群
   dateStartInput.onchange = refreshDashboardView;
   dateEndInput.onchange = refreshDashboardView;
-
-  // キーワード入力イベント
   keywordInput.oninput = refreshDashboardView;
 
-  // 直近件数クイックボタン
   limitPills.forEach(pill => {
     pill.onclick = () => {
       limitPills.forEach(p => p.classList.remove("active"));
       pill.classList.add("active");
       currentLimit = pill.getAttribute("data-limit");
-      customLimitInput.value = ""; // 自由入力をクリア
+      customLimitInput.value = "";
       refreshDashboardView();
     };
   });
 
-  // 直近件数自由入力イベント
   customLimitInput.oninput = () => {
     if (customLimitInput.value.trim()) {
       limitPills.forEach(p => p.classList.remove("active"));
@@ -420,7 +416,6 @@ function initDashboard(profile) {
     refreshDashboardView();
   };
 
-  // タイプ系統ピルクリックイベント
   catPills.forEach(pill => {
     pill.onclick = () => {
       catPills.forEach(p => p.classList.remove("active"));
@@ -438,10 +433,8 @@ function initDashboard(profile) {
     };
   });
 
-  // カスタムタイプ入力イベント
   customTypeInput.oninput = refreshDashboardView;
 
-  // 一括リセットボタン
   dateClearBtn.onclick = () => {
     dateStartInput.value = "";
     dateEndInput.value = "";
@@ -457,6 +450,9 @@ function initDashboard(profile) {
 
     refreshDashboardView();
   };
+
+  // ★ SNS共有モーダルイベントの初期化
+  initShareFeature(profile);
 
   refreshDashboardView();
 }
@@ -494,7 +490,6 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
     return;
   }
 
-  // 絞り込みによって該当0件になったとき
   if (responses.length === 0 && isFiltered) {
     tabsContainer.style.display = "flex";
     statsArea.style.display = "none";
@@ -514,14 +509,12 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
   emptyState.style.display = "none";
   statsArea.style.display = "block";
 
-  // タブのバッジ件数更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
     if (countEl) countEl.textContent = responses.filter(item => item.relation === r).length;
   });
 
-  // --- ① メインカードのデータ判定 ---
   const mainData = activeRel === "all" ? responses : responses.filter(r => r.relation === activeRel);
   const mainMetrics = computeGroupMetrics(mainData);
 
@@ -558,7 +551,6 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
     });
   }
 
-  // --- ② 関係性ミニカード群（小計）の生成＆入れ替え処理 ---
   miniCardsContainer.innerHTML = "";
 
   const allRelKeys = ["friend", "partner", "work", "family", "hobby", "other"];
@@ -730,6 +722,190 @@ function renderResponseList(profile, visibleResponses = null) {
     updateProfileSelector();
     showToast("回答を削除しました");
   };
+}
+
+// ★ SNS共有機能の初期化（URLエンコード・X共有・Canvas画像生成）
+function initShareFeature(profile) {
+  const openModalBtn = document.getElementById("open-share-modal-btn");
+  const shareModal = document.getElementById("share-modal");
+  const closeModalBtn = document.getElementById("close-share-modal-btn");
+  const btnShareX = document.getElementById("btn-share-x");
+  const btnCopyUrl = document.getElementById("btn-copy-share-url");
+  const btnDownloadImage = document.getElementById("btn-download-image");
+
+  if (!openModalBtn || !shareModal) return;
+
+  openModalBtn.onclick = () => {
+    if (profile.responses.length === 0) {
+      alert("まだ回答が届いていないため、共有できません。");
+      return;
+    }
+
+    // ① サマリーデータの集計とURLエンコード（個別ログは一切含めない）
+    const totalMetrics = computeGroupMetrics(profile.responses);
+    const relSummary = {};
+    ["friend", "partner", "work", "family", "hobby", "other"].forEach(k => {
+      const items = profile.responses.filter(r => r.relation === k);
+      const m = computeGroupMetrics(items);
+      relSummary[k] = m ? { type: m.type, count: m.count } : null;
+    });
+
+    const sharePayload = {
+      n: profile.name,
+      t: totalMetrics.type,
+      c: totalMetrics.count,
+      sc: totalMetrics.avgScores.map(v => Number(v.toFixed(1))),
+      r: relSummary
+    };
+
+    // JSON文字列をUTF-8 Base64エンコード
+    const jsonStr = JSON.stringify(sharePayload);
+    const encodedData = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+      return String.fromCharCode('0x' + p1);
+    }));
+
+    const currentPath = window.location.pathname;
+    const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
+    const viewUrl = `${window.location.origin}${basePath}view.html?d=${encodeURIComponent(encodedData)}`;
+
+    // ② Xでポストするリンクの設定
+    const notableRels = [];
+    if (relSummary.friend) notableRels.push(`友達: ${relSummary.friend.type}`);
+    if (relSummary.partner) notableRels.push(`恋人: ${relSummary.partner.type}`);
+    if (relSummary.work) notableRels.push(`職場: ${relSummary.work.type}`);
+    const relText = notableRels.length > 0 ? `（${notableRels.slice(0, 2).join(' / ')}）` : "";
+
+    const tweetText = encodeURIComponent(
+      `周りから見た私の他己分析結果は【${totalMetrics.type}】でした！${relText}\n人間関係ごとに演じ分けている仮面（ペルソナ）を暴く性格診断。\n\n#ペルソナ16タイプ他己分析 #ChimeraTestLab\n`
+    );
+    btnShareX.href = `https://twitter.com/intent/tweet?text=${tweetText}&url=${encodeURIComponent(viewUrl)}`;
+
+    // ③ 閲覧URLコピーボタン
+    btnCopyUrl.onclick = () => {
+      navigator.clipboard.writeText(viewUrl);
+      showToast("閲覧専用URLをコピーしました！");
+    };
+
+    // ④ 結果カード画像のダウンロード
+    btnDownloadImage.onclick = () => {
+      generateAndDownloadShareCard(sharePayload);
+    };
+
+    shareModal.style.display = "flex";
+  };
+
+  closeModalBtn.onclick = () => {
+    shareModal.style.display = "none";
+  };
+
+  shareModal.onclick = (e) => {
+    if (e.target === shareModal) shareModal.style.display = "none";
+  };
+}
+
+// ★ Canvasを使った高精細OGP風カード画像（1200×630px）の自動生成＆ダウンロード
+function generateAndDownloadShareCard(payload) {
+  const canvas = document.getElementById("share-card-canvas");
+  const ctx = canvas.getContext("2d");
+
+  // 背景（モダンダークグラデーション）
+  const bgGrad = ctx.createLinearGradient(0, 0, 1200, 630);
+  bgGrad.addColorStop(0, "#0f172a");
+  bgGrad.addColorStop(0.5, "#1e1b4b");
+  bgGrad.addColorStop(1, "#312e81");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, 1200, 630);
+
+  // 外枠の微細グロー
+  ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+  ctx.lineWidth = 4;
+  ctx.strokeRect(30, 30, 1140, 570);
+
+  // ヘッダーバッジ
+  ctx.fillStyle = "#818cf8";
+  ctx.font = "bold 24px -apple-system, sans-serif";
+  ctx.fillText("OTHER-ANALYSIS LAB ｜ ペルソナ16タイプ他己分析", 60, 85);
+
+  // メインタイトル（名前）
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "bold 44px -apple-system, sans-serif";
+  ctx.fillText(`${payload.n} さんの他己分析結果`, 60, 145);
+
+  // 総合タイプ表示（巨大レタリング）
+  ctx.fillStyle = "#c7d2fe";
+  ctx.font = "bold 22px -apple-system, sans-serif";
+  ctx.fillText(`全体の社会的仮面（回答数: ${payload.c}件）`, 60, 210);
+
+  ctx.fillStyle = "#ffffff";
+  ctx.font = "900 110px -apple-system, sans-serif";
+  ctx.fillText(payload.t, 60, 320);
+
+  // タイプ解説文
+  ctx.fillStyle = "#e0e7ff";
+  ctx.font = "500 24px -apple-system, sans-serif";
+  const desc = TYPE_DESCS[payload.t] || "";
+  ctx.fillText(desc.length > 36 ? desc.substring(0, 36) + "…" : desc, 60, 370);
+
+  // 関係性ごとの小計カード群（右半分にグリッド描画）
+  const startX = 660;
+  const startY = 160;
+  const cardW = 230;
+  const cardH = 95;
+  const gapX = 20;
+  const gapY = 16;
+
+  const relKeys = [
+    { k: "friend", l: "友達" },
+    { k: "partner", l: "恋人" },
+    { k: "work", l: "職場・学校" },
+    { k: "family", l: "家族" },
+    { k: "hobby", l: "ネット・趣味" },
+    { k: "other", l: "その他" }
+  ];
+
+  relKeys.forEach((item, idx) => {
+    const col = idx % 2;
+    const row = Math.floor(idx / 2);
+    const x = startX + col * (cardW + gapX);
+    const y = startY + row * (cardH + gapY);
+
+    // ミニカード背景
+    ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
+    ctx.fillRect(x, y, cardW, cardH);
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.12)";
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, cardW, cardH);
+
+    // ラベル
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "bold 18px -apple-system, sans-serif";
+    ctx.fillText(item.l, x + 16, y + 32);
+
+    // 判定タイプ
+    const data = payload.r[item.k];
+    const typeStr = data ? data.type : "―";
+    const countStr = data ? `(${data.count}件)` : "(0件)";
+
+    ctx.fillStyle = data ? "#38bdf8" : "#64748b";
+    ctx.font = "900 32px -apple-system, sans-serif";
+    ctx.fillText(typeStr, x + 16, y + 74);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "bold 16px -apple-system, sans-serif";
+    ctx.fillText(countStr, x + 120, y + 74);
+  });
+
+  // フッタークレジット
+  ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
+  ctx.font = "bold 20px -apple-system, sans-serif";
+  ctx.fillText("Chimera Test Lab ｜ tests.hiddenchimera.com", 60, 565);
+
+  // ダウンロード実行
+  const link = document.createElement("a");
+  link.download = `persona16_${encodeURIComponent(payload.n)}_result.png`;
+  link.href = canvas.toDataURL("image/png");
+  link.click();
+  showToast("結果画像を保存しました！");
 }
 
 function calculateTypeFromScore(scores) {
