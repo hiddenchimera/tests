@@ -13,11 +13,28 @@
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ペルソナ16タイプ他己分析｜回答ページ - Chimera Test Lab</title>
-  <meta name="description" content="友達や仲間の性格・普段の印象を12問で回答する他己分析ページ。">
+  <meta name="description" content="友達や仲間の性格・普段の印象を16問で回答する他己分析ページ。">
 
   <!-- スタイルシート -->
   <link rel="stylesheet" href="../../assets/css/common.css">
   <link rel="stylesheet" href="style.css">
+
+  <style>
+    /* 回答中の対象者リマインド表示 */
+    .target-reminder-box {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #eef2ff;
+      border: 1px solid #c7d2fe;
+      border-radius: 9999px;
+      padding: 4px 14px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: #4338ca;
+      margin-bottom: 12px;
+    }
+  </style>
 </head>
 <body>
   <main class="container">
@@ -29,7 +46,7 @@
         <span class="intro-badge">OTHER-ANALYSIS</span>
         <h1 class="intro-title"><span id="target-name-display" style="color: #4f46e5;"></span> さんの他己分析</h1>
         <p class="intro-desc">
-          あなたが普段接している <strong id="target-name-bold"></strong> さんの印象について、直感で12問の質問に答えてください（所要時間：約1分）。
+          あなたが普段接している <strong id="target-name-bold"></strong> さんの印象について、直感で16問の質問に答えてください（所要時間：約1分）。
         </p>
 
         <div class="input-group">
@@ -58,7 +75,14 @@
           <div class="progress-bar-bg">
             <div id="survey-progress-bar" class="progress-bar-fill"></div>
           </div>
-          <span id="survey-progress-text" class="progress-text">1 / 12</span>
+          <span id="survey-progress-text" class="progress-text">1 / 16</span>
+        </div>
+
+        <!-- ★ 回答中の対象者リマインド枠（常時固定表示） -->
+        <div style="text-align: center;">
+          <div class="target-reminder-box">
+            <span>👤 <strong id="target-name-reminder">あの人</strong> さんを思い浮かべて答えてください</span>
+          </div>
         </div>
 
         <div class="question-box">
