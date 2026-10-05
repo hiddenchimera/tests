@@ -333,7 +333,7 @@
 .theme-sp .summary-sub { color: #d97706; }
 .theme-sp .summary-type { color: #78350f; }
 
-/* --- 関係性小計ミニカード群（新設スタイル） --- */
+/* --- 関係性小計ミニカード群 --- */
 .mini-cards-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
@@ -345,7 +345,7 @@
   background: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 10px;
-  padding: 10px 6px;
+  padding: 10px 4px;
   text-align: center;
   cursor: pointer;
   display: flex;
@@ -364,7 +364,7 @@
 }
 
 .mini-card-title {
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 700;
   color: #64748b;
   line-height: 1.25;
@@ -418,17 +418,20 @@
 }
 .mini-theme-empty .mini-card-type { color: #cbd5e1; }
 
-/* スマホ等でのミニカード折り返し */
+/* ★ スマホ画面（幅680px以下）時は横2列×縦3行に切り替え */
 @media (max-width: 680px) {
   .mini-cards-grid {
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 8px;
   }
+  .mini-summary-card {
+    padding: 10px 8px;
+  }
   .mini-card-title {
-    font-size: 0.66rem;
+    font-size: 0.76rem;
   }
   .mini-card-type {
-    font-size: 0.95rem;
+    font-size: 1rem;
   }
 }
 
