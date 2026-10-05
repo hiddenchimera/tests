@@ -253,21 +253,6 @@ function updateProfileSelector() {
   };
 }
 
-// ★ 日付範囲による回答リストの絞り込みヘルパー
-function filterResponsesByDate(responses, startDateStr, endDateStr) {
-  if (!startDateStr && !endDateStr) return responses;
-
-  const start = startDateStr ? new Date(`${startDateStr}T00:00:00`) : null;
-  const end = endDateStr ? new Date(`${endDateStr}T23:59:59.999`) : null;
-
-  return responses.filter(r => {
-    const rDate = new Date(r.createdAt);
-    if (start && rDate < start) return false;
-    if (end && rDate > end) return false;
-    return true;
-  });
-}
-
 // ダッシュボード初期化
 function initDashboard(profile) {
   document.getElementById("target-user-name").textContent = profile.name;
@@ -288,25 +273,76 @@ function initDashboard(profile) {
   const dateFilterBox = document.getElementById("date-filter-box");
   const dateStartInput = document.getElementById("date-start");
   const dateEndInput = document.getElementById("date-end");
+  const keywordInput = document.getElementById("filter-keyword");
   const dateClearBtn = document.getElementById("date-filter-clear-btn");
+  const limitPills = document.querySelectorAll("#filter-limit-group .filter-pill");
+  const catPills = document.querySelectorAll("#filter-category-group .filter-pill");
 
   let currentRel = "all";
+  let currentLimit = "all";
+  let currentCat = "all";
 
-  // 日付フィルターの表示制御（回答が1件以上ある場合のみ表示）
+  // 回答が1件以上ある場合のみフィルター枠を表示
   if (profile.responses.length > 0) {
     dateFilterBox.style.display = "block";
   } else {
     dateFilterBox.style.display = "none";
   }
 
-  // 表示の統合更新関数
-  const refreshDashboardView = () => {
+  // ★ 統合フィルター処理関数（期間・キーワード・タイプ系統・件数制限）
+  const getFilteredResponses = () => {
+    let result = [...profile.responses];
+
+    // ① 日付期間
     const sVal = dateStartInput.value;
     const eVal = dateEndInput.value;
-    const filteredResponses = filterResponsesByDate(profile.responses, sVal, eVal);
-    const isDateFiltered = !!(sVal || eVal);
+    if (sVal) {
+      const start = new Date(`${sVal}T00:00:00`);
+      result = result.filter(r => new Date(r.createdAt) >= start);
+    }
+    if (eVal) {
+      const end = new Date(`${eVal}T23:59:59.999`);
+      result = result.filter(r => new Date(r.createdAt) <= end);
+    }
 
-    renderStats(filteredResponses, currentRel, profile.responses.length > 0, isDateFiltered);
+    // ② キーワード検索（回答者名 または ひとことメモ）
+    const kw = keywordInput.value.trim().toLowerCase();
+    if (kw) {
+      result = result.filter(r => {
+        const nameMatch = (r.name || "").toLowerCase().includes(kw);
+        const memoMatch = (r.memo || "").toLowerCase().includes(kw);
+        return nameMatch || memoMatch;
+      });
+    }
+
+    // ③ 判定タイプ系統（nt, nf, sj, sp）
+    if (currentCat !== "all") {
+      result = result.filter(r => getColorCategoryClass(r.type) === currentCat);
+    }
+
+    // ④ 直近件数（降順に並んでいるため先頭N件を抽出）
+    if (currentLimit !== "all") {
+      const limitNum = parseInt(currentLimit, 10);
+      if (!isNaN(limitNum)) {
+        result = result.slice(0, limitNum);
+      }
+    }
+
+    return result;
+  };
+
+  // 表示の統合更新関数
+  const refreshDashboardView = () => {
+    const filteredResponses = getFilteredResponses();
+    const isFiltered = !!(
+      dateStartInput.value || 
+      dateEndInput.value || 
+      keywordInput.value.trim() || 
+      currentLimit !== "all" || 
+      currentCat !== "all"
+    );
+
+    renderStats(filteredResponses, currentRel, profile.responses.length > 0, isFiltered);
     renderResponseList(profile, filteredResponses);
   };
 
@@ -325,10 +361,40 @@ function initDashboard(profile) {
   dateStartInput.onchange = refreshDashboardView;
   dateEndInput.onchange = refreshDashboardView;
 
-  // クリアボタン
+  // キーワード入力イベント（リアルタイム）
+  keywordInput.oninput = refreshDashboardView;
+
+  // 直近件数ピルクリックイベント
+  limitPills.forEach(pill => {
+    pill.onclick = () => {
+      limitPills.forEach(p => p.classList.remove("active"));
+      pill.classList.add("active");
+      currentLimit = pill.getAttribute("data-limit");
+      refreshDashboardView();
+    };
+  });
+
+  // タイプ系統ピルクリックイベント
+  catPills.forEach(pill => {
+    pill.onclick = () => {
+      catPills.forEach(p => p.classList.remove("active"));
+      pill.classList.add("active");
+      currentCat = pill.getAttribute("data-cat");
+      refreshDashboardView();
+    };
+  });
+
+  // 一括リセットボタン
   dateClearBtn.onclick = () => {
     dateStartInput.value = "";
     dateEndInput.value = "";
+    keywordInput.value = "";
+    currentLimit = "all";
+    currentCat = "all";
+
+    limitPills.forEach(p => p.classList.toggle("active", p.getAttribute("data-limit") === "all"));
+    catPills.forEach(p => p.classList.toggle("active", p.getAttribute("data-cat") === "all"));
+
     refreshDashboardView();
   };
 
@@ -352,7 +418,7 @@ function computeGroupMetrics(items) {
 }
 
 // 統計・集計の描画
-function renderStats(responses, activeRel = "all", hasTotalResponses = true, isDateFiltered = false) {
+function renderStats(responses, activeRel = "all", hasTotalResponses = true, isFiltered = false) {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
   const statsArea = document.getElementById("stats-area");
@@ -360,7 +426,6 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isD
   const miniCardsContainer = document.getElementById("relation-mini-cards");
 
   if (!hasTotalResponses) {
-    // 回答が一切ないとき
     tabsContainer.style.display = "none";
     statsArea.style.display = "none";
     emptyState.style.display = "block";
@@ -369,15 +434,14 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isD
     return;
   }
 
-  // 期間絞り込みによって該当0件になったとき
-  if (responses.length === 0 && isDateFiltered) {
+  // 絞り込みによって該当0件になったとき
+  if (responses.length === 0 && isFiltered) {
     tabsContainer.style.display = "flex";
     statsArea.style.display = "none";
     emptyState.style.display = "block";
-    document.getElementById("empty-state-title").textContent = "指定された期間の回答はありません";
-    document.getElementById("empty-state-desc").textContent = "日付範囲を変更するか、「解除」ボタンを押して全期間を表示してください。";
+    document.getElementById("empty-state-title").textContent = "条件に一致する回答はありません";
+    document.getElementById("empty-state-desc").textContent = "検索条件を変更するか、「条件をリセット」ボタンを押して全回答を表示してください。";
 
-    // タブ件数は0に更新
     document.getElementById("count-all").textContent = 0;
     ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
       const countEl = document.getElementById(`count-${r}`);
@@ -390,7 +454,7 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isD
   emptyState.style.display = "none";
   statsArea.style.display = "block";
 
-  // タブのバッジ件数更新（絞り込み後の件数を反映）
+  // タブのバッジ件数更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(r => {
     const countEl = document.getElementById(`count-${r}`);
@@ -479,7 +543,7 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isD
         b.classList.toggle("active", b.getAttribute("data-rel") === item.key);
       });
       activeRel = item.key;
-      renderStats(responses, activeRel, hasTotalResponses, isDateFiltered);
+      renderStats(responses, activeRel, hasTotalResponses, isFiltered);
     });
 
     miniCardsContainer.appendChild(card);
