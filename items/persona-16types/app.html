@@ -149,16 +149,50 @@
           </div>
         </div>
 
-        <!-- ★ 期間絞り込みフィルターバー（スライダーと届いた回答履歴の間に配置） ★ -->
+        <!-- ★ 統合絞り込みフィルターバー（期間・検索・直近件数・タイプ系統） ★ -->
         <div class="date-filter-box" id="date-filter-box" style="display: none; margin-top: 10px; margin-bottom: 20px;">
           <div class="date-filter-header">
-            <span class="date-filter-title">📅 期間で絞り込み</span>
-            <button type="button" id="date-filter-clear-btn" class="btn-date-clear">解除</button>
+            <span class="date-filter-title">🔍 回答の絞り込み</span>
+            <button type="button" id="date-filter-clear-btn" class="btn-date-clear">条件をリセット</button>
           </div>
-          <div class="date-input-row">
-            <input type="date" id="date-start" class="date-input" min="2000-01-01" max="2099-12-31" aria-label="開始日">
-            <span class="date-separator">〜</span>
-            <input type="date" id="date-end" class="date-input" min="2000-01-01" max="2099-12-31" aria-label="終了日">
+
+          <!-- ① 期間指定 -->
+          <div class="filter-sub-group">
+            <span class="filter-sub-label">期間:</span>
+            <div class="date-input-row">
+              <input type="date" id="date-start" class="date-input" min="2000-01-01" max="2099-12-31" aria-label="開始日">
+              <span class="date-separator">〜</span>
+              <input type="date" id="date-end" class="date-input" min="2000-01-01" max="2099-12-31" aria-label="終了日">
+            </div>
+          </div>
+
+          <!-- ② キーワード検索（名前・ひとことメモ） -->
+          <div class="filter-sub-group" style="margin-top: 8px;">
+            <span class="filter-sub-label">検索:</span>
+            <input type="text" id="filter-keyword" class="filter-text-input" placeholder="回答者名やひとことメモで検索…">
+          </div>
+
+          <!-- ③ 直近件数クイックボタン -->
+          <div class="filter-sub-group" style="margin-top: 8px;">
+            <span class="filter-sub-label">件数:</span>
+            <div class="filter-pill-group" id="filter-limit-group">
+              <button type="button" class="filter-pill active" data-limit="all">全件</button>
+              <button type="button" class="filter-pill" data-limit="3">直近3件</button>
+              <button type="button" class="filter-pill" data-limit="5">直近5件</button>
+              <button type="button" class="filter-pill" data-limit="10">直近10件</button>
+            </div>
+          </div>
+
+          <!-- ④ 判定タイプ系統ボタン -->
+          <div class="filter-sub-group" style="margin-top: 8px;">
+            <span class="filter-sub-label">系統:</span>
+            <div class="filter-pill-group" id="filter-category-group">
+              <button type="button" class="filter-pill active" data-cat="all">すべて</button>
+              <button type="button" class="filter-pill pill-nt" data-cat="nt">🟣 NT系</button>
+              <button type="button" class="filter-pill pill-nf" data-cat="nf">🟢 NF系</button>
+              <button type="button" class="filter-pill pill-sj" data-cat="sj">🔵 SJ系</button>
+              <button type="button" class="filter-pill pill-sp" data-cat="sp">🟡 SP系</button>
+            </div>
           </div>
         </div>
 
