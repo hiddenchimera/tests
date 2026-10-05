@@ -133,26 +133,122 @@ body {
   transform: translateY(0);
 }
 
-/* --- 診断回答画面：ヘッダー・進捗 --- */
-.card-header {
-  margin-bottom: 20px;
+/* --- 診断回答画面：プログレスバー --- */
+.progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.progress-bar-bg {
+  flex: 1;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 9999px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: #4f46e5;
+  border-radius: 9999px;
+  transition: width 0.3s ease;
 }
 
 .progress-text {
   font-size: 0.8rem;
   font-weight: 700;
   color: #64748b;
-  margin-bottom: 8px;
+  min-width: 45px;
+}
+
+/* --- 設問表示ボックス --- */
+.question-box {
+  min-height: 90px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  border-radius: 12px;
+  margin-bottom: 24px;
 }
 
 .question-text {
-  font-size: 1.15rem;
-  font-weight: 800;
-  color: #0f172a;
-  line-height: 1.45;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #1e293b;
+  line-height: 1.5;
 }
 
+/* --- 5段階評価（Likert Scale）ボタングループ（★ここを復元・強化） --- */
+.likert-scale {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.likert-btn {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  background: #ffffff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 16px;
+  font-size: 0.92rem;
+  font-weight: 600;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.likert-btn:hover {
+  background: #f8fafc;
+  border-color: #cbd5e1;
+}
+
+.likert-btn:active {
+  background: #eef2ff;
+  border-color: #6366f1;
+}
+
+.likert-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: #f1f5f9;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 800;
+  margin-right: 12px;
+  flex-shrink: 0;
+}
+
+.likert-txt {
+  flex: 1;
+}
+
+/* スコアに応じたアクセントカラー */
+.likert-btn[data-score="1"] .likert-num { background: #fee2e2; color: #dc2626; }
+.likert-btn[data-score="2"] .likert-num { background: #ffedd5; color: #ea580c; }
+.likert-btn[data-score="3"] .likert-num { background: #f1f5f9; color: #64748b; }
+.likert-btn[data-score="4"] .likert-num { background: #e0f2fe; color: #0284c7; }
+.likert-btn[data-score="5"] .likert-num { background: #dcfce7; color: #16a34a; }
+
 /* 4択・3択設問グループ（love-style, dopagaki, career-thinking） */
+.card-header {
+  margin-bottom: 20px;
+}
+
 .options-group {
   display: flex;
   flex-direction: column;
@@ -302,5 +398,9 @@ body {
   .option-btn {
     padding: 12px 14px;
     font-size: 0.88rem;
+  }
+  .likert-btn {
+    padding: 10px 14px;
+    font-size: 0.86rem;
   }
 }
