@@ -74,6 +74,19 @@
           <p class="share-hint">※LINEやDMで送って答えてもらい、結果URLを送り返してもらってください。</p>
         </div>
 
+        <!-- ★ 期間絞り込みフィルターバー ★ -->
+        <div class="date-filter-box" id="date-filter-box" style="display: none;">
+          <div class="date-filter-header">
+            <span class="date-filter-title">📅 期間で絞り込み</span>
+            <button type="button" id="date-filter-clear-btn" class="btn-date-clear">解除</button>
+          </div>
+          <div class="date-input-row">
+            <input type="date" id="date-start" class="date-input" aria-label="開始日">
+            <span class="date-separator">〜</span>
+            <input type="date" id="date-end" class="date-input" aria-label="終了日">
+          </div>
+        </div>
+
         <div class="relation-tabs" id="relation-tabs" style="display: none;">
           <button class="tab-btn active" data-rel="all">全体 (<span id="count-all">0</span>)</button>
           <button class="tab-btn" data-rel="friend">友達 (<span id="count-friend">0</span>)</button>
@@ -85,8 +98,8 @@
         </div>
 
         <div id="empty-state" class="empty-state" style="display: none;">
-          <p class="empty-title">まだ回答が届いていません</p>
-          <p class="empty-desc">上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！</p>
+          <p class="empty-title" id="empty-state-title">まだ回答が届いていません</p>
+          <p class="empty-desc" id="empty-state-desc">上のURLを友達や仲間にシェアして、あなたの普段の印象を回答してもらいましょう！</p>
         </div>
 
         <div id="stats-area" style="display: none;">
@@ -97,7 +110,7 @@
             <p class="summary-desc" id="type-description">回答データを集計しています...</p>
           </div>
 
-          <!-- 関係性ごとの小計ミニカード群（新設） -->
+          <!-- 関係性ごとの小計ミニカード群 -->
           <div id="relation-mini-cards" class="mini-cards-grid"></div>
 
           <!-- 4軸バランススライダー -->
