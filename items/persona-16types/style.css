@@ -598,8 +598,9 @@
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 480px;
-  overflow-y: auto;
+  /* 高さ制限を解除してすべての展開パラメータを自然に表示 */
+  max-height: none;
+  overflow: visible;
 }
 
 /* 回答カード本体 */
