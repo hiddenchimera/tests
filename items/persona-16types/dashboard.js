@@ -300,7 +300,7 @@ function computeGroupMetrics(items) {
   return { avgScores, type, count: items.length };
 }
 
-// 統計・集計の描画（★ メインカードとミニカード群の相互入れ替えに対応）
+// 統計・集計の描画
 function renderStats(responses, activeRel = "all") {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
@@ -337,7 +337,6 @@ function renderStats(responses, activeRel = "all") {
   document.getElementById("current-filter-label").textContent = mainLabel;
 
   if (!mainMetrics) {
-    // 該当データがまだ0件のとき
     document.getElementById("dominant-type").textContent = "―";
     document.getElementById("type-description").textContent = "この関係性からの回答はまだありません。";
     summaryCard.className = "result-summary-card theme-sj";
@@ -370,19 +369,16 @@ function renderStats(responses, activeRel = "all") {
   // --- ② 関係性ミニカード群（小計）の生成＆入れ替え処理 ---
   miniCardsContainer.innerHTML = "";
 
-  // 全6区分
   const allRelKeys = ["friend", "partner", "work", "family", "hobby", "other"];
 
-  // ミニカードに並べるリスト：現在メインに表示している項目以外を並べる
+  // ★ 「〜から見たタイプ」を省略し、関係性ラベル単体にして省スペース化
   let miniCardKeys = [];
   if (activeRel === "all") {
-    // 全体がメインなら、ミニカードは全6区分
-    miniCardKeys = allRelKeys.map(k => ({ key: k, label: `${RELATIONS[k].label}から見たタイプ` }));
+    miniCardKeys = allRelKeys.map(k => ({ key: k, label: RELATIONS[k].label }));
   } else {
-    // 特定の関係性がメインなら、先頭に「全体」を置き、残りの他5区分を並べる
-    miniCardKeys.push({ key: "all", label: "全体から見たタイプ" });
+    miniCardKeys.push({ key: "all", label: "全体" });
     allRelKeys.filter(k => k !== activeRel).forEach(k => {
-      miniCardKeys.push({ key: k, label: `${RELATIONS[k].label}から見たタイプ` });
+      miniCardKeys.push({ key: k, label: RELATIONS[k].label });
     });
   }
 
@@ -410,7 +406,6 @@ function renderStats(responses, activeRel = "all") {
       <span class="mini-card-count">(${groupItems.length}件)</span>
     `;
 
-    // ミニカードをクリックした時、その項目をメインカードへ切り替え（タブとも連動）
     card.addEventListener("click", () => {
       const tabBtns = document.querySelectorAll(".tab-btn");
       tabBtns.forEach(b => {
