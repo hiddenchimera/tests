@@ -126,7 +126,7 @@ function formatDate(isoStr) {
   return `${year}/${month}/${day}`;
 }
 
-// ストレージ読み込み＆マイグレーション処理
+// ストレージ読み込み処理
 function loadStore() {
   const raw = localStorage.getItem("persona16_data");
   if (!raw) {
@@ -175,25 +175,22 @@ function createProfile(name) {
   showToast(`プロファイル「${name}」を作成しました`);
 }
 
-// ★ 送られてきた回答の蓄積（本人識別チェックを厳格化）
+// 送られてきた回答の蓄積（本人識別チェック）
 function handleIncomingResponse(rid, rel, sc, uid, n) {
   if (!uid) {
     alert("エラー: 出題者IDが含まれていない無効な回答URLです。");
     return;
   }
 
-  // 1. このブラウザ内に該当する出題者プロファイルが存在するか照合
   const targetProfile = store.profiles.find(p => p.id === uid);
 
-  // 2. 一致するプロファイルが見つからない場合（＝回答者自身や第三者が踏んだ場合）
   if (!targetProfile) {
     alert(
       `【確認】\nこのリンクは、回答を募集した出題者本人（URLを発行した端末）専用の受け取りリンクです。\n\n現在の端末には該当する出題者データが見つかりませんでした。\nこのURLを出題者にLINEやDMで送り返してください。`
     );
-    return; // ★ 他のプロファイルへの誤登録・勝手なプロファイル新規作成を完全防止
+    return;
   }
 
-  // 3. すでに反映済みかチェック
   const isDuplicate = targetProfile.responses.some(r => r.id === rid);
   if (isDuplicate) {
     showToast("この回答はすでに反映済みです");
@@ -202,7 +199,6 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
     return;
   }
 
-  // 4. 正当な出題者のプロファイルにのみ回答を反映
   const scores = sc.split(",").map(Number);
   const computedType = calculateTypeFromScore(scores);
 
@@ -216,7 +212,6 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
     createdAt: new Date().toISOString()
   });
 
-  // 対象プロファイルを表示状態にする
   store.activeProfileId = targetProfile.id;
   saveStore();
   showToast(`${n}さん（${RELATIONS[rel]?.label || "回答"}）のデータを反映しました！`);
@@ -452,6 +447,7 @@ function initDashboard(profile) {
   refreshDashboardView();
 }
 
+// 単一リストの平均スコアおよび16タイプを算出するヘルパー
 function computeGroupMetrics(items) {
   if (!items || items.length === 0) return null;
   const avgScores = [0, 0, 0, 0];
@@ -467,6 +463,7 @@ function computeGroupMetrics(items) {
   return { avgScores, type, count: items.length };
 }
 
+// 統計・集計の描画
 function renderStats(responses, activeRel = "all", hasTotalResponses = true, isFiltered = false) {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
@@ -537,7 +534,8 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
     ];
 
     axes.forEach(axis => {
-      const rightPercent = Math.round(((axis.score - 1) / 4) * 100);
+      // 4段階計算: 1.0点=0%, 2.5点=50%, 4.0点=100%
+      const rightPercent = Math.round(((axis.score - 1) / 3) * 100);
       const leftPercent = 100 - rightPercent;
       document.getElementById(`bar-${axis.id}`).style.left = `${rightPercent}%`;
       document.getElementById(`val-${axis.id}`).textContent = `${leftPercent}% : ${rightPercent}%`;
@@ -595,6 +593,7 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
   });
 }
 
+// 回答履歴一覧＆削除＆ひとことメモ管理
 function renderResponseList(profile, visibleResponses = null) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
@@ -625,7 +624,7 @@ function renderResponseList(profile, visibleResponses = null) {
     ];
 
     const detailRowsHtml = axisConfigs.map(ax => {
-      const rightPct = Math.round(((ax.score - 1) / 4) * 100);
+      const rightPct = Math.round(((ax.score - 1) / 3) * 100);
       const leftPct = 100 - rightPct;
       return `
         <div class="detail-axis-row">
@@ -716,6 +715,7 @@ function renderResponseList(profile, visibleResponses = null) {
   };
 }
 
+// SNS共有機能の初期化
 function initShareFeature(profile) {
   const openModalBtn = document.getElementById("open-share-modal-btn");
   const shareModal = document.getElementById("share-modal");
@@ -1012,7 +1012,8 @@ function drawShareCardToCanvas(payload, canvas) {
     drawRoundedRect(ctx, ax.x, ax.y, axisRowW, axisRowH, 8);
     ctx.stroke();
 
-    const rightPct = Math.round(((ax.score - 1) / 4) * 100);
+    // 4段階計算: (score - 1) / 3
+    const rightPct = Math.round(((ax.score - 1) / 3) * 100);
     const leftPct = 100 - rightPct;
 
     ctx.textAlign = "left";
@@ -1061,11 +1062,12 @@ function generateAndDownloadShareCard(payload) {
   showToast("結果画像を保存しました！");
 }
 
+// 4段階評価基準（1.0〜4.0点、中央値2.5点）によるタイプ判定
 function calculateTypeFromScore(scores) {
-  const e_or_i = scores[0] >= 3.0 ? "I" : "E";
-  const s_or_n = scores[1] >= 3.0 ? "N" : "S";
-  const t_or_f = scores[2] >= 3.0 ? "F" : "T";
-  const j_or_p = scores[3] >= 3.0 ? "P" : "J";
+  const e_or_i = scores[0] >= 2.5 ? "I" : "E";
+  const s_or_n = scores[1] >= 2.5 ? "N" : "S";
+  const t_or_f = scores[2] >= 2.5 ? "F" : "T";
+  const j_or_p = scores[3] >= 2.5 ? "P" : "J";
   return `${e_or_i}${s_or_n}${t_or_f}${j_or_p}`;
 }
 
