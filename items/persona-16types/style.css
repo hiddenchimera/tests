@@ -418,7 +418,6 @@
 }
 .mini-theme-empty .mini-card-type { color: #cbd5e1; }
 
-/* スマホ画面（幅680px以下）時は横2列×縦3行に切り替え */
 @media (max-width: 680px) {
   .mini-cards-grid {
     grid-template-columns: repeat(2, 1fr);
@@ -552,13 +551,15 @@
   justify-content: space-between;
   padding: 10px 12px;
   font-size: 0.85rem;
+  gap: 8px;
 }
 
 .response-info-left {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
   flex: 1;
+  min-width: 0;
 }
 
 .response-name-clickable {
@@ -567,10 +568,11 @@
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
   border-radius: 4px;
   padding: 2px 4px;
   transition: background-color 0.15s, color 0.15s;
+  white-space: nowrap;
 }
 
 .response-name-clickable:hover {
@@ -590,10 +592,66 @@
   color: #4f46e5;
 }
 
+/* ★ ひとことメモのスタイル ★ */
+.memo-wrap {
+  display: inline-flex;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.response-memo-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #f1f5f9;
+  border: 1px dashed #cbd5e1;
+  color: #475569;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.response-memo-tag:hover {
+  background: #eef2ff;
+  border-color: #a5b4fc;
+  color: #4338ca;
+}
+
+.memo-edit-pen {
+  font-size: 0.65rem;
+  opacity: 0.6;
+}
+
+.btn-add-memo {
+  background: transparent;
+  border: 1px dashed #cbd5e1;
+  color: #94a3b8;
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-add-memo:hover {
+  background: #ffffff;
+  border-color: #94a3b8;
+  color: #475569;
+}
+
 .response-info-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  flex-shrink: 0;
 }
 
 .badge-rel {
@@ -603,9 +661,9 @@
   font-weight: 700;
   background: #e2e8f0;
   color: #334155;
+  white-space: nowrap;
 }
 
-/* 関係性別バッジカラー */
 .rel-friend { background: #e0e7ff; color: #3730a3; }
 .rel-partner { background: #fce7f3; color: #9d174d; }
 .rel-work { background: #e0f2fe; color: #0369a1; }
@@ -613,7 +671,6 @@
 .rel-hobby { background: #f3e8ff; color: #6b21a8; }
 .rel-other { background: #f1f5f9; color: #475569; }
 
-/* タイプバッジ（4色） */
 .response-type {
   font-weight: 800;
   font-size: 0.82rem;
@@ -628,6 +685,7 @@
 .response-date {
   font-size: 0.75rem;
   color: #94a3b8;
+  white-space: nowrap;
 }
 
 /* 回答者個別パラメータ詳細エリア */
@@ -778,7 +836,6 @@
   border-color: #c7d2fe;
 }
 
-/* 戻るテキストボタン */
 .btn-text-back {
   background: transparent;
   border: none;
