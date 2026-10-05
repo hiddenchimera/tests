@@ -45,7 +45,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("target-name-bold").textContent = targetUserName;
   document.getElementById("finish-target-name").textContent = targetUserName;
 
-  // ★ 設問画面の上部リマインド枠に対象者名を反映
+  // 設問画面の上部リマインド枠に対象者名を反映
   const reminderEl = document.getElementById("target-name-reminder");
   if (reminderEl) {
     reminderEl.textContent = targetUserName;
@@ -64,6 +64,10 @@ document.addEventListener("DOMContentLoaded", () => {
   // 診断開始ボタン
   const startBtn = document.getElementById("start-survey-btn");
   startBtn.addEventListener("click", () => {
+    // ★ 開始時に全16問の出題順をランダムシャッフル
+    if (typeof shuffleArray === "function") {
+      shuffleArray(surveyQuestions);
+    }
     document.getElementById("answer-intro-view").style.display = "none";
     document.getElementById("answer-survey-view").style.display = "block";
     renderSurveyQuestion();
