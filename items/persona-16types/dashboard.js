@@ -43,40 +43,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   if (rid && rel && sc) {
     handleIncomingResponse(rid, rel, sc, uid, n);
+    // クエリを除去して app.html のクリーンなURLに戻す
     const cleanUrl = window.location.origin + window.location.pathname;
     window.history.replaceState({}, document.title, cleanUrl);
-    // 回答受け取り時は直接ダッシュボードを表示
-    renderApp("dashboard");
-  } else {
-    // 通常アクセス時はイントロ（トップ画面）を表示
-    renderApp("intro");
   }
 
-  // --- ② イントロ画面の「はじめる」ボタン ---
-  const startAppBtn = document.getElementById("start-app-btn");
-  if (startAppBtn) {
-    startAppBtn.addEventListener("click", () => {
-      const current = getCurrentProfile();
-      if (current) {
-        renderApp("dashboard");
-      } else {
-        renderApp("setup");
-      }
-    });
-  }
+  // --- ② 画面初期表示の制御 ---
+  renderApp();
 
-  // --- ③ 画面切り替え（戻るボタン） ---
-  const backToSetUp = document.getElementById("back-to-intro-from-setup");
-  if (backToSetUp) {
-    backToSetUp.addEventListener("click", () => renderApp("intro"));
-  }
-
-  const backToDash = document.getElementById("back-to-intro-from-dash");
-  if (backToDash) {
-    backToDash.addEventListener("click", () => renderApp("intro"));
-  }
-
-  // --- ④ 初回URL発行ボタンイベント ---
+  // --- ③ 初回URL発行ボタンイベント ---
   const generateBtn = document.getElementById("generate-btn");
   if (generateBtn) {
     generateBtn.addEventListener("click", () => {
@@ -89,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- ⑤ プロファイル新規追加ボタン ---
+  // --- ④ プロファイル新規追加ボタン ---
   const addProfileBtn = document.getElementById("add-profile-btn");
   if (addProfileBtn) {
     addProfileBtn.addEventListener("click", () => {
@@ -100,7 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // --- ⑥ 現在のプロファイル削除ボタン ---
+  // --- ⑤ 現在のプロファイル削除ボタン ---
   const deleteProfileBtn = document.getElementById("delete-profile-btn");
   if (deleteProfileBtn) {
     deleteProfileBtn.addEventListener("click", () => {
@@ -114,7 +89,7 @@ document.addEventListener("DOMContentLoaded", () => {
       store.profiles = store.profiles.filter(p => p.id !== current.id);
       store.activeProfileId = store.profiles.length > 0 ? store.profiles[0].id : null;
       saveStore();
-      renderApp("intro");
+      renderApp();
       showToast("プロファイルを削除しました");
     });
   }
@@ -197,7 +172,7 @@ function createProfile(name) {
   store.profiles.push(newProfile);
   store.activeProfileId = newProfile.id;
   saveStore();
-  renderApp("dashboard");
+  renderApp();
   showToast(`プロファイル「${name}」を作成しました`);
 }
 
@@ -241,37 +216,17 @@ function handleIncomingResponse(rid, rel, sc, uid, n) {
   showToast(`${n}さん（${RELATIONS[rel]?.label || "回答"}）のデータを反映しました！`);
 }
 
-// 画面切り替え制御（viewMode: "intro" | "setup" | "dashboard"）
-function renderApp(viewMode = "intro") {
-  const introView = document.getElementById("intro-view");
+// 画面全体の再描画
+function renderApp() {
   const setupView = document.getElementById("setup-view");
   const dashboardView = document.getElementById("dashboard-view");
   const currentProfile = getCurrentProfile();
 
-  // 画面の表示・非表示リセット
-  introView.style.display = "none";
-  setupView.style.display = "none";
-  dashboardView.style.display = "none";
-
-  if (viewMode === "intro") {
-    introView.style.display = "block";
-    const startBtn = document.getElementById("start-app-btn");
-    const hintText = document.getElementById("existing-profile-hint");
-
-    if (currentProfile) {
-      startBtn.textContent = `ダッシュボードを開く（${currentProfile.name}）`;
-      hintText.style.display = "block";
-    } else {
-      startBtn.textContent = "他己分析をはじめる";
-      hintText.style.display = "none";
-    }
-  } else if (viewMode === "setup") {
+  if (!currentProfile) {
     setupView.style.display = "block";
-  } else if (viewMode === "dashboard") {
-    if (!currentProfile) {
-      setupView.style.display = "block";
-      return;
-    }
+    dashboardView.style.display = "none";
+  } else {
+    setupView.style.display = "none";
     dashboardView.style.display = "block";
     updateProfileSelector();
     initDashboard(currentProfile);
@@ -294,16 +249,18 @@ function updateProfileSelector() {
   selector.onchange = () => {
     store.activeProfileId = selector.value;
     saveStore();
-    renderApp("dashboard");
+    renderApp();
   };
 }
 
-// ダッシュボード初期化
+// ダッシュボード初期化（回答募集URLを app.html と同一階層の answer.html 宛てに生成）
 function initDashboard(profile) {
   document.getElementById("target-user-name").textContent = profile.name;
 
-  const baseUrl = window.location.href.split("?")[0].replace("index.html", "");
-  const answerUrl = `${baseUrl}answer.html?u=${encodeURIComponent(profile.name)}&uid=${profile.id}`;
+  const currentPath = window.location.pathname;
+  const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
+  const answerUrl = `${window.location.origin}${basePath}answer.html?u=${encodeURIComponent(profile.name)}&uid=${profile.id}`;
+
   const shareInput = document.getElementById("share-url-input");
   shareInput.value = answerUrl;
 
