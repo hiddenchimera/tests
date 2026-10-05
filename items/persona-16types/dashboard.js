@@ -92,6 +92,9 @@ document.addEventListener("DOMContentLoaded", () => {
       showToast("プロファイルを削除しました");
     });
   }
+
+  // --- ⑥ バックアップ・引継ぎモーダルの初期化 ---
+  initBackupFeature();
 });
 
 // 暗号学的一意ID生成関数
@@ -447,7 +450,6 @@ function initDashboard(profile) {
   refreshDashboardView();
 }
 
-// 単一リストの平均スコアおよび16タイプを算出するヘルパー
 function computeGroupMetrics(items) {
   if (!items || items.length === 0) return null;
   const avgScores = [0, 0, 0, 0];
@@ -463,7 +465,6 @@ function computeGroupMetrics(items) {
   return { avgScores, type, count: items.length };
 }
 
-// 統計・集計の描画
 function renderStats(responses, activeRel = "all", hasTotalResponses = true, isFiltered = false) {
   const tabsContainer = document.getElementById("relation-tabs");
   const emptyState = document.getElementById("empty-state");
@@ -534,7 +535,6 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
     ];
 
     axes.forEach(axis => {
-      // 4段階計算: 1.0点=0%, 2.5点=50%, 4.0点=100%
       const rightPercent = Math.round(((axis.score - 1) / 3) * 100);
       const leftPercent = 100 - rightPercent;
       document.getElementById(`bar-${axis.id}`).style.left = `${rightPercent}%`;
@@ -593,7 +593,6 @@ function renderStats(responses, activeRel = "all", hasTotalResponses = true, isF
   });
 }
 
-// 回答履歴一覧＆削除＆ひとことメモ管理
 function renderResponseList(profile, visibleResponses = null) {
   const container = document.getElementById("response-list");
   const deleteBtn = document.getElementById("delete-selected-btn");
@@ -715,7 +714,6 @@ function renderResponseList(profile, visibleResponses = null) {
   };
 }
 
-// SNS共有機能の初期化
 function initShareFeature(profile) {
   const openModalBtn = document.getElementById("open-share-modal-btn");
   const shareModal = document.getElementById("share-modal");
@@ -1012,7 +1010,6 @@ function drawShareCardToCanvas(payload, canvas) {
     drawRoundedRect(ctx, ax.x, ax.y, axisRowW, axisRowH, 8);
     ctx.stroke();
 
-    // 4段階計算: (score - 1) / 3
     const rightPct = Math.round(((ax.score - 1) / 3) * 100);
     const leftPct = 100 - rightPct;
 
@@ -1062,13 +1059,193 @@ function generateAndDownloadShareCard(payload) {
   showToast("結果画像を保存しました！");
 }
 
-// 4段階評価基準（1.0〜4.0点、中央値2.5点）によるタイプ判定
 function calculateTypeFromScore(scores) {
   const e_or_i = scores[0] >= 2.5 ? "I" : "E";
   const s_or_n = scores[1] >= 2.5 ? "N" : "S";
   const t_or_f = scores[2] >= 2.5 ? "F" : "T";
   const j_or_p = scores[3] >= 2.5 ? "P" : "J";
   return `${e_or_i}${s_or_n}${t_or_f}${j_or_p}`;
+}
+
+// ★ バックアップ・引継ぎ（インポート／エクスポート）機能の実装
+function initBackupFeature() {
+  const backupBtn = document.getElementById("backup-profile-btn");
+  const initImportBtn = document.getElementById("init-import-btn");
+  const backupModal = document.getElementById("backup-modal");
+  const closeModalBtn = document.getElementById("close-backup-modal-btn");
+
+  const tabExportBtn = document.getElementById("tab-export-btn");
+  const tabImportBtn = document.getElementById("tab-import-btn");
+  const exportPane = document.getElementById("export-pane");
+  const importPane = document.getElementById("import-pane");
+
+  const btnDownloadFile = document.getElementById("btn-download-backup-file");
+  const btnCopyCode = document.getElementById("btn-copy-backup-code");
+  const backupFileInput = document.getElementById("backup-file-input");
+  const backupCodeInput = document.getElementById("backup-code-input");
+  const btnExecuteImport = document.getElementById("btn-execute-import");
+
+  if (!backupModal) return;
+
+  const openModal = (targetTab = "export") => {
+    if (targetTab === "export") {
+      tabExportBtn.classList.add("active");
+      tabImportBtn.classList.remove("active");
+      exportPane.style.display = "block";
+      importPane.style.display = "none";
+    } else {
+      tabImportBtn.classList.add("active");
+      tabExportBtn.classList.remove("active");
+      importPane.style.display = "block";
+      exportPane.style.display = "none";
+    }
+    backupModal.style.display = "flex";
+  };
+
+  if (backupBtn) backupBtn.onclick = () => openModal("export");
+  if (initImportBtn) initImportBtn.onclick = () => openModal("import");
+
+  closeModalBtn.onclick = () => backupModal.style.display = "none";
+  backupModal.onclick = (e) => {
+    if (e.target === backupModal) backupModal.style.display = "none";
+  };
+
+  tabExportBtn.onclick = () => {
+    tabExportBtn.classList.add("active");
+    tabImportBtn.classList.remove("active");
+    exportPane.style.display = "block";
+    importPane.style.display = "none";
+  };
+
+  tabImportBtn.onclick = () => {
+    tabImportBtn.classList.add("active");
+    tabExportBtn.classList.remove("active");
+    importPane.style.display = "block";
+    exportPane.style.display = "none";
+  };
+
+  // 1. JSONファイルでダウンロード保存
+  btnDownloadFile.onclick = () => {
+    if (!store.profiles || store.profiles.length === 0) {
+      alert("エクスポートできるプロファイルが存在しません。");
+      return;
+    }
+    const dataStr = JSON.stringify(store, null, 2);
+    const blob = new Blob([dataStr], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    const current = getCurrentProfile();
+    const nameStr = current ? current.name : "all";
+    a.href = url;
+    a.download = `persona16_backup_${encodeURIComponent(nameStr)}_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    showToast("バックアップファイルを保存しました");
+  };
+
+  // 2. 引継ぎコードをクリップボードコピー
+  btnCopyCode.onclick = () => {
+    if (!store.profiles || store.profiles.length === 0) {
+      alert("エクスポートできるプロファイルが存在しません。");
+      return;
+    }
+    const jsonStr = JSON.stringify(store);
+    const code = btoa(encodeURIComponent(jsonStr).replace(/%([0-9A-F]{2})/g, (match, p1) => {
+      return String.fromCharCode('0x' + p1);
+    }));
+    navigator.clipboard.writeText(code);
+    showToast("引継ぎコードをコピーしました！");
+  };
+
+  // 3. インポート処理（ファイルまたはコード）
+  btnExecuteImport.onclick = () => {
+    const file = backupFileInput.files[0];
+    const pastedCode = backupCodeInput.value.trim();
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          processImportData(parsed);
+        } catch (err) {
+          alert("ファイルの解析に失敗しました。有効なJSONファイルを選択してください。");
+        }
+      };
+      reader.readAsText(file);
+    } else if (pastedCode) {
+      try {
+        let parsed = null;
+        if (pastedCode.startsWith("{")) {
+          parsed = JSON.parse(pastedCode);
+        } else {
+          const decodedStr = decodeURIComponent(Array.prototype.map.call(atob(pastedCode), (c) => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          parsed = JSON.parse(decodedStr);
+        }
+        processImportData(parsed);
+      } catch (err) {
+        alert("引継ぎコードの復元に失敗しました。正しいコードが貼り付けられているか確認してください。");
+      }
+    } else {
+      alert("バックアップファイルを選択するか、引継ぎコードを入力してください。");
+    }
+  };
+
+  function processImportData(importedStore) {
+    if (!importedStore || (!Array.isArray(importedStore.profiles) && !importedStore.userName)) {
+      alert("プロファイルデータの形式が正しくありません。");
+      return;
+    }
+
+    mergeImportedStore(importedStore);
+    backupModal.style.display = "none";
+    backupFileInput.value = "";
+    backupCodeInput.value = "";
+    renderApp();
+    showToast("プロファイルを復元・結合しました！");
+  }
+}
+
+// インポートデータの安全なマージ処理（ID単位の差分追加・重複除外）
+function mergeImportedStore(imported) {
+  let incomingProfiles = [];
+
+  if (Array.isArray(imported.profiles)) {
+    incomingProfiles = imported.profiles;
+  } else if (imported.userName && Array.isArray(imported.responses)) {
+    incomingProfiles = [{
+      id: generateUUID("p_"),
+      name: imported.userName,
+      responses: imported.responses
+    }];
+  }
+
+  incomingProfiles.forEach(inProf => {
+    const existing = store.profiles.find(p => p.id === inProf.id);
+    if (existing) {
+      existing.name = inProf.name || existing.name;
+      // 回答ログの差分マージ
+      inProf.responses.forEach(inResp => {
+        if (!existing.responses.some(r => r.id === inResp.id)) {
+          existing.responses.push(inResp);
+        }
+      });
+      // 作成日時順で並び替え
+      existing.responses.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+    } else {
+      store.profiles.push(inProf);
+    }
+  });
+
+  if (imported.activeProfileId && store.profiles.some(p => p.id === imported.activeProfileId)) {
+    store.activeProfileId = imported.activeProfileId;
+  } else if (!store.activeProfileId && store.profiles.length > 0) {
+    store.activeProfileId = store.profiles[0].id;
+  }
+
+  saveStore();
 }
 
 function showToast(msg) {
