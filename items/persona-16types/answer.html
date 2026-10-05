@@ -12,85 +12,39 @@
     gtag('config', 'G-FW7R85YTVX');
   </script>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ペルソナ16タイプ他己分析｜回答ページ - Chimera Test Lab</title>
-  <meta name="description" content="友達や仲間の性格・普段の印象を16問で回答する他己分析ページ。">
+  <title>回答する｜ペルソナ16タイプ他己分析 - Chimera Test Lab</title>
+  <meta name="description" content="周りの人から見たあの人の印象を答える他己分析回答フォーム。">
+  <meta name="robots" content="noindex, follow">
 
   <!-- スタイルシート -->
   <link rel="stylesheet" href="../../assets/css/common.css">
   <link rel="stylesheet" href="style.css">
-
-  <style>
-    /* 回答中の対象者リマインド表示 */
-    .target-reminder-box {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #eef2ff;
-      border: 1px solid #c7d2fe;
-      border-radius: 9999px;
-      padding: 4px 14px;
-      font-size: 0.78rem;
-      font-weight: 700;
-      color: #4338ca;
-      margin-bottom: 12px;
-    }
-
-    /* 設問ナビゲーション（戻る・進む） */
-    .survey-nav-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 14px;
-      padding-top: 12px;
-      border-top: 1px dashed #e2e8f0;
-    }
-
-    .btn-survey-nav {
-      background: #f8fafc;
-      border: 1px solid #cbd5e1;
-      color: #475569;
-      font-size: 0.82rem;
-      font-weight: 700;
-      padding: 8px 14px;
-      border-radius: 8px;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      transition: all 0.15s ease;
-    }
-
-    .btn-survey-nav:hover {
-      background: #eef2ff;
-      border-color: #c7d2fe;
-      color: #4338ca;
-    }
-
-    /* 選択済み状態のリッカートボタン */
-    .likert-btn.selected {
-      background: #eef2ff;
-      border-color: #6366f1;
-      box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
-    }
-  </style>
 </head>
 <body>
   <main class="container">
     <section id="quiz-card">
       <div id="test-nav-header"></div>
 
-      <!-- ① 開始前画面：関係性と回答者名入力 -->
-      <div id="answer-intro-view">
-        <span class="intro-badge">OTHER-ANALYSIS</span>
-        <h1 class="intro-title"><span id="target-name-display" style="color: #4f46e5;"></span> さんの他己分析</h1>
+      <!-- ① 回答前・導入画面（関係性とニックネームの入力） -->
+      <div id="intro-screen">
+        <span class="intro-badge">STEP 1 / 2</span>
+        <h1 class="intro-title"><span id="target-user-name" style="color: #4f46e5;"></span> さんの他己分析</h1>
         <p class="intro-desc">
-          あなたが普段接している <strong id="target-name-bold"></strong> さんの印象について、直感で16問の質問に答えてください（所要時間：約1分）。
+          普段接している中で感じる「<span id="target-user-name-sub"></span> さんの印象」について直感でお答えください。（全16問・約2分）
         </p>
 
+        <!-- ★ 回答前の安心リマインドバナー ★ -->
+        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 14px; margin-bottom: 20px; text-align: left;">
+          <p style="font-size: 0.76rem; color: #64748b; line-height: 1.5; margin: 0;">
+            🔒 <strong>回答内容のプライバシーについて</strong><br>
+            あなたがどの設問にどう答えたかという個別内容は相手には伝わりません（4つの性格傾向バランスのみ反映されます）。気兼ねなく率直な印象をお答えください。
+          </p>
+        </div>
+
         <div class="input-group">
-          <label class="input-label">あなたと相手の関係性は？</label>
-          <div class="relation-grid">
-            <button type="button" class="rel-select-btn active" data-rel="friend">友達</button>
+          <label class="input-label">あなたと <span id="target-user-name-rel"></span> さんの関係性</label>
+          <div class="relation-grid" id="relation-selector">
+            <button type="button" class="rel-select-btn" data-rel="friend">友達</button>
             <button type="button" class="rel-select-btn" data-rel="partner">恋人</button>
             <button type="button" class="rel-select-btn" data-rel="work">職場・学校</button>
             <button type="button" class="rel-select-btn" data-rel="family">家族</button>
@@ -100,90 +54,66 @@
         </div>
 
         <div class="input-group" style="margin-top: 16px;">
-          <label for="respondent-name-input" class="input-label">あなたの名前（ニックネーム）</label>
-          <input type="text" id="respondent-name-input" class="text-input" placeholder="例: たろう（空欄でもOK）" maxlength="12">
+          <label for="answerer-name-input" class="input-label">あなたのニックネーム（任意）</label>
+          <input type="text" id="answerer-name-input" class="text-input" placeholder="例: たろう（未入力時は匿名）" maxlength="15">
         </div>
 
-        <button id="start-survey-btn" class="start-btn-primary" style="margin-top: 10px;">診断をはじめる</button>
+        <button id="start-btn" class="copy-btn" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 10px; margin-top: 8px;">診断をはじめる</button>
       </div>
 
-      <!-- ② 設問回答画面 -->
-      <div id="answer-survey-view" style="display: none;">
-        <div class="progress-wrap">
-          <div class="progress-bar-bg">
-            <div id="survey-progress-bar" class="progress-bar-fill"></div>
-          </div>
-          <span id="survey-progress-text" class="progress-text">1 / 16</span>
+      <!-- ② 診断設問画面（全16問） -->
+      <div id="quiz-screen" style="display: none;">
+        <!-- 固定リマインドバナー -->
+        <div class="remind-banner" id="remind-banner">
+          👤 <span id="remind-target-name"></span> さんを思い浮かべて答えてください
         </div>
 
-        <!-- 回答中の対象者リマインド枠 -->
-        <div style="text-align: center;">
-          <div class="target-reminder-box">
-            <span>👤 <strong id="target-name-reminder">あの人</strong> さんを思い浮かべて答えてください</span>
-          </div>
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress"></div>
+        </div>
+        <div class="quiz-progress-text" id="quiz-progress-num">問 1 / 16</div>
+
+        <h2 class="question-text" id="question-text"></h2>
+
+        <div class="options-container" id="options-container">
+          <!-- 選択肢が動的に挿入されます -->
         </div>
 
-        <div class="question-box">
-          <p id="survey-question-text" class="question-text">質問文が読み込まれます</p>
-        </div>
-
-        <div class="likert-scale">
-          <button class="likert-btn" data-score="1">
-            <span class="likert-num">1</span>
-            <span class="likert-txt">全く当てはまらない</span>
-          </button>
-          <button class="likert-btn" data-score="2">
-            <span class="likert-num">2</span>
-            <span class="likert-txt">あまり当てはまらない</span>
-          </button>
-          <button class="likert-btn" data-score="3">
-            <span class="likert-num">3</span>
-            <span class="likert-txt">どちらともいえない</span>
-          </button>
-          <button class="likert-btn" data-score="4">
-            <span class="likert-num">4</span>
-            <span class="likert-txt">やや当てはまる</span>
-          </button>
-          <button class="likert-btn" data-score="5">
-            <span class="likert-num">5</span>
-            <span class="likert-txt">非常に当てはまる</span>
-          </button>
-        </div>
-
-        <!-- ★ 前に戻る / 次へ進む ナビゲーションバー -->
-        <div class="survey-nav-row" id="survey-nav-row">
-          <button type="button" id="btn-prev-q" class="btn-survey-nav">← 前に戻る</button>
-          <button type="button" id="btn-next-q" class="btn-survey-nav" style="visibility: hidden;">次へ進む →</button>
+        <!-- 設問ナビゲーション -->
+        <div class="question-nav-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
+          <button type="button" id="btn-prev-question" class="btn-text-back">← 前に戻る</button>
+          <button type="button" id="btn-next-question" class="btn-text-back" style="color: #4f46e5;">次へ進む →</button>
         </div>
       </div>
 
-      <!-- ③ 回答完了画面：結果を相手に送る -->
-      <div id="answer-finish-view" style="display: none;">
-        <span class="intro-badge">COMPLETE</span>
-        <h1 class="intro-title">回答が完了しました！</h1>
-        <p class="intro-desc">
-          ご協力ありがとうございました。<br>
-          以下のボタンを押して、回答結果を <strong id="finish-target-name"></strong> さんに送り返してください。相手の画面で結果が集計されます。
+      <!-- ③ 回答完了・リンク送り返し画面 -->
+      <div id="complete-screen" style="display: none;">
+        <span class="intro-badge" style="background: #ecfdf5; color: #059669; border-color: #a7f3d0;">COMPLETE</span>
+        <h1 class="intro-title" style="margin-top: 8px;">ご回答ありがとうございました！</h1>
+        <p class="intro-desc" style="line-height: 1.6;">
+          以下の結果URLをコピーして、<strong id="complete-target-name"></strong> さんにLINEやDMなどで送り返してください。<br>
+          <span style="font-size: 0.78rem; color: #94a3b8;">
+            ※ あなたがどの設問にどう答えたかという個別内容は相手には伝わりません（4つの性格傾向バランスのみ反映されます）。
+          </span>
         </p>
 
-        <div style="display: flex; flex-direction: column; gap: 12px; margin: 24px 0;">
-          <a id="line-share-btn" href="#" target="_blank" rel="noopener noreferrer" class="start-btn-primary" style="background: #06c755; text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
-            LINEで結果を送る
-          </a>
-          <button id="copy-result-btn" class="copy-btn" style="padding: 12px; font-size: 0.95rem;">結果リンクをコピー（DM等で送信）</button>
+        <div class="share-box" style="margin-top: 20px;">
+          <p class="share-box-label">相手に送り返す結果URL</p>
+          <div class="share-url-row">
+            <input type="text" id="result-url-input" class="share-url-input" readonly>
+            <button id="copy-result-url-btn" class="copy-btn">コピー</button>
+          </div>
         </div>
 
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; font-size: 0.8rem; color: #64748b; line-height: 1.5; text-align: left;">
-          ※ あなたがどの設問にどう答えたかという個別内容は相手には伝わりません（4つの性格傾向バランスのみ反映されます）。
+        <div style="margin-top: 24px; text-align: center;">
+          <a href="app.html" class="footer-nav-link">あなた自身も他己分析を募集してみる →</a>
         </div>
       </div>
 
       <footer class="tool-footer">
-        <p class="disclaimer">※本ツールは非公式の性格分析ツールです。</p>
-        <div class="nav-links-row" style="margin-top: 14px;">
-          <a href="app.html" class="sub-link">自分も他己分析URLを発行する</a>
-          <span style="color: #cbd5e1;">|</span>
-          <a href="../../" class="main-link">テスト一覧トップへ</a>
+        <p class="disclaimer">※本ツールは非公式の性格分析ツールであり、Myers-Briggs Type Indicator（MBTI）および NERIS Analytics Limited（16Personalities）とは一切関係ありません。</p>
+        <div style="margin-top: 12px;">
+          <a href="../../" class="footer-nav-link">← 他の診断を見る（トップへ）</a>
         </div>
       </footer>
     </section>
