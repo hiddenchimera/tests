@@ -42,7 +42,14 @@
         </div>
 
         <button id="generate-btn" class="copy-btn" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 10px;">回答募集URLを発行する</button>
-        <div style="margin-top: 16px; text-align: center;">
+        
+        <div style="margin-top: 18px; text-align: center;">
+          <button type="button" id="init-import-btn" class="btn-text-back" style="font-size: 0.82rem; color: #4f46e5;">
+            📥 別の端末のデータを復元・引き継ぎする
+          </button>
+        </div>
+
+        <div style="margin-top: 12px; text-align: center;">
           <a href="index.html" class="btn-text-back">← 診断の解説トップへ戻る</a>
         </div>
       </div>
@@ -56,6 +63,7 @@
           </div>
           <div class="profile-actions">
             <button id="add-profile-btn" class="btn-icon-sub" title="別のニックネームを追加">＋新規追加</button>
+            <button id="backup-profile-btn" class="btn-icon-sub" title="データの保存・別端末へ引き継ぎ">🔄 引継・保存</button>
             <button id="delete-profile-btn" class="btn-icon-danger" title="現在のプロファイルを削除">削除</button>
           </div>
         </div>
@@ -148,7 +156,7 @@
             </div>
           </div>
 
-          <!-- ★ 結果をSNSで共有するボタン ★ -->
+          <!-- 結果をSNSで共有するボタン -->
           <div style="margin: 18px 0 24px; text-align: center;">
             <button type="button" id="open-share-modal-btn" class="btn-share-result-primary">
               📢 この他己分析結果をSNSで共有する
@@ -243,8 +251,8 @@
           </p>
           <ul>
             <li><strong>データ保持先:</strong> あなたのプロファイルおよび回答データは、当サーバーではなくお使いのブラウザ内部（LocalStorage）にのみ平文保存されます。</li>
-            <li><strong>端末・ブラウザ間の非同期:</strong> 別の端末（PCからスマホ等）や異なるブラウザ（SafariとChrome等）、シークレット/プライベートモード間ではデータは共有・引き継ぎされません。</li>
-            <li><strong>キャッシュクリアの注意:</strong> ブラウザの履歴やCookie・サイトデータを手動で完全消去した場合、保存されていたプロファイルや集計履歴もすべて消失しますのでご注意ください。</li>
+            <li><strong>端末間のデータ引継ぎ:</strong> 「🔄 引継・保存」機能からエクスポートしたバックアップデータ（ファイルまたはコード）を使うことで、別端末や他ブラウザへ安全にプロファイルを復元・移行できます。</li>
+            <li><strong>キャッシュクリアの注意:</strong> ブラウザの履歴やCookie・サイトデータを手動で完全消去した場合、保存されていたデータも消失しますので、定期的なバックアップ保存をおすすめします。</li>
             <li><strong>プライバシー保護:</strong> 入力されたニックネームや回答スコアが外部サーバーへ送信・記録されることは一切ありません。</li>
           </ul>
         </div>
@@ -258,7 +266,7 @@
       </footer>
     </section>
 
-    <!-- ★ SNS共有モーダル ★ -->
+    <!-- SNS共有モーダル -->
     <div id="share-modal" class="modal-backdrop" style="display: none;">
       <div class="modal-content">
         <div class="modal-header">
@@ -271,24 +279,73 @@
           <span style="font-size: 0.74rem; color: #94a3b8;">※ 個別の回答者名や自由メモなどの履歴データは一切共有されません。</span>
         </p>
 
-        <!-- 画像保存用Canvas（裏で描画） -->
         <canvas id="share-card-canvas" width="1200" height="630" style="display: none;"></canvas>
 
         <div class="share-actions-grid">
-          <!-- ① Xでポスト -->
           <a id="btn-share-x" href="#" target="_blank" rel="noopener noreferrer" class="btn-sns-action btn-sns-x">
             <span>𝕏 でポストする</span>
           </a>
-
-          <!-- ② 結果URLをコピー -->
           <button type="button" id="btn-copy-share-url" class="btn-sns-action btn-sns-copy">
             🔗 閲覧用URLをコピー
           </button>
-
-          <!-- ③ 画像を生成・保存 -->
           <button type="button" id="btn-download-image" class="btn-sns-action btn-sns-image">
             📷 結果カード画像を保存（PNG）
           </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ★ プロファイル引継ぎ・バックアップモーダル ★ -->
+    <div id="backup-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-content" style="max-width: 480px;">
+        <div class="modal-header">
+          <h3 class="modal-title">プロファイルの引継ぎ・保存</h3>
+          <button type="button" id="close-backup-modal-btn" class="btn-modal-close">×</button>
+        </div>
+
+        <div class="backup-tab-row">
+          <button type="button" id="tab-export-btn" class="backup-tab-btn active">エクスポート（書出）</button>
+          <button type="button" id="tab-import-btn" class="backup-tab-btn">インポート（読込）</button>
+        </div>
+
+        <!-- ① 出力（エクスポート）エリア -->
+        <div id="export-pane" class="backup-pane">
+          <p class="modal-desc">
+            現在のプロファイルと回答履歴をファイルまたはコードとして書き出します。別のブラウザやスマホへの移行、バックアップにご利用ください。
+          </p>
+          <div class="share-actions-grid">
+            <button type="button" id="btn-download-backup-file" class="btn-sns-action btn-sns-image" style="background:#f0fdf4; border-color:#bbf7d0; color:#15803d;">
+              💾 バックアップファイルを保存 (.json)
+            </button>
+            <button type="button" id="btn-copy-backup-code" class="btn-sns-action btn-sns-copy">
+              📋 引継ぎコードをコピー
+            </button>
+          </div>
+        </div>
+
+        <!-- ② 入力（インポート）エリア -->
+        <div id="import-pane" class="backup-pane" style="display: none;">
+          <p class="modal-desc">
+            保存したバックアップファイル（.json）を読み込むか、引継ぎコードを貼り付けて復元します。
+          </p>
+
+          <!-- ファイル読込 -->
+          <div style="margin-bottom: 14px;">
+            <label class="input-label">ファイルから復元:</label>
+            <input type="file" id="backup-file-input" accept=".json,application/json" class="file-input-custom">
+          </div>
+
+          <!-- コード直接貼付 -->
+          <div>
+            <label for="backup-code-input" class="input-label">または引継ぎコードを貼り付け:</label>
+            <textarea id="backup-code-input" class="text-input" rows="3" placeholder="ここに引継ぎコードをペーストしてください..." style="font-size: 0.76rem; font-family: monospace;"></textarea>
+          </div>
+
+          <div style="margin-top: 14px;">
+            <button type="button" id="btn-execute-import" class="copy-btn" style="width: 100%; padding: 10px; font-size: 0.9rem;">
+              プロファイルを復元・結合する
+            </button>
+          </div>
         </div>
       </div>
     </div>
