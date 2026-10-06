@@ -86,7 +86,6 @@ function handleUrlIncoming() {
 
   if (!rid || !rel || !sc) return;
 
-  // scは 4〜16の整数 4つ (EI, SN, TF, JP)
   const scores = sc.split(",").map(s => parseInt(s.trim(), 10));
   if (scores.length !== 4 || scores.some(v => isNaN(v) || v < 4 || v > 16)) {
     console.warn("無効なスコアデータのため取り込みをスキップしました:", sc);
@@ -113,14 +112,13 @@ function handleUrlIncoming() {
   const profile = state.profiles[targetId];
   if (!profile.responses) profile.responses = [];
 
-  // 重複取り込み防止
   const exists = profile.responses.some(r => r.id === rid);
   if (!exists) {
     profile.responses.unshift({
       id: rid,
       name: n ? n.trim() : "匿名",
       relation: rel,
-      scores: scores, // [sumEI, sumSN, sumTF, sumJP]
+      scores: scores,
       date: new Date().toISOString().split("T")[0],
       memo: ""
     });
@@ -140,7 +138,6 @@ function cleanUrlParams() {
 
 // イベントリスナー登録
 function initEvents() {
-  // 初期プロファイル作成
   const genBtn = document.getElementById("generate-btn");
   if (genBtn) {
     genBtn.addEventListener("click", () => {
@@ -158,7 +155,6 @@ function initEvents() {
     });
   }
 
-  // プロファイル切り替え
   const selector = document.getElementById("profile-selector");
   if (selector) {
     selector.addEventListener("change", (e) => {
@@ -168,7 +164,6 @@ function initEvents() {
     });
   }
 
-  // プロファイル追加
   const addBtn = document.getElementById("add-profile-btn");
   if (addBtn) {
     addBtn.addEventListener("click", () => {
@@ -182,7 +177,6 @@ function initEvents() {
     });
   }
 
-  // プロファイル削除
   const delBtn = document.getElementById("delete-profile-btn");
   if (delBtn) {
     delBtn.addEventListener("click", () => {
@@ -197,7 +191,6 @@ function initEvents() {
     });
   }
 
-  // URLコピーボタン
   const copyBtn = document.getElementById("copy-url-btn");
   if (copyBtn) {
     copyBtn.addEventListener("click", () => {
@@ -208,7 +201,6 @@ function initEvents() {
     });
   }
 
-  // 関係性タブ切り替え
   const relTabs = document.getElementById("relation-tabs");
   if (relTabs) {
     relTabs.querySelectorAll(".tab-btn").forEach(btn => {
@@ -221,7 +213,6 @@ function initEvents() {
     });
   }
 
-  // フィルターイベント群
   const dateStart = document.getElementById("date-start");
   const dateEnd = document.getElementById("date-end");
   const filterKey = document.getElementById("filter-keyword");
@@ -252,7 +243,6 @@ function initEvents() {
     });
   }
 
-  // 件数フィルターピル
   const limitGroup = document.getElementById("filter-limit-group");
   if (limitGroup) {
     limitGroup.querySelectorAll(".filter-pill").forEach(pill => {
@@ -278,7 +268,6 @@ function initEvents() {
     }
   }
 
-  // 系統フィルターピル
   const catGroup = document.getElementById("filter-category-group");
   if (catGroup) {
     catGroup.querySelectorAll(".filter-pill").forEach(pill => {
@@ -304,7 +293,6 @@ function initEvents() {
     }
   }
 
-  // 選択回答削除ボタン
   const delSelBtn = document.getElementById("delete-selected-btn");
   if (delSelBtn) {
     delSelBtn.addEventListener("click", () => {
@@ -319,9 +307,7 @@ function initEvents() {
     });
   }
 
-  // バックアップモーダル関連
   initBackupEvents();
-  // SNS共有モーダル関連
   initShareEvents();
 }
 
@@ -346,7 +332,6 @@ function renderApp() {
 
   const profile = state.profiles[state.currentProfileId];
 
-  // プロファイル選択セレクトボックスの更新
   const selector = document.getElementById("profile-selector");
   if (selector) {
     selector.innerHTML = "";
@@ -361,7 +346,6 @@ function renderApp() {
 
   document.getElementById("target-user-name").textContent = profile.name;
 
-  // シェアURLの設定
   const shareInput = document.getElementById("share-url-input");
   const currentPath = window.location.pathname;
   const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
@@ -378,7 +362,6 @@ function updateStatsView() {
 
   const responses = profile.responses || [];
 
-  // 関係性カウントの更新
   document.getElementById("count-all").textContent = responses.length;
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(rel => {
     const c = responses.filter(r => r.relation === rel).length;
@@ -405,23 +388,17 @@ function updateStatsView() {
   if (relationTabs) relationTabs.style.display = "flex";
   if (dateFilterBox) dateFilterBox.style.display = "block";
 
-  // フィルター適用
   let filtered = [...responses];
 
-  // ① 関係性タブフィルター
   if (state.activeRelation !== "all") {
     filtered = filtered.filter(r => r.relation === state.activeRelation);
   }
-
-  // ② 期間フィルター
   if (state.filter.startDate) {
     filtered = filtered.filter(r => r.date >= state.filter.startDate);
   }
   if (state.filter.endDate) {
     filtered = filtered.filter(r => r.date <= state.filter.endDate);
   }
-
-  // ③ キーワードフィルター
   if (state.filter.keyword) {
     filtered = filtered.filter(r => {
       const nameHit = r.name && r.name.toLowerCase().includes(state.filter.keyword);
@@ -429,8 +406,6 @@ function updateStatsView() {
       return nameHit || memoHit;
     });
   }
-
-  // ④ 系統 / カスタムタイプフィルター
   if (state.filter.category !== "all") {
     filtered = filtered.filter(r => {
       const type = get16TypeFromSums(r.scores);
@@ -442,8 +417,6 @@ function updateStatsView() {
       return cat === state.filter.category;
     });
   }
-
-  // ⑤ 件数制限（直近N件）
   if (state.filter.limit !== "all") {
     const limitNum = parseInt(state.filter.limit, 10);
     if (!isNaN(limitNum) && limitNum > 0) {
@@ -451,13 +424,11 @@ function updateStatsView() {
     }
   }
 
-  // 統計集計の計算（合計点の平均値を算出）
   renderAggregatedStats(filtered);
   renderMiniCards(responses);
   renderResponseList(filtered);
 }
 
-// 4〜16点の合計点から 16タイプ文字列（INTJなど）を算出
 function get16TypeFromSums(sums) {
   if (!sums || sums.length !== 4) return "----";
   const e_i = sums[0] > 10 ? "I" : "E";
@@ -467,7 +438,6 @@ function get16TypeFromSums(sums) {
   return `${e_i}${s_n}${t_f}${j_p}`;
 }
 
-// 系統色カテゴリの判定
 function getColorCategory(typeStr) {
   if (!typeStr || typeStr.length < 4) return "sj";
   const sn = typeStr[1];
@@ -480,7 +450,6 @@ function getColorCategory(typeStr) {
   return "sj";
 }
 
-// ワイルドカード（- や _）対応のタイプパターンマッチ
 function matchTypePattern(type, pattern) {
   if (pattern.length > 4) pattern = pattern.substring(0, 4);
   for (let i = 0; i < pattern.length; i++) {
@@ -491,7 +460,6 @@ function matchTypePattern(type, pattern) {
   return true;
 }
 
-// 絞り込み後の集計結果を描画
 function renderAggregatedStats(list) {
   const domType = document.getElementById("dominant-type");
   const typeDesc = document.getElementById("type-description");
@@ -509,7 +477,6 @@ function renderAggregatedStats(list) {
     return;
   }
 
-  // 合計点の総和を足し合わせ、回答人数 list.length で割って各軸の平均合計点を算出
   const avgSums = [0, 0, 0, 0];
   list.forEach(r => {
     r.scores.forEach((s, i) => {
@@ -527,7 +494,6 @@ function renderAggregatedStats(list) {
   const colorCat = getColorCategory(finalType);
   summaryCard.className = `result-summary-card theme-${colorCat}`;
 
-  // 4軸バーの描画：(avgSum - 4) / 12 * 100 で厳密なパーセンテージを算出
   const axes = ["ei", "sn", "tf", "jp"];
   avgSums.forEach((avgVal, idx) => {
     const id = axes[idx];
@@ -546,7 +512,6 @@ function resetAxesBars() {
   });
 }
 
-// 関係性ごとの小計ミニカード群の描画
 function renderMiniCards(allResponses) {
   const container = document.getElementById("relation-mini-cards");
   if (!container) return;
@@ -595,7 +560,6 @@ function renderMiniCards(allResponses) {
   });
 }
 
-// 回答履歴一覧の描画
 function renderResponseList(list) {
   const container = document.getElementById("response-list");
   if (!container) return;
@@ -656,7 +620,6 @@ function renderResponseList(list) {
       </div>
     `;
 
-    // チェックボックスイベント
     const chk = card.querySelector(".response-checkbox");
     chk.addEventListener("change", (e) => {
       if (e.target.checked) {
@@ -670,13 +633,11 @@ function renderResponseList(list) {
         : "選択した回答を削除";
     });
 
-    // 詳細アコーディオン開閉
     const toggleBtn = card.querySelector(`[data-toggle="${r.id}"]`);
     toggleBtn.addEventListener("click", () => {
       card.classList.toggle("open");
     });
 
-    // メモ編集・追加イベント
     const memoEl = card.querySelector(`[data-memoid="${r.id}"]`);
     if (memoEl) {
       memoEl.addEventListener("click", () => {
@@ -755,7 +716,6 @@ function initBackupEvents() {
     });
   }
 
-  // ファイルエクスポート
   const btnDown = document.getElementById("btn-download-backup-file");
   if (btnDown) {
     btnDown.addEventListener("click", () => {
@@ -767,7 +727,6 @@ function initBackupEvents() {
     });
   }
 
-  // コードコピー
   const btnCopyCode = document.getElementById("btn-copy-backup-code");
   if (btnCopyCode) {
     btnCopyCode.addEventListener("click", () => {
@@ -777,7 +736,6 @@ function initBackupEvents() {
     });
   }
 
-  // インポート実行
   const btnExecImp = document.getElementById("btn-execute-import");
   if (btnExecImp) {
     btnExecImp.addEventListener("click", () => {
@@ -820,7 +778,6 @@ function mergeProfiles(imported) {
     if (!state.profiles[id]) {
       state.profiles[id] = imported[id];
     } else {
-      // 回答レコードの結合
       const existingRids = new Set((state.profiles[id].responses || []).map(r => r.id));
       (imported[id].responses || []).forEach(r => {
         if (!existingRids.has(r.id)) {
@@ -863,7 +820,6 @@ function prepareShareData() {
 
   const finalType = get16TypeFromSums(avgSums);
 
-  // 関係性ごとの結果サマリー
   const relSummary = {};
   ["friend", "partner", "work", "family", "hobby", "other"].forEach(rel => {
     const group = responses.filter(r => r.relation === rel);
@@ -882,7 +838,7 @@ function prepareShareData() {
     n: profile.name,
     c: responses.length,
     t: finalType,
-    sc: avgSums, // 4〜16の合計点平均
+    sc: avgSums,
     r: relSummary
   };
 
@@ -893,14 +849,12 @@ function prepareShareData() {
   const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
   const shareViewUrl = `${window.location.origin}${basePath}view.html?d=${encodeURIComponent(base64Str)}`;
 
-  // Xシェアリンク
   const btnX = document.getElementById("btn-share-x");
   if (btnX) {
     const text = encodeURIComponent(`周りから見た私の性格タイプは【${finalType}】でした！\n友達・恋人・職場ごとの仮面（ペルソナ）を暴く他己分析結果👇\n#ペルソナ16タイプ他己分析 #ChimeraTestLab`);
     btnX.href = `https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(shareViewUrl)}`;
   }
 
-  // URLコピー
   const btnCopy = document.getElementById("btn-copy-share-url");
   if (btnCopy) {
     btnCopy.onclick = () => {
@@ -909,63 +863,247 @@ function prepareShareData() {
     };
   }
 
-  // 画像生成
   const btnImg = document.getElementById("btn-download-image");
   if (btnImg) {
     btnImg.onclick = () => {
-      generateShareImage(profile.name, finalType, responses.length);
+      generateShareImage(profile.name, finalType, responses.length, avgSums, relSummary);
     };
   }
 }
 
-// Canvasを使ったシェアカード画像生成
-function generateShareImage(targetName, typeStr, count) {
+// Canvasを使ったシェアカード画像生成（2枚目のライトUI＆フルコンポーネントデザイン）
+function generateShareImage(targetName, typeStr, count, avgSums, relSummary) {
   const canvas = document.getElementById("share-card-canvas");
   if (!canvas) return;
   const ctx = canvas.getContext("2d");
 
-  // 背景
-  const grad = ctx.createLinearGradient(0, 0, 1200, 630);
-  grad.addColorStop(0, "#1e1b4b");
-  grad.addColorStop(1, "#312e81");
-  ctx.fillStyle = grad;
+  // 1200 x 630 (OGP / Twitter標準比率)
+  canvas.width = 1200;
+  canvas.height = 630;
+
+  // 1. 全体背景（サイトと同じ微細ドットパターン #f8fafc + #cbd5e1 ドット）
+  ctx.fillStyle = "#f8fafc";
   ctx.fillRect(0, 0, 1200, 630);
 
-  // 外枠カード
-  ctx.fillStyle = "rgba(255, 255, 255, 0.08)";
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-  ctx.lineWidth = 2;
+  ctx.fillStyle = "#cbd5e1";
+  const dotSpacing = 24;
+  for (let x = 12; x < 1200; x += dotSpacing) {
+    for (let y = 12; y < 630; y += dotSpacing) {
+      ctx.beginPath();
+      ctx.arc(x, y, 1.3, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }
+
+  // 2. メインの白いカード枠 (#quiz-card風)
+  ctx.save();
+  ctx.shadowColor = "rgba(15, 23, 42, 0.08)";
+  ctx.shadowBlur = 24;
+  ctx.shadowOffsetY = 8;
+  ctx.fillStyle = "#ffffff";
   ctx.beginPath();
-  ctx.roundRect(60, 60, 1080, 510, 24);
+  ctx.roundRect(40, 30, 1120, 570, 24);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.strokeStyle = "#e2e8f0";
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // 3. ヘッダー：DASHBOARD バッジ
+  ctx.fillStyle = "#eef2ff";
+  ctx.strokeStyle = "#c7d2fe";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.roundRect(75, 56, 110, 28, 999);
   ctx.fill();
   ctx.stroke();
 
-  // タイトル
-  ctx.fillStyle = "#c7d2fe";
-  ctx.font = "bold 26px sans-serif";
-  ctx.fillText("CHIMERA TEST LAB ｜ ペルソナ16タイプ他己分析", 100, 130);
+  ctx.fillStyle = "#4f46e5";
+  ctx.font = "bold 13px sans-serif";
+  ctx.textAlign = "center";
+  ctx.fillText("DASHBOARD", 130, 75);
 
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "bold 44px sans-serif";
-  ctx.fillText(`${targetName} さんの他己分析結果（回答数: ${count}件）`, 100, 200);
+  // 4. ヘッダー右上ロゴ
+  ctx.textAlign = "right";
+  ctx.font = "bold 16px sans-serif";
+  ctx.fillStyle = "#64748b";
+  ctx.fillText("Chimera Test Lab  |  ペルソナ16タイプ他己分析", 1125, 75);
 
-  // メインタイプ表示
-  ctx.fillStyle = "#ffffff";
-  ctx.font = "900 110px sans-serif";
-  ctx.fillText(typeStr, 100, 340);
+  // 5. タイトル：「○○ さんの他己分析」
+  ctx.textAlign = "left";
+  ctx.fillStyle = "#0f172a";
+  ctx.font = "900 34px sans-serif";
+  ctx.fillText(`${targetName} さんの他己分析`, 75, 122);
 
-  ctx.fillStyle = "#e0e7ff";
-  ctx.font = "bold 28px sans-serif";
-  ctx.fillText(TYPE_DESCS[typeStr] || "", 100, 410, 980);
+  // 6. メイン総合判定カード（左上）
+  const colorCat = getColorCategory(typeStr);
+  const themeColors = {
+    nt: { bg: "#f5f3ff", border: "#ddd6fe", sub: "#7c3aed", type: "#5b21b6" },
+    nf: { bg: "#f0fdf4", border: "#bbf7d0", sub: "#16a34a", type: "#14532d" },
+    sj: { bg: "#f0f9ff", border: "#bae6fd", sub: "#0284c7", type: "#0c4a6e" },
+    sp: { bg: "#fffbeb", border: "#fde68a", sub: "#d97706", type: "#78350f" }
+  };
+  const theme = themeColors[colorCat] || themeColors.sj;
 
-  // フッター
-  ctx.fillStyle = "#94a3b8";
-  ctx.font = "22px sans-serif";
-  ctx.fillText("https://tests.hiddenchimera.com/", 100, 520);
+  ctx.fillStyle = theme.bg;
+  ctx.strokeStyle = theme.border;
+  ctx.lineWidth = 1.5;
+  ctx.beginPath();
+  ctx.roundRect(75, 142, 470, 228, 16);
+  ctx.fill();
+  ctx.stroke();
+
+  // 総合判定カード内テキスト
+  ctx.textAlign = "center";
+  ctx.fillStyle = theme.sub;
+  ctx.font = "bold 16px sans-serif";
+  ctx.fillText(`全体から見たタイプ (${count}件の回答)`, 310, 180);
+
+  ctx.fillStyle = theme.type;
+  ctx.font = "900 68px sans-serif";
+  ctx.fillText(typeStr, 310, 260);
+
+  ctx.fillStyle = "#475569";
+  ctx.font = "bold 14px sans-serif";
+  let desc = TYPE_DESCS[typeStr] || "";
+  if (desc.length > 25) desc = desc.substring(0, 25) + "…";
+  ctx.fillText(desc, 310, 315);
+
+  // 7. 関係性ミニカード群（右上 3列×2行）
+  const relDefs = [
+    { k: "friend", l: "友達", col: 0, row: 0 },
+    { k: "partner", l: "恋人", col: 1, row: 0 },
+    { k: "work", l: "職場・学校", col: 2, row: 0 },
+    { k: "family", l: "家族", col: 0, row: 1 },
+    { k: "hobby", l: "ネット・趣味", col: 1, row: 1 },
+    { k: "other", l: "その他", col: 2, row: 1 }
+  ];
+
+  const miniStartX = 570;
+  const miniStartY = 142;
+  const miniW = 173;
+  const miniH = 108;
+  const miniGap = 18;
+
+  relDefs.forEach(def => {
+    const x = miniStartX + def.col * (miniW + miniGap);
+    const y = miniStartY + def.row * (miniH + miniGap);
+    const relData = relSummary[def.k];
+
+    let rType = "―";
+    let rCount = 0;
+    let rTheme = { bg: "#ffffff", border: "#e2e8f0", typeColor: "#cbd5e1" };
+
+    if (relData && relData.count > 0) {
+      rType = relData.type;
+      rCount = relData.count;
+      const rCat = getColorCategory(rType);
+      rTheme = themeColors[rCat] || themeColors.sj;
+    }
+
+    ctx.fillStyle = rTheme.bg;
+    ctx.strokeStyle = rTheme.border;
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.roundRect(x, y, miniW, miniH, 14);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#64748b";
+    ctx.font = "bold 13px sans-serif";
+    ctx.fillText(def.l, x + miniW / 2, y + 26);
+
+    ctx.fillStyle = rTheme.typeColor || rTheme.type;
+    ctx.font = "900 28px sans-serif";
+    ctx.fillText(rType, x + miniW / 2, y + 66);
+
+    ctx.fillStyle = "#94a3b8";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText(`(${rCount}件)`, x + miniW / 2, y + 92);
+  });
+
+  // 8. 4軸スライダー群（下部 2列×2行）
+  const axisDefs = [
+    { left: "外向 (E)", right: "内向 (I)", sum: avgSums[0], col: 0, row: 0 },
+    { left: "感覚 (S)", right: "直観 (N)", sum: avgSums[1], col: 1, row: 0 },
+    { left: "思考 (T)", right: "感情 (F)", sum: avgSums[2], col: 0, row: 1 },
+    { left: "判断 (J)", right: "知覚 (P)", sum: avgSums[3], col: 1, row: 1 }
+  ];
+
+  const axisStartX = 75;
+  const axisStartY = 405;
+  const axisW = 495;
+  const axisH = 68;
+  const axisGapX = 55;
+  const axisGapY = 16;
+
+  axisDefs.forEach(def => {
+    const x = axisStartX + def.col * (axisW + axisGapX);
+    const y = axisStartY + def.row * (axisH + axisGapY);
+
+    const rightPct = Math.round(((def.sum - 4) / 12) * 100);
+    const leftPct = 100 - rightPct;
+
+    // スライダー枠
+    ctx.fillStyle = "#f8fafc";
+    ctx.strokeStyle = "#e2e8f0";
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.roundRect(x, y, axisW, axisH, 10);
+    ctx.fill();
+    ctx.stroke();
+
+    // テキスト行
+    ctx.font = "bold 13px sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#4f46e5";
+    ctx.fillText(def.left, x + 16, y + 26);
+
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#0ea5e9";
+    ctx.fillText(def.right, x + axisW - 16, y + 26);
+
+    ctx.textAlign = "center";
+    ctx.fillStyle = "#64748b";
+    ctx.font = "bold 12px sans-serif";
+    ctx.fillText(`${leftPct}% : ${rightPct}%`, x + axisW / 2, y + 26);
+
+    // バー背景
+    const barX = x + 16;
+    const barY = y + 42;
+    const barW = axisW - 32;
+    const barH = 6;
+
+    ctx.fillStyle = "#e2e8f0";
+    ctx.beginPath();
+    ctx.roundRect(barX, barY, barW, barH, 999);
+    ctx.fill();
+
+    // インジケーター丸
+    const indX = barX + (barW * (rightPct / 100));
+    const indY = barY + barH / 2;
+
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.2)";
+    ctx.shadowBlur = 4;
+    ctx.shadowOffsetY = 1;
+
+    ctx.fillStyle = "#4f46e5";
+    ctx.beginPath();
+    ctx.arc(indX, indY, 7, 0, Math.PI * 2);
+    ctx.fill();
+
+    ctx.strokeStyle = "#ffffff";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+    ctx.restore();
+  });
 
   // ダウンロード実行
   const link = document.createElement("a");
-  link.download = `persona16_${targetName}_${typeStr}.png`;
+  link.download = `persona16_${targetName}_result.png`;
   link.href = canvas.toDataURL("image/png");
   link.click();
 }
