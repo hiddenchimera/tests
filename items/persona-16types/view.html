@@ -175,10 +175,7 @@
       }
 
       try {
-        const decodedStr = decodeURIComponent(Array.prototype.map.call(atob(encodedData), (c) => {
-          return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-        }).join(''));
-
+        const decodedStr = decodeURIComponent(escape(atob(encodedData)));
         const data = JSON.parse(decodedStr);
 
         document.getElementById("view-target-name").textContent = data.n || "あの人";
@@ -189,11 +186,11 @@
         const colorCat = getColorCategoryClass(data.t);
         document.getElementById("view-summary-card").className = `result-summary-card theme-${colorCat}`;
 
-        // 4軸スライダー反映（4段階仕様: (score - 1) / 3）
+        // 4軸スライダー反映（合計点4〜16スケール: (score - 4) / 12）
         const axes = ["ei", "sn", "tf", "jp"];
         data.sc.forEach((score, idx) => {
           const id = axes[idx];
-          const rightPct = Math.round(((score - 1) / 3) * 100);
+          const rightPct = Math.round(((score - 4) / 12) * 100);
           const leftPct = 100 - rightPct;
           document.getElementById(`view-bar-${id}`).style.left = `${rightPct}%`;
           document.getElementById(`view-val-${id}`).textContent = `${leftPct}% : ${rightPct}%`;
