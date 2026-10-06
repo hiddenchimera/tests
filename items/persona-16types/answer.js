@@ -16,8 +16,32 @@ const OPTIONS = [
   { label: "全くそう思わない", score: 1 }
 ];
 
+// 決選設問（タイブレーク二者択一）の定義
+// leftChoice: 合計10点から -1点 (合計9点) / rightChoice: 合計10点から +1点 (合計11点)
+const TIEBREAKER_QUESTIONS = {
+  ei: {
+    question: "普段の雰囲気について、究極の二択で選ぶならどちらに近い？",
+    leftLabel: "どちらかといえば、社交的で周囲と積極的に関わる【外向的 (E)】",
+    rightLabel: "どちらかといえば、落ち着いていて自分の世界を大切にする【内向的 (I)】"
+  },
+  sn: {
+    question: "物事の捉え方や興味について、究極の二択で選ぶならどちらに近い？",
+    leftLabel: "どちらかといえば、現実的で事実や具体的な手順を重視する【感覚派 (S)】",
+    rightLabel: "どちらかといえば、直感的で未来の可能性やアイデアを好む【直観派 (N)】"
+  },
+  tf: {
+    question: "判断やコミュニケーションの基準として、どちらに近い？",
+    leftLabel: "どちらかといえば、感情に流されず論理と筋道を重んじる【思考派 (T)】",
+    rightLabel: "どちらかといえば、相手の気持ちや共感・調和を重んじる【感情派 (F)】"
+  },
+  jp: {
+    question: "行動スタイルや物事の進め方として、どちらに近い？",
+    leftLabel: "どちらかといえば、計画通りにキッチリ結論・進行をつけたい【判断派 (J)】",
+    rightLabel: "どちらかといえば、臨機応変でノリや柔軟性を大切にしたい【知覚派 (P)】"
+  }
+};
+
 // 設問定義（各軸4問：左側特性2問［反転］＋右側特性2問［正転］＝全16問）
-// スコア計算：1.0点（左特性MAX）〜 4.0点（右特性MAX） / 中央値: 2.5点
 const QUESTIONS_MASTER = [
   // --- 軸1: 外向(E: 1点側) vs 内向(I: 4点側) ---
   { id: "ei_1", axis: "ei", text: "初対面の人や大勢の集まりでも、すぐに打ち解けて活発に話すほうだ。", reverse: true },
@@ -51,6 +75,11 @@ let answererName = "";
 let questions = [];
 let currentQuestionIndex = 0;
 let answers = {}; // { questionId: rawScore (1~4) }
+
+// 各軸の合計点（4〜16点）
+let axisSums = { ei: 0, sn: 0, tf: 0, jp: 0 };
+let tiebreakerAxes = []; // ちょうど10点（引き分け）の軸リスト
+let currentTieIndex = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   const urlParams = new URLSearchParams(window.location.search);
@@ -107,7 +136,6 @@ document.addEventListener("DOMContentLoaded", () => {
       currentQuestionIndex--;
       renderQuestion();
     } else {
-      // 導入画面に戻る場合は進捗バーを初期化
       document.getElementById("quiz-progress").style.width = "0%";
       document.getElementById("quiz-progress-num").textContent = `問 1 / ${QUESTIONS_MASTER.length}`;
       document.getElementById("quiz-screen").style.display = "none";
@@ -125,7 +153,7 @@ document.addEventListener("DOMContentLoaded", () => {
       currentQuestionIndex++;
       renderQuestion();
     } else {
-      finishQuiz();
+      processQuizCompletion();
     }
   });
 });
@@ -145,7 +173,6 @@ function renderQuestion() {
   const progressNum = currentQuestionIndex + 1;
   const total = questions.length;
 
-  // 設問1（回答0問）で0%、回答済みに応じて平方根でイージング計算
   document.getElementById("quiz-progress").style.width = `${Math.sqrt(currentQuestionIndex / total) * 100}%`;
   document.getElementById("quiz-progress-num").textContent = `問 ${progressNum} / ${total}`;
   document.getElementById("question-text").textContent = q.text;
@@ -175,7 +202,7 @@ function renderQuestion() {
           currentQuestionIndex++;
           renderQuestion();
         } else {
-          finishQuiz();
+          processQuizCompletion();
         }
       }, 160);
     });
@@ -183,35 +210,98 @@ function renderQuestion() {
   });
 }
 
-// 診断集計と完了URL生成処理（4段階完全専用）
-function finishQuiz() {
-  const axisScores = {
-    ei: 0,
-    sn: 0,
-    tf: 0,
-    jp: 0
-  };
+// 通常設問完了後の判定処理（10点の軸を抽出して決選へ分岐）
+function processQuizCompletion() {
+  axisSums = { ei: 0, sn: 0, tf: 0, jp: 0 };
 
   questions.forEach(q => {
     const raw = answers[q.id] || 2;
-    // 逆転項目の反転（4段階：1点⇄4点、2点⇄3点 ➔ 5 - raw）
     const effectiveScore = q.reverse ? (5 - raw) : raw;
-    axisScores[q.axis] += effectiveScore;
+    axisSums[q.axis] += effectiveScore;
   });
 
-  const avgEI = Number((axisScores.ei / 4).toFixed(1));
-  const avgSN = Number((axisScores.sn / 4).toFixed(1));
-  const avgTF = Number((axisScores.tf / 4).toFixed(1));
-  const avgJP = Number((axisScores.jp / 4).toFixed(1));
+  // 合計がちょうど10点（50:50）になった軸を特定
+  tiebreakerAxes = [];
+  ["ei", "sn", "tf", "jp"].forEach(axis => {
+    if (axisSums[axis] === 10) {
+      tiebreakerAxes.push(axis);
+    }
+  });
+
+  document.getElementById("quiz-screen").style.display = "none";
+
+  if (tiebreakerAxes.length > 0) {
+    currentTieIndex = 0;
+    document.getElementById("tiebreaker-screen").style.display = "block";
+    renderTiebreaker();
+  } else {
+    finishQuiz();
+  }
+}
+
+// 決選設問の描画処理
+function renderTiebreaker() {
+  const axis = tiebreakerAxes[currentTieIndex];
+  const tbData = TIEBREAKER_QUESTIONS[axis];
+  const totalTies = tiebreakerAxes.length;
+
+  document.getElementById("tiebreaker-progress-num").textContent = `決選質問 ${currentTieIndex + 1} / ${totalTies}`;
+  document.getElementById("tiebreaker-question-text").textContent = `【${targetUserName} さんについて】\n${tbData.question}`;
+
+  const container = document.getElementById("tiebreaker-options-container");
+  container.innerHTML = "";
+
+  // 選択肢1: 左特性 (-1点 ➔ 合計9点に確定)
+  const leftBtn = document.createElement("button");
+  leftBtn.type = "button";
+  leftBtn.className = "quiz-option-btn";
+  leftBtn.textContent = tbData.leftLabel;
+  leftBtn.addEventListener("click", () => {
+    axisSums[axis] -= 1; // 10点 - 1点 = 9点
+    handleTiebreakerNext();
+  });
+
+  // 選択肢2: 右特性 (+1点 ➔ 合計11点に確定)
+  const rightBtn = document.createElement("button");
+  rightBtn.type = "button";
+  rightBtn.className = "quiz-option-btn";
+  rightBtn.textContent = tbData.rightLabel;
+  rightBtn.addEventListener("click", () => {
+    axisSums[axis] += 1; // 10点 + 1点 = 11点
+    handleTiebreakerNext();
+  });
+
+  container.appendChild(leftBtn);
+  container.appendChild(rightBtn);
+}
+
+function handleTiebreakerNext() {
+  currentTieIndex++;
+  if (currentTieIndex < tiebreakerAxes.length) {
+    renderTiebreaker();
+  } else {
+    document.getElementById("tiebreaker-screen").style.display = "none";
+    finishQuiz();
+  }
+}
+
+// 最終集計と完了URL生成処理（4〜16の整数合計点）
+function finishQuiz() {
+  // 不正値防止用クランプ（4〜16の整数を保証）
+  const clampScore = (n) => Math.max(4, Math.min(16, Math.round(n)));
+
+  const sumEI = clampScore(axisSums.ei);
+  const sumSN = clampScore(axisSums.sn);
+  const sumTF = clampScore(axisSums.tf);
+  const sumJP = clampScore(axisSums.jp);
 
   const rid = "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
-  const scStr = `${avgEI},${avgSN},${avgTF},${avgJP}`;
+  const scStr = `${sumEI},${sumSN},${sumTF},${sumJP}`;
 
   const currentPath = window.location.pathname;
   const basePath = currentPath.substring(0, currentPath.lastIndexOf("/") + 1);
   const resultUrl = `${window.location.origin}${basePath}app.html?uid=${encodeURIComponent(targetUserId)}&rid=${encodeURIComponent(rid)}&rel=${encodeURIComponent(selectedRelation)}&sc=${encodeURIComponent(scStr)}&n=${encodeURIComponent(answererName)}`;
 
-  document.getElementById("quiz-screen").style.display = "none";
   document.getElementById("complete-screen").style.display = "block";
 
   const urlInput = document.getElementById("result-url-input");
