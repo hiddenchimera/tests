@@ -17,7 +17,7 @@ const OPTIONS = [
 ];
 
 // 決選設問（タイブレーク二者択一）の定義
-// leftChoice: 合計10点から -1点 (合計9点) / rightChoice: 合計10点から +1点 (合計11点)
+// leftChoice: -1点 (合計9点) / rightChoice: +1点 (合計11点)
 const TIEBREAKER_QUESTIONS = {
   ei: {
     question: "普段の雰囲気について、究極の二択で選ぶならどちらに近い？",
@@ -76,9 +76,10 @@ let questions = [];
 let currentQuestionIndex = 0;
 let answers = {}; // { questionId: rawScore (1~4) }
 
-// 各軸の合計点（4〜16点）
+// 各軸のベース合計点（4〜16点）
 let axisSums = { ei: 0, sn: 0, tf: 0, jp: 0 };
 let tiebreakerAxes = []; // ちょうど10点（引き分け）の軸リスト
+let tiebreakerAnswers = {}; // { [axis]: -1 or 1 }
 let currentTieIndex = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
@@ -124,13 +125,14 @@ document.addEventListener("DOMContentLoaded", () => {
     questions = shuffleArray([...QUESTIONS_MASTER]);
     currentQuestionIndex = 0;
     answers = {};
+    tiebreakerAnswers = {};
 
     document.getElementById("intro-screen").style.display = "none";
     document.getElementById("quiz-screen").style.display = "block";
     renderQuestion();
   });
 
-  // ナビゲーションボタン（前に戻る・次へ進む）
+  // 通常設問ナビゲーションボタン（前に戻る・次へ進む）
   document.getElementById("btn-prev-question").addEventListener("click", () => {
     if (currentQuestionIndex > 0) {
       currentQuestionIndex--;
@@ -156,6 +158,35 @@ document.addEventListener("DOMContentLoaded", () => {
       processQuizCompletion();
     }
   });
+
+  // 決選設問ナビゲーションボタン（前に戻る・次へ進む）
+  const btnPrevTie = document.getElementById("btn-prev-tiebreaker");
+  if (btnPrevTie) {
+    btnPrevTie.addEventListener("click", () => {
+      if (currentTieIndex > 0) {
+        currentTieIndex--;
+        renderTiebreaker();
+      } else {
+        // 最初の決選設問から戻る場合は通常設問の最終問へ復帰
+        document.getElementById("tiebreaker-screen").style.display = "none";
+        document.getElementById("quiz-screen").style.display = "block";
+        currentQuestionIndex = questions.length - 1;
+        renderQuestion();
+      }
+    });
+  }
+
+  const btnNextTie = document.getElementById("btn-next-tiebreaker");
+  if (btnNextTie) {
+    btnNextTie.addEventListener("click", () => {
+      const axis = tiebreakerAxes[currentTieIndex];
+      if (tiebreakerAnswers[axis] === undefined) {
+        alert("いずれかの選択肢を選んでください。");
+        return;
+      }
+      handleTiebreakerNext();
+    });
+  }
 });
 
 // 配列シャッフル関数（Fisher-Yates）
@@ -221,10 +252,18 @@ function processQuizCompletion() {
   });
 
   // 合計がちょうど10点（50:50）になった軸を特定
+  const previousTieAxes = [...tiebreakerAxes];
   tiebreakerAxes = [];
   ["ei", "sn", "tf", "jp"].forEach(axis => {
     if (axisSums[axis] === 10) {
       tiebreakerAxes.push(axis);
+    }
+  });
+
+  // もはや10点でなくなった軸の決選回答はクリーンアップ
+  Object.keys(tiebreakerAnswers).forEach(axis => {
+    if (!tiebreakerAxes.includes(axis)) {
+      delete tiebreakerAnswers[axis];
     }
   });
 
@@ -248,27 +287,44 @@ function renderTiebreaker() {
   document.getElementById("tiebreaker-progress-num").textContent = `決選質問 ${currentTieIndex + 1} / ${totalTies}`;
   document.getElementById("tiebreaker-question-text").textContent = `【${targetUserName} さんについて】\n${tbData.question}`;
 
+  const btnNextTie = document.getElementById("btn-next-tiebreaker");
+  if (btnNextTie) {
+    btnNextTie.textContent = (currentTieIndex === totalTies - 1) ? "回答を完了する →" : "次へ進む →";
+  }
+
   const container = document.getElementById("tiebreaker-options-container");
   container.innerHTML = "";
+
+  const savedChoice = tiebreakerAnswers[axis]; // -1 または 1
 
   // 選択肢1: 左特性 (-1点 ➔ 合計9点に確定)
   const leftBtn = document.createElement("button");
   leftBtn.type = "button";
   leftBtn.className = "quiz-option-btn";
+  if (savedChoice === -1) leftBtn.classList.add("selected");
   leftBtn.textContent = tbData.leftLabel;
   leftBtn.addEventListener("click", () => {
-    axisSums[axis] -= 1; // 10点 - 1点 = 9点
-    handleTiebreakerNext();
+    tiebreakerAnswers[axis] = -1;
+    container.querySelectorAll(".quiz-option-btn").forEach(b => b.classList.remove("selected"));
+    leftBtn.classList.add("selected");
+    setTimeout(() => {
+      handleTiebreakerNext();
+    }, 160);
   });
 
   // 選択肢2: 右特性 (+1点 ➔ 合計11点に確定)
   const rightBtn = document.createElement("button");
   rightBtn.type = "button";
   rightBtn.className = "quiz-option-btn";
+  if (savedChoice === 1) rightBtn.classList.add("selected");
   rightBtn.textContent = tbData.rightLabel;
   rightBtn.addEventListener("click", () => {
-    axisSums[axis] += 1; // 10点 + 1点 = 11点
-    handleTiebreakerNext();
+    tiebreakerAnswers[axis] = 1;
+    container.querySelectorAll(".quiz-option-btn").forEach(b => b.classList.remove("selected"));
+    rightBtn.classList.add("selected");
+    setTimeout(() => {
+      handleTiebreakerNext();
+    }, 160);
   });
 
   container.appendChild(leftBtn);
@@ -290,10 +346,17 @@ function finishQuiz() {
   // 不正値防止用クランプ（4〜16の整数を保証）
   const clampScore = (n) => Math.max(4, Math.min(16, Math.round(n)));
 
-  const sumEI = clampScore(axisSums.ei);
-  const sumSN = clampScore(axisSums.sn);
-  const sumTF = clampScore(axisSums.tf);
-  const sumJP = clampScore(axisSums.jp);
+  // 決選設問の選択（-1 または +1）を基本点数へ合算
+  const finalSums = { ...axisSums };
+  tiebreakerAxes.forEach(axis => {
+    const diff = tiebreakerAnswers[axis] || 0;
+    finalSums[axis] += diff;
+  });
+
+  const sumEI = clampScore(finalSums.ei);
+  const sumSN = clampScore(finalSums.sn);
+  const sumTF = clampScore(finalSums.tf);
+  const sumJP = clampScore(finalSums.jp);
 
   const rid = "r_" + Date.now().toString(36) + "_" + Math.random().toString(36).substring(2, 7);
   const scStr = `${sumEI},${sumSN},${sumTF},${sumJP}`;
