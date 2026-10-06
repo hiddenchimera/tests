@@ -1260,7 +1260,6 @@
   margin-bottom: 8px;
 }
 
-/* ★ 共通アニメーション（0.35s cubic-bezier(0.16, 1, 0.3, 1)）に完全準拠 ★ */
 .quiz-progress-fill {
   height: 100%;
   background: linear-gradient(90deg, #4f46e5, #0ea5e9);
@@ -1289,6 +1288,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  white-space: pre-line;
 }
 
 /* 4段階選択肢コンテナ */
@@ -1316,6 +1316,7 @@
   outline: none;
   box-shadow: 0 2px 4px rgba(15, 23, 42, 0.03);
   user-select: none;
+  line-height: 1.45;
 }
 
 .quiz-option-btn:hover {
@@ -1329,13 +1330,28 @@
   transform: translateY(0);
 }
 
-/* 選択されたボタン（パープル・アクセント） */
 .quiz-option-btn.selected {
   background: #eef2ff;
   border-color: #4f46e5;
   color: #4f46e5;
   box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.18);
   font-weight: 800;
+}
+
+/* 決選設問コンテナ内のボタン調整（二択直球選択用） */
+#tiebreaker-options-container .quiz-option-btn {
+  padding: 16px 20px;
+  text-align: left;
+  border-color: #cbd5e1;
+  background: #ffffff;
+  color: #1e293b;
+  position: relative;
+}
+
+#tiebreaker-options-container .quiz-option-btn:hover {
+  border-color: #b45309;
+  background: #fffbeb;
+  color: #92400e;
 }
 
 /* 設問前後のナビゲーション行 */
