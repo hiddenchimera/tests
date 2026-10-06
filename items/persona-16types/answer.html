@@ -63,7 +63,7 @@
         <button id="start-btn" class="copy-btn" style="width: 100%; padding: 14px; font-size: 1rem; border-radius: 10px; margin-top: 8px;">診断をはじめる</button>
       </div>
 
-      <!-- ② 診断設問画面（全16問） -->
+      <!-- ② 通常設問画面（全16問） -->
       <div id="quiz-screen" style="display: none;">
         <!-- 固定リマインドバナー -->
         <div class="remind-banner" id="remind-banner">
@@ -85,6 +85,24 @@
         <div class="question-nav-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 20px;">
           <button type="button" id="btn-prev-question" class="btn-text-back">← 前に戻る</button>
           <button type="button" id="btn-next-question" class="btn-text-back" style="color: #4f46e5;">次へ進む →</button>
+        </div>
+      </div>
+
+      <!-- ②-B 決選設問画面（同点軸が存在する場合のみ表示） -->
+      <div id="tiebreaker-screen" style="display: none;">
+        <span class="intro-badge" style="background: #fef3c7; color: #b45309; border-color: #fde68a;">FINAL DECISION</span>
+        <div class="remind-banner" style="margin-top: 6px;">
+          ⚖️ 回答結果が完全に拮抗したため、決選質問を行います
+        </div>
+
+        <div class="quiz-progress-text" id="tiebreaker-progress-num" style="margin-top: 10px; font-weight: 800; color: #b45309;">
+          決選質問 1 / 1
+        </div>
+
+        <h2 class="question-text" id="tiebreaker-question-text" style="min-height: 2.8em;"></h2>
+
+        <div class="options-container" id="tiebreaker-options-container">
+          <!-- 直球2択ボタンが動的に挿入されます -->
         </div>
       </div>
 
