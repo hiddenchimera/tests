@@ -105,6 +105,24 @@
       font-size: 0.92rem;
       margin-bottom: 16px;
     }
+
+    /* 図解・インフォグラフィック共通ラッパー */
+    .lp-figure-block {
+      margin: 20px 0 24px;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05);
+      background: #ffffff;
+    }
+    .lp-figure-img {
+      display: block;
+      width: 100%;
+      height: auto;
+      object-fit: cover;
+    }
+
+    /* 人間関係カードグリッド */
     .lp-card-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -116,6 +134,25 @@
       border: 1px solid #e2e8f0;
       border-radius: 12px;
       padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+    .lp-card-icon-wrap {
+      width: 56px;
+      height: 56px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin-bottom: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+      flex-shrink: 0;
+    }
+    .lp-card-icon {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
     }
     .lp-info-card h3 {
       font-size: 0.95rem;
@@ -129,6 +166,8 @@
       line-height: 1.6;
       margin: 0;
     }
+
+    /* 3ステップフロー */
     .lp-flow-item {
       display: flex;
       gap: 14px;
@@ -151,6 +190,8 @@
       justify-content: center;
       font-size: 0.82rem;
     }
+
+    /* FAQ */
     .faq-item {
       background: #f8fafc;
       border: 1px solid #e2e8f0;
@@ -211,11 +252,28 @@
         </a>
       </div>
 
+      <!-- ① 完成結果プレビュー（ゴール提示） -->
+      <div class="lp-figure-block">
+        <img src="img/lp-result-preview.webp" alt="ペルソナ16タイプ他己分析のダッシュボード集計結果プレビュー" class="lp-figure-img" width="1200" height="675" loading="lazy">
+      </div>
+
       <!-- 1. 他己分析とは -->
       <h2 class="lp-section-heading">「他己分析」とは？なぜ自己診断だけでは不十分なのか</h2>
+
+      <!-- ② 自己診断バイアス図解 -->
+      <div class="lp-figure-block">
+        <img src="img/lp-bias.webp" alt="自己診断のバイアス：理想の自分を選んでしまう心理と客観的視点のギャップ" class="lp-figure-img" width="1200" height="675" loading="lazy">
+      </div>
+
       <p class="lp-paragraph">
         心理テストや性格診断の多くは「自分で自分を採点する（自己分析）」形式です。しかし、人は無意識のうちに「こうありたい理想の自分」を選んでしまったり、自分自身の客観的な癖に気づけなかったりします。
       </p>
+
+      <!-- ③ ジョハリの窓図解 -->
+      <div class="lp-figure-block">
+        <img src="img/lp-johari.webp" alt="ジョハリの窓：自分は気づかず他人にだけ見えている盲点の窓" class="lp-figure-img" width="1200" height="675" loading="lazy">
+      </div>
+
       <p class="lp-paragraph">
         心理学における「ジョハリの窓」の考え方にある通り、自分自身が自覚している領域だけでなく、<strong>「他人にしか見えていない自分（盲点の窓）」を知ることこそが、本当の強みや人間関係の摩擦の原因を解き明かす鍵</strong>になります。
       </p>
@@ -225,20 +283,34 @@
       <p class="lp-paragraph">
         人は誰しも、接する相手によって異なる顔を使い分けて生きています。親友の前で見せるリラックスした素顔と、職場で同僚に見せるビジネスライクな顔、恋人の前で甘える顔がすべて同一人物であるはずがありません。
       </p>
+
+      <!-- ④ 関係性カードグリッド（各アイコン配置） -->
       <div class="lp-card-grid">
         <div class="lp-info-card">
+          <div class="lp-card-icon-wrap">
+            <img src="img/rel-friend.webp" alt="友達から見たペルソナ" class="lp-card-icon" width="400" height="400" loading="lazy">
+          </div>
           <h3>👥 友達から見たあなた</h3>
           <p>ノリや空気感、飾らないフランクな場で見せる素のコミュニケーション傾向。</p>
         </div>
         <div class="lp-info-card">
+          <div class="lp-card-icon-wrap">
+            <img src="img/rel-work.webp" alt="職場・学校から見たペルソナ" class="lp-card-icon" width="400" height="400" loading="lazy">
+          </div>
           <h3>💼 職場・学校から見たあなた</h3>
           <p>タスク処理や規律、責任感など、公の場で発揮されている実務的なスタンス。</p>
         </div>
         <div class="lp-info-card">
+          <div class="lp-card-icon-wrap">
+            <img src="img/rel-partner.webp" alt="恋人から見たペルソナ" class="lp-card-icon" width="400" height="400" loading="lazy">
+          </div>
           <h3>❤ 恋人から見たあなた</h3>
           <p>感情の共有や心理的距離感、親密な関係性において無意識に出るパーソナルな顔。</p>
         </div>
         <div class="lp-info-card">
+          <div class="lp-card-icon-wrap">
+            <img src="img/rel-hobby.webp" alt="ネット・趣味から見たペルソナ" class="lp-card-icon" width="400" height="400" loading="lazy">
+          </div>
           <h3>🌐 ネット・趣味から見たあなた</h3>
           <p>共通の関心事や知的好奇心の場で前面に出る、純粋な探求・行動パターン。</p>
         </div>
@@ -252,6 +324,12 @@
       <p class="lp-paragraph">
         回答者は、あなたに関する全16問の設問に直感で答えます。「どちらともいえない」を排除した4段階評価により、テンポよく迷わずに回答できる設計となっています。もし回答スコアが完全に拮抗（50:50）した軸があった場合は、<strong>直球二択の「決選設問（サドンデス）」</strong>が発生し、確実にあなたの傾向を導き出します。
       </p>
+
+      <!-- ⑤ 決選設問・サドンデス分岐フロー図解 -->
+      <div class="lp-figure-block">
+        <img src="img/lp-sudden-death.webp" alt="16問回答から拮抗時の決選設問サドンデス分岐フロー" class="lp-figure-img" width="1200" height="675" loading="lazy">
+      </div>
+
       <ul>
         <li><strong>外向 (E) vs 内向 (I)：</strong> 社交的で発信を好むか、落ち着いて物思いに耽るか</li>
         <li><strong>感覚 (S) vs 直観 (N)：</strong> 現実的・具体的な事実を重視するか、抽象的なアイデアを好むか</li>
@@ -261,6 +339,12 @@
 
       <!-- 4. 使い方 3ステップ -->
       <h2 class="lp-section-heading">かんたん 3ステップの利用手順</h2>
+
+      <!-- ⑥ 3ステップ全体フロー図解 -->
+      <div class="lp-figure-block">
+        <img src="img/lp-steps-flow.webp" alt="URL発行からLINE送信、自動集計までの3ステップ利用フロー" class="lp-figure-img" width="1200" height="600" loading="lazy">
+      </div>
+
       <div class="lp-flow-item">
         <span class="lp-flow-num">1</span>
         <div>
