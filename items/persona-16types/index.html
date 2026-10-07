@@ -30,8 +30,10 @@
     /* LP専用の読ませるレイアウトスタイル */
     .lp-article-wrap {
       text-align: left;
-      line-height: 1.8;
+      line-height: 1.85;
       color: #334155;
+      word-break: normal;
+      overflow-wrap: break-word;
     }
     .lp-hero-box {
       text-align: center;
@@ -44,13 +46,14 @@
       font-weight: 900;
       color: #0f172a;
       letter-spacing: -0.02em;
-      line-height: 1.35;
+      line-height: 1.4;
       margin: 12px 0 10px;
     }
     .lp-sub-copy {
       font-size: 0.95rem;
       color: #64748b;
       margin-bottom: 20px;
+      line-height: 1.65;
     }
     .lp-cta-block {
       background: linear-gradient(135deg, #1e1b4b 0%, #312e81 60%, #4338ca 100%);
@@ -66,11 +69,13 @@
       font-weight: 800;
       margin-bottom: 8px;
       color: #ffffff;
+      line-height: 1.4;
     }
     .lp-cta-desc {
       font-size: 0.85rem;
       color: #e0e7ff;
       margin-bottom: 18px;
+      line-height: 1.65;
     }
     .btn-lp-primary {
       display: inline-flex;
@@ -99,11 +104,22 @@
       border-left: 4px solid #4f46e5;
       padding-left: 12px;
       margin: 36px 0 16px;
-      line-height: 1.4;
+      line-height: 1.45;
     }
     .lp-paragraph {
       font-size: 0.92rem;
       margin-bottom: 16px;
+      line-height: 1.85;
+    }
+
+    /* レスポンシブ改行ユーティリティ */
+    .sp-only-br {
+      display: none;
+    }
+    @media (max-width: 640px) {
+      .sp-only-br {
+        display: inline;
+      }
     }
 
     /* 図解・インフォグラフィック共通ラッパー */
@@ -145,7 +161,7 @@
     }
     .lp-card-banner {
       width: 100%;
-      height: 145px;
+      height: 155px;
       overflow: hidden;
       background: #f1f5f9;
       position: relative;
@@ -154,7 +170,7 @@
       width: 100%;
       height: 100%;
       object-fit: cover;
-      object-position: top center;
+      object-position: center 25%;
       display: block;
       transition: transform 0.3s ease;
     }
@@ -177,7 +193,7 @@
     .lp-info-card p {
       font-size: 0.82rem;
       color: #64748b;
-      line-height: 1.6;
+      line-height: 1.65;
       margin: 0;
     }
 
@@ -190,6 +206,7 @@
       border: 1px solid #e2e8f0;
       border-radius: 12px;
       padding: 14px 16px;
+      align-items: flex-start;
     }
     .lp-flow-num {
       flex-shrink: 0;
@@ -203,6 +220,22 @@
       align-items: center;
       justify-content: center;
       font-size: 0.82rem;
+      margin-top: 2px;
+    }
+    .lp-flow-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    /* 4軸箇条書きリスト */
+    .lp-traits-list {
+      margin: 16px 0 24px 20px;
+      line-height: 1.8;
+      font-size: 0.9rem;
+      color: #334155;
+    }
+    .lp-traits-list li {
+      margin-bottom: 8px;
     }
 
     /* FAQ */
@@ -218,11 +251,13 @@
       font-size: 0.92rem;
       color: #0f172a;
       margin-bottom: 6px;
+      line-height: 1.45;
     }
     .faq-a {
       font-size: 0.86rem;
       color: #475569;
       margin: 0;
+      line-height: 1.7;
     }
   </style>
 </head>
@@ -234,9 +269,13 @@
       <!-- ヒーローヘッダー -->
       <header class="lp-hero-box">
         <span class="intro-badge">OTHER-ANALYSIS LAB</span>
-        <h1 class="lp-main-title">ペルソナ16タイプ他己分析<br><span style="font-size: 1.05rem; color: #64748b; font-weight: 700;">― 人間関係ごとの顔を暴く性格診断 ―</span></h1>
+        <h1 class="lp-main-title">
+          ペルソナ16タイプ他己分析<br>
+          <span style="font-size: 1.05rem; color: #64748b; font-weight: 700;">― 人間関係ごとの顔を暴く性格診断 ―</span>
+        </h1>
         <p class="lp-sub-copy">
-          自分ひとりで答える診断では見えない、「他人の目に映るあなたの社会的仮面」を解き明かします。
+          自分ひとりで答える診断では見えない、<br class="sp-only-br">
+          「他人の目に映るあなたの社会的仮面」を解き明かします。
         </p>
 
         <!-- メタ情報 -->
@@ -259,7 +298,10 @@
       <!-- ファーストビューCTA -->
       <div class="lp-cta-block">
         <h2 class="lp-cta-title">あなたの他己分析URLを発行</h2>
-        <p class="lp-cta-desc">ニックネームを入力してURLを発行し、LINEやDMで友達・仲間に送るだけ。登録不要・完全無料。</p>
+        <p class="lp-cta-desc">
+          ニックネームを入力してURLを発行し、<br class="sp-only-br">LINEやDMで友達・仲間に送るだけ。<br>
+          面倒な登録は一切不要・完全無料で利用できます。
+        </p>
         <a href="app.html" class="btn-lp-primary">
           <span>他己分析をはじめる（無料）</span>
           <span style="font-size: 1.1rem;">→</span>
@@ -267,7 +309,7 @@
       </div>
 
       <!-- 1. 他己分析とは -->
-      <h2 class="lp-section-heading">「他己分析」とは？なぜ自己診断だけでは不十分なのか</h2>
+      <h2 class="lp-section-heading">「他己分析」とは？<br class="sp-only-br">なぜ自己診断だけでは不十分なのか</h2>
 
       <!-- ① 自己診断バイアス図解 -->
       <div class="lp-figure-block">
@@ -275,7 +317,8 @@
       </div>
 
       <p class="lp-paragraph">
-        心理テストや性格診断の多くは「自分で自分を採点する（自己分析）」形式です。しかし、人は無意識のうちに「こうありたい理想の自分」を選んでしまったり、自分自身の客観的な癖に気づけなかったりします。
+        心理テストや性格診断の多くは「自分で自分を採点する（自己分析）」形式です。<br>
+        しかし、人は無意識のうちに「こうありたい理想の自分」を選んでしまったり、自分自身の客観的な癖や振る舞いに気づけなかったりします。
       </p>
 
       <!-- ② ジョハリの窓図解 -->
@@ -284,13 +327,15 @@
       </div>
 
       <p class="lp-paragraph">
-        心理学における「ジョハリの窓」の考え方にある通り、自分自身が自覚している領域だけでなく、<strong>「他人にしか見えていない自分（盲点の窓）」を知ることこそが、本当の強みや人間関係の摩擦の原因を解き明かす鍵</strong>になります。
+        心理学における「ジョハリの窓」の考え方にある通り、自分自身が自覚している領域だけでなく、<br>
+        <strong>「他人にしか見えていない自分（盲点の窓）」を知ることこそが、本当の強みや人間関係の摩擦の原因を解き明かす鍵</strong>になります。
       </p>
 
       <!-- 2. 人間関係ごとの社会的仮面（ペルソナ） -->
-      <h2 class="lp-section-heading">人間関係ごとに変わる「社会的仮面（ペルソナ）」を可視化</h2>
+      <h2 class="lp-section-heading">人間関係ごとに変わる<br class="sp-only-br">「社会的仮面（ペルソナ）」を可視化</h2>
       <p class="lp-paragraph">
-        人は誰しも、接する相手によって異なる顔を使い分けて生きています。親友の前で見せるリラックスした素顔と、職場で同僚に見せるビジネスライクな顔、恋人の前で甘える顔がすべて同一人物であるはずがありません。
+        人は誰しも、接する相手によって異なる顔を使い分けて生きています。<br>
+        親友の前で見せるリラックスした素顔と、職場の同僚に見せるビジネスライクな顔、恋人の前で甘える顔がすべて同一人物であるはずがありません。
       </p>
 
       <!-- ③ 関係性カードグリッド（ヘッダーバナー風） -->
@@ -337,13 +382,15 @@
       </div>
 
       <p class="lp-paragraph">
-        本ツールでは、回答者が選んだ関係性（友達、恋人、職場、家族、趣味、その他）ごとに評価を自動で分類・集計します。
+        本ツールでは、回答者が選んだ関係性（友達・恋人・職場・家族・趣味・その他）ごとに、あなたの印象を自動で分類・集計します。
       </p>
 
       <!-- 3. 診断の仕組み -->
-      <h2 class="lp-section-heading">16タイプ判定の仕組み（4軸＋決選設問）</h2>
+      <h2 class="lp-section-heading">16タイプ判定の仕組み<br class="sp-only-br">（4軸＋決選設問）</h2>
       <p class="lp-paragraph">
-        回答者は、あなたに関する全16問の設問に直感で答えます。「どちらともいえない」を排除した4段階評価により、テンポよく迷わずに回答できる設計となっています。もし回答スコアが完全に拮抗（50:50）した軸があった場合は、<strong>直球二択の「決選設問（サドンデス）」</strong>が発生し、確実にあなたの傾向を導き出します。
+        回答者は、あなたに関する全16問の設問に直感で答えます。<br>
+        「どちらともいえない」を排除した4段階評価により、テンポよく迷わずに回答できる設計となっています。<br>
+        もし回答スコアが完全に拮抗（50:50）した軸があった場合は、<strong>直球二択の「決選設問（サドンデス）」</strong>が発生し、確実にあなたの傾向を導き出します。
       </p>
 
       <!-- ④ 決選設問・サドンデス分岐フロー図解 -->
@@ -351,7 +398,7 @@
         <img src="img/lp-sudden-death.webp" alt="16問回答から拮抗時の決選設問サドンデス分岐フロー" class="lp-figure-img" width="1200" height="675" loading="lazy">
       </div>
 
-      <ul>
+      <ul class="lp-traits-list">
         <li><strong>外向 (E) vs 内向 (I)：</strong> 社交的で発信を好むか、落ち着いて物思いに耽るか</li>
         <li><strong>感覚 (S) vs 直観 (N)：</strong> 現実的・具体的な事実を重視するか、抽象的なアイデアを好むか</li>
         <li><strong>思考 (T) vs 感情 (F)：</strong> 論理と客観性で判断するか、共感と人情を優先するか</li>
@@ -368,23 +415,34 @@
 
       <div class="lp-flow-item">
         <span class="lp-flow-num">1</span>
-        <div>
+        <div class="lp-flow-content">
           <strong style="display:block; font-size:0.95rem; color:#0f172a; margin-bottom:4px;">ニックネームを決めてURLを発行</strong>
-          <span style="font-size:0.84rem; color:#64748b;">本名でもハンドルネームでもOK。ツールを開いて名前を入力するだけで専用URLが即時発行されます。</span>
+          <span style="font-size:0.84rem; color:#64748b; line-height:1.65; display:block;">
+            本名でもハンドルネームでもOK。<br class="sp-only-br">
+            ツールを開いて名前を入力するだけで、あなた専用の回答募集URLが即時発行されます。
+          </span>
         </div>
       </div>
+
       <div class="lp-flow-item">
         <span class="lp-flow-num">2</span>
-        <div>
+        <div class="lp-flow-content">
           <strong style="display:block; font-size:0.95rem; color:#0f172a; margin-bottom:4px;">LINEやDMでURLを友達・仲間にシェア</strong>
-          <span style="font-size:0.84rem; color:#64748b;">相手は会員登録不要・約2分で回答できます。回答完了画面から「LINEで結果を送る」ボタンまたはURLコピーで送り返してもらいます。</span>
+          <span style="font-size:0.84rem; color:#64748b; line-height:1.65; display:block;">
+            相手は会員登録不要・約2分で手軽に回答できます。<br>
+            回答完了画面から「LINEで結果を送る」ボタン、またはURLコピーで送り返してもらいます。
+          </span>
         </div>
       </div>
+
       <div class="lp-flow-item">
         <span class="lp-flow-num">3</span>
-        <div>
+        <div class="lp-flow-content">
           <strong style="display:block; font-size:0.95rem; color:#0f172a; margin-bottom:4px;">ダッシュボードで関係性ごとの顔を分析</strong>
-          <span style="font-size:0.84rem; color:#64748b;">受け取ったURLを開くだけで自動集計。「友達から見た自分」や「職場から見た自分」のタイプとパラメータが可視化されます。</span>
+          <span style="font-size:0.84rem; color:#64748b; line-height:1.65; display:block;">
+            受け取ったURLを開くだけで自動集計。<br>
+            「友達から見た自分」や「職場から見た自分」など、関係性ごとのペルソナと性格バランスが可視化されます。
+          </span>
         </div>
       </div>
 
@@ -395,27 +453,46 @@
 
       <!-- 5. よくある質問 (FAQ) -->
       <h2 class="lp-section-heading">よくある質問 (FAQ)</h2>
+
       <div class="faq-item">
         <div class="faq-q">Q. 友達に回答内容（どの問にどう答えたか）を見られますか？</div>
-        <p class="faq-a">A. いいえ、見られません。集計されるのは4軸の総合パラメータのみであり、各設問にどう回答したかという具体的な個別回答は相手にも表示されません。</p>
+        <p class="faq-a">
+          A. いいえ、見られません。<br>
+          集計されるのは4軸の総合パラメータのみであり、各設問にどう回答したかという具体的な個別回答は相手には一切伝わりません。
+        </p>
       </div>
+
       <div class="faq-item">
         <div class="faq-q">Q. 別のスマホやPCにデータを引き継ぐことはできますか？</div>
-        <p class="faq-a">A. はい、可能です。ダッシュボード上部の「🔄 引継・保存」メニューから、バックアップファイルの保存や引継ぎコードのコピーができ、別端末へ安全にデータを移行・復元できます。</p>
+        <p class="faq-a">
+          A. はい、可能です。<br>
+          ダッシュボード上部の「🔄 引継・保存」メニューから、バックアップファイルの保存や引継ぎコードの発行ができ、別端末へ安全にデータを移行・復元できます。
+        </p>
       </div>
+
       <div class="faq-item">
         <div class="faq-q">Q. 料金はかかりますか？会員登録は必要ですか？</div>
-        <p class="faq-a">A. 完全無料で利用できます。メールアドレス登録やログインなどの手続きは一切不要で、すぐに発行できます。</p>
+        <p class="faq-a">
+          A. 完全無料で利用できます。<br>
+          メールアドレスの登録やログインなどの面倒な手続きは一切不要で、誰でもすぐに発行できます。
+        </p>
       </div>
+
       <div class="faq-item">
         <div class="faq-q">Q. 自分の入力したデータがサーバーに送信・流出する心配はありますか？</div>
-        <p class="faq-a">A. サーバーへのデータ送信は一切行われません。すべてのデータはお使いのブラウザ内（LocalStorage）にのみ安全に保持されます。</p>
+        <p class="faq-a">
+          A. サーバーへのデータ送信は一切行われません。<br>
+          すべてのデータはお使いのブラウザ内（LocalStorage）にのみ安全に保持されます。
+        </p>
       </div>
 
       <!-- ボトムCTA -->
       <div class="lp-cta-block" style="margin-top: 36px;">
         <h2 class="lp-cta-title">さっそく他己分析をはじめましょう</h2>
-        <p class="lp-cta-desc">あなたの隠された社会的仮面（ペルソナ）を客観的な視点から解き明かします。</p>
+        <p class="lp-cta-desc">
+          あなたの隠された社会的仮面（ペルソナ）を、<br class="sp-only-br">
+          客観的な視点から解き明かしてみませんか？
+        </p>
         <a href="app.html" class="btn-lp-primary">
           <span>他己分析をはじめる（URL発行へ）</span>
           <span style="font-size: 1.1rem;">→</span>
